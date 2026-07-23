@@ -16,8 +16,7 @@ const links = [
 ];
 ---
 
-<div class="nav-wrap">
-  <header class="nav container" data-nav>
+<header class="nav container" data-nav>
     <LogoFlip scale={1} />
 
     <nav class="nav__right" aria-label="Principal">
@@ -25,30 +24,44 @@ const links = [
         links.map((link, i) => (
           <>
             {i > 0 && <span class="sep" aria-hidden="true" />}
+            {/* Per-character roll (marrow.au): each letter is a clipped window
+                holding the letter twice, stacked. On hover they slide up in
+                sequence. The visible copy is aria-hidden and the accessible
+                name comes from the sr-only span. */}
             <a class="nav__link" href={link.href}>
-              {link.label}
+              <span class="sr-only">{link.label}</span>
+              <span class="roll" aria-hidden="true">
+                {[...link.label].map((ch, c) => (
+                  <span class="roll__char" style={`--i:${c}`}>
+                    <span class="roll__inner">
+                      <span class="roll__face">{ch === " " ? " " : ch}</span>
+                      <span class="roll__face">{ch === " " ? " " : ch}</span>
+                    </span>
+                  </span>
+                ))}
+              </span>
             </a>
           </>
         ))
       }
       <a class="nav__cta" href="#contacto">¡Hablemos!</a>
     </nav>
-  </header>
-</div>
+</header>
 
 <style>
-  /* The wrapper only supplies the 34px offset — it must NOT be sticky itself,
-     or sticky pushes it to top:34px at scroll 0 and the padding stacks on top,
-     landing the nav at y=68 instead of y=34. */
-  .nav-wrap {
-    padding-top: 34px;
-    margin-bottom: 29px; /* hero row starts at y=129; nav bottom is y=100 */
-  }
-
+  /* A sticky element only travels within its containing block. Wrapping the
+     nav in a 100px-tall div meant it stuck for 100px and then scrolled away
+     with the wrapper — so the nav is a direct child of <body> instead, whose
+     box spans the whole page.
+     `margin-top` (not the wrapper's padding) supplies the 34px offset: the
+     natural position and the sticky `top` then agree, so nothing shifts at
+     scroll 0. body has `display: flow-root` to stop that margin collapsing. */
   .nav {
     position: sticky;
     top: 34px;
     z-index: 100;
+    margin-top: 34px;
+    margin-bottom: 29px; /* hero row starts at y=129; nav bottom is y=100 */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -95,6 +108,59 @@ const links = [
   .nav__link:hover,
   .nav__link:focus-visible {
     background: color-mix(in srgb, var(--text) 10%, transparent);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* --- Per-character roll ------------------------------------------------ */
+  .roll {
+    display: inline-flex;
+  }
+
+  .roll__char {
+    display: inline-block;
+    height: 20.2px; /* the link's line-height — the clip window */
+    overflow: hidden;
+  }
+
+  .roll__inner {
+    display: block;
+    transition: transform 420ms cubic-bezier(0.76, 0, 0.24, 1);
+    /* Stagger left-to-right; 22ms per character reads as one wave, not
+       seven separate animations. */
+    transition-delay: calc(var(--i) * 22ms);
+  }
+
+  .roll__face {
+    display: block;
+    height: 20.2px;
+    line-height: 20.2px;
+    white-space: pre;
+  }
+
+  .nav__link:hover .roll__inner,
+  .nav__link:focus-visible .roll__inner {
+    transform: translateY(-20.2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .roll__inner {
+      transition: none;
+    }
+    .nav__link:hover .roll__inner,
+    .nav__link:focus-visible .roll__inner {
+      transform: none;
+    }
   }
 
   .sep {

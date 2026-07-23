@@ -1,0 +1,415 @@
+---
+import ArrowCircle from "../icons/arrow-circle.svg?raw";
+
+/**
+ * Figma Frame 146 (462x415) plus the 3 dots at y=818.
+ *
+ * The ring beside the title is the autoplay countdown for the next slide —
+ * Group 3515 in Figma is a static snapshot of that sweep, which is why it
+ * exports as two offset arcs rather than concentric circles.
+ */
+export interface Slide {
+  title: string;
+  img: string;
+  alt: string;
+  tags: string[];
+  desc: string;
+  href: string;
+  /** Copy not yet supplied by Victor — flagged so it can't ship unnoticed. */
+  placeholder?: boolean;
+}
+interface Props {
+  slides: Slide[];
+  intervalMs?: number;
+}
+const { slides, intervalMs = 6000 } = Astro.props;
+
+// r is inset by half the stroke so the ring sits inside its 25px box.
+const R = 11.257;
+const CIRC = +(2 * Math.PI * R).toFixed(3);
+---
+
+<article class="slider" data-slider data-interval={intervalMs} style={`--circ:${CIRC};`}>
+  <header class="slider__head">
+    <span class="slider__title">
+      <span class="ring" aria-hidden="true">
+        <svg viewBox="0 0 25 25">
+          <circle class="ring__track" cx="12.5" cy="12.5" r={R}></circle>
+          <circle class="ring__fill" data-ring cx="12.5" cy="12.5" r={R}></circle>
+        </svg>
+      </span>
+      <span class="t-body-md slider__name" data-slider-title aria-live="polite">{slides[0].title}</span>
+    </span>
+
+    <span class="slider__arrows">
+      <button class="arrow" type="button" data-slider-prev aria-label="Proyecto anterior" set:html={ArrowCircle} />
+      <button
+        class="arrow arrow--next"
+        type="button"
+        data-slider-next
+        aria-label="Proyecto siguiente"
+        set:html={ArrowCircle}
+      />
+    </span>
+  </header>
+
+  <div class="slider__viewport">
+    <div class="slider__track" data-slider-track>
+      {
+        slides.map((slide, i) => (
+          <a
+            class="slide"
+            href={slide.href}
+            aria-hidden={i === 0 ? undefined : "true"}
+            tabindex={i === 0 ? undefined : -1}
+            data-slide
+          >
+            <span class="slide__shot">
+              <img
+                src={slide.img}
+                alt={slide.alt}
+                width="430"
+                height="251"
+                loading={i === 0 ? "eager" : "lazy"}
+              />
+            </span>
+            <span class="slide__meta">
+              <span class="tags">
+                {slide.tags.map((tag) => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </span>
+              <span class="t-body slide__desc">{slide.desc}</span>
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="slider__dots" role="tablist" aria-label="Proyectos">
+    {
+      slides.map((slide, i) => (
+        <button
+          class="dot"
+          type="button"
+          role="tab"
+          data-slider-dot
+          aria-selected={i === 0 ? "true" : "false"}
+          aria-label={slide.title}
+        />
+      ))
+    }
+  </div>
+</article>
+
+<style>
+  .slider {
+    width: 462px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .slider__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 25px;
+  }
+
+  .slider__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+    min-width: 0;
+  }
+
+  .slider__name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 220ms ease;
+  }
+  .slider.is-swapping .slider__name {
+    opacity: 0;
+  }
+
+  /* Countdown ring — a muted track with a lime arc that sweeps once per slide. */
+  .ring {
+    width: 25px;
+    height: 25px;
+    flex: none;
+  }
+  .ring svg {
+    width: 100%;
+    height: 100%;
+    /* Start the sweep at 12 o'clock. */
+    transform: rotate(-90deg);
+  }
+  .ring circle {
+    fill: none;
+    stroke-width: 2.4857;
+  }
+  .ring__track {
+    stroke: var(--muted);
+  }
+  .ring__fill {
+    stroke: var(--accent);
+    stroke-linecap: round;
+    stroke-dasharray: var(--circ);
+    stroke-dashoffset: var(--circ);
+  }
+
+  .slider__arrows {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .arrow {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+    transition:
+      opacity 200ms ease,
+      translate 200ms ease;
+  }
+  .arrow:hover {
+    opacity: 0.7;
+  }
+  .arrow:active {
+    translate: -2px 0;
+  }
+  .arrow--next {
+    transform: rotate(180deg);
+  }
+  .arrow--next:active {
+    translate: 2px 0;
+  }
+  .arrow :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .slider__viewport {
+    overflow: hidden;
+    border-radius: var(--r-md);
+  }
+
+  .slider__track {
+    display: flex;
+    /* Snappy but not abrupt — matches the 400ms theme flip's character. */
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .slide {
+    flex: 0 0 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+    background: var(--surface);
+  }
+
+  .slide__shot {
+    display: block;
+    height: 251px;
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+  }
+  /* The 437x328 screenshot sits at (-4, -43) in its 430x251 frame, so the
+     visible crop is the middle band — 59% down, not the top. */
+  .slide__shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 59%;
+    transition: scale 600ms cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  .slide:hover .slide__shot img {
+    scale: 1.03;
+  }
+
+  .slide__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .tag {
+    padding: 6px 8px;
+    border-radius: var(--r-pill);
+    background: var(--surface-2);
+    color: var(--accent);
+    font-size: 12px;
+    line-height: 10px;
+    font-weight: 500;
+  }
+
+  .slide__desc {
+    color: var(--text);
+    /* Keep every slide the same height regardless of copy length. */
+    min-height: 40px;
+  }
+
+  .slider__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: -5px; /* dots land at y=818, 10px under the card */
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #d9d9d9;
+    opacity: 0.45;
+    cursor: pointer;
+    transition:
+      opacity 250ms ease,
+      scale 250ms ease;
+  }
+  .dot[aria-selected="true"] {
+    opacity: 1;
+    scale: 1.15;
+  }
+  .dot:hover {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 1000px) {
+    .slider {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  type SliderEls = {
+    root: HTMLElement;
+    track: HTMLElement;
+    title: HTMLElement;
+    ring: SVGCircleElement;
+    dots: HTMLButtonElement[];
+    slides: HTMLElement[];
+    titles: string[];
+    interval: number;
+  };
+
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function initSlider(root: HTMLElement) {
+    const track = root.querySelector<HTMLElement>("[data-slider-track]");
+    const title = root.querySelector<HTMLElement>("[data-slider-title]");
+    const ring = root.querySelector<SVGCircleElement>("[data-ring]");
+    if (!track || !title || !ring) return;
+
+    const slides = [...root.querySelectorAll<HTMLElement>("[data-slide]")];
+    const dots = [...root.querySelectorAll<HTMLButtonElement>("[data-slider-dot]")];
+    const titles = dots.map((d) => d.getAttribute("aria-label") ?? "");
+    const interval = Number(root.dataset.interval) || 6000;
+    if (slides.length < 2) return;
+
+    const els: SliderEls = { root, track, title, ring, dots, slides, titles, interval };
+    let index = 0;
+    let sweep: Animation | null = null;
+    let timer: number | undefined;
+    let paused = false;
+
+    const circ = getComputedStyle(root).getPropertyValue("--circ").trim();
+
+    function render(next: number) {
+      index = (next + els.slides.length) % els.slides.length;
+      els.track.style.transform = `translateX(-${index * 100}%)`;
+
+      // Cross-fade the title rather than swapping it mid-transition.
+      els.root.classList.add("is-swapping");
+      window.setTimeout(() => {
+        els.title.textContent = els.titles[index];
+        els.root.classList.remove("is-swapping");
+      }, 220);
+
+      els.dots.forEach((d, i) => d.setAttribute("aria-selected", String(i === index)));
+      // Off-screen slides must not be reachable by keyboard or screen readers.
+      els.slides.forEach((s, i) => {
+        if (i === index) {
+          s.removeAttribute("aria-hidden");
+          s.removeAttribute("tabindex");
+        } else {
+          s.setAttribute("aria-hidden", "true");
+          s.setAttribute("tabindex", "-1");
+        }
+      });
+    }
+
+    function startSweep() {
+      sweep?.cancel();
+      window.clearTimeout(timer);
+      if (reduced) return; // no autoplay, and the ring stays empty
+
+      sweep = els.ring.animate([{ strokeDashoffset: circ }, { strokeDashoffset: "0" }], {
+        duration: els.interval,
+        easing: "linear",
+        fill: "forwards",
+      });
+      timer = window.setTimeout(() => {
+        if (!paused) go(index + 1);
+      }, els.interval);
+    }
+
+    function go(next: number) {
+      render(next);
+      startSweep();
+    }
+
+    root.querySelector("[data-slider-next]")?.addEventListener("click", () => go(index + 1));
+    root.querySelector("[data-slider-prev]")?.addEventListener("click", () => go(index - 1));
+    dots.forEach((dot, i) => dot.addEventListener("click", () => go(i)));
+
+    // Hovering the card pauses the countdown so a reader isn't yanked away.
+    const pause = () => {
+      paused = true;
+      sweep?.pause();
+      window.clearTimeout(timer);
+    };
+    const resume = () => {
+      if (!paused) return;
+      paused = false;
+      // Resume with only the remaining time, not a full interval.
+      const remaining = sweep
+        ? els.interval - Number(sweep.currentTime ?? 0)
+        : els.interval;
+      sweep?.play();
+      window.clearTimeout(timer);
+      if (!reduced) timer = window.setTimeout(() => go(index + 1), Math.max(remaining, 0));
+    };
+
+    root.addEventListener("mouseenter", pause);
+    root.addEventListener("mouseleave", resume);
+    root.addEventListener("focusin", pause);
+    root.addEventListener("focusout", resume);
+    document.addEventListener("visibilitychange", () => (document.hidden ? pause() : resume()));
+
+    render(0);
+    startSweep();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-slider]").forEach(initSlider);
+</script>

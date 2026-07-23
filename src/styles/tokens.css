@@ -57,6 +57,9 @@ html {
 
 body {
   margin: 0;
+  /* Keeps the nav's 34px margin-top from collapsing out of <body>, which
+     would drop the nav to y=0. */
+  display: flow-root;
   background: #1d2222;
   color: var(--text);
   font-family: var(--font);

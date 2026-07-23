@@ -84,8 +84,32 @@ file, not a layout error — do not "fix" it by shrinking line-height.
   breakpoint below 1000px is a judgement call and needs Victor's review.
 - **Live clock.** The frame shows a static `9:45 PM`; the build renders real
   `America/Bogota` time and swaps a moon/sun glyph at 18:00/06:00.
-- **Carousel, video and avatar switching are presentational only** — the
-  markup and states exist, the behaviour does not.
+- **Slider copy and thumbnails for slides 2-3 are placeholders.** The Polestar
+  and LeanCore case-study frames exist, but neither has card copy or a card
+  thumbnail in Figma. Descriptions read `PENDIENTE:` and the images are
+  content-scored crops of each frame. Both need Victor.
+- **The showreel is a generated placeholder** (`public/video/showreel-placeholder.mp4`
+  — a slow push on the Figma poster frame). Real footage needed.
+- **Avatar switching is presentational only** — states exist, behaviour does not.
+- **Nav link hover** is a per-character roll, taken from marrow.au rather than
+  from the Figma file, which has no hover states.
+
+## Motion references supplied by Victor
+
+| Reference | For | Stack it uses |
+|---|---|---|
+| grainandmortar.com | dark/light transition | GSAP + Lenis + Lottie |
+| marrow.au | top-menu hover | Framer Motion — **built**, per-character roll |
+| harrygeorge.design | loading screen, page transitions | GSAP |
+| ampli.net | loading screen, page transitions | GSAP + Lottie |
+| juanmora.co/work.html | loading screen, page transitions | GSAP + Lenis |
+| andreigorskikh.digital | local time | Framer Motion — **built**, no library needed |
+
+Four of the six are GSAP; three of those add Lenis for smooth scroll. Nothing
+in the current build needs a library yet — the theme flip, logo roll, nav
+hover, slider and clock are all CSS plus the Web Animations API. Adding a
+preloader and cross-page transitions is the point where GSAP + Lenis (or
+Astro's own `<ClientRouter />`) starts to earn its weight.
 
 ## Assets
 

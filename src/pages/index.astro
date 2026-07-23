@@ -3,17 +3,48 @@ import Base from "../layouts/Base.astro";
 import Nav from "../components/Nav.astro";
 import LogoFlip from "../components/LogoFlip.astro";
 import LocalClock from "../components/LocalClock.astro";
+import ProjectSlider, { type Slide } from "../components/ProjectSlider.astro";
 
 import Play from "../icons/play.svg?raw";
 import Diamond from "../icons/diamond.svg?raw";
 import Handshake from "../icons/handshake.svg?raw";
 import Signature from "../icons/signature.svg?raw";
-import ArrowCircle from "../icons/arrow-circle.svg?raw";
 import LogoFigma from "../icons/logo-figma.svg?raw";
 import LogoFramer from "../icons/logo-framer.svg?raw";
-import ProgressRing from "../icons/progress-ring.svg?raw";
 import QuoteOpen from "../icons/quote-open.svg?raw";
 import QuoteClose from "../icons/quote-close.svg?raw";
+
+// Slide 1 is verbatim from Figma. Slides 2 and 3 exist as full case-study
+// frames but have no card copy in the file — the imagery is real (cropped from
+// each frame's hero) and the text is PLACEHOLDER pending Victor.
+const projects: Slide[] = [
+  {
+    title: "ICP Tool Coca-Cola",
+    img: "/img/proj-coca.png",
+    alt: "ICP Tool para Coca-Cola",
+    tags: ["UI", "Prototype", "Landing Page", "Design System"],
+    desc: "Unificando la gestión de presupuestos de Coca-Cola: de la fragmentación a un sistema escalable.",
+    href: "/proyectos/coca-cola",
+  },
+  {
+    title: "Polestar",
+    img: "/img/proj-polestar.png",
+    alt: "Caso de estudio Polestar",
+    tags: ["UI", "Web Design", "Motion"],
+    desc: "PENDIENTE: descripción del caso de estudio Polestar.",
+    href: "/proyectos/polestar",
+    placeholder: true,
+  },
+  {
+    title: "LeanCore Studio",
+    img: "/img/proj-leancore.png",
+    alt: "Caso de estudio LeanCore Studio",
+    tags: ["UI", "Design System", "Branding"],
+    desc: "PENDIENTE: descripción del caso de estudio LeanCore Studio.",
+    href: "/proyectos/leancore-studio",
+    placeholder: true,
+  },
+];
 
 const kpis = [
   {
@@ -83,59 +114,34 @@ const description =
       </div>
 
       <div class="hero__row" id="proyectos">
-        <article class="card">
-          <header class="card__head">
-            <span class="card__title">
-              <span class="card__rings" aria-hidden="true" set:html={ProgressRing} />
-              <span class="t-body-md">ICP Tool Coca-Cola</span>
-            </span>
-            <span class="card__arrows">
-              <button class="arrow" type="button" aria-label="Proyecto anterior" set:html={ArrowCircle} />
-              <button
-                class="arrow arrow--next"
-                type="button"
-                aria-label="Proyecto siguiente"
-                set:html={ArrowCircle}
-              />
-            </span>
-          </header>
-
-          <a class="card__body" href="/proyectos/coca-cola">
-            <span class="card__shot">
-              <img src="/img/proj-coca.png" alt="ICP Tool para Coca-Cola" width="430" height="251" />
-            </span>
-            <span class="card__meta">
-              <span class="tags">
-                <span class="tag">UI</span>
-                <span class="tag">Prototype</span>
-                <span class="tag">Landing Page</span>
-                <span class="tag">Design System</span>
-              </span>
-              <span class="t-body card__desc">
-                Unificando la gestión de presupuestos de Coca-Cola: de la fragmentación a un sistema
-                escalable.
-              </span>
-            </span>
-          </a>
-        </article>
+        <ProjectSlider slides={projects} />
 
         <figure class="video">
-          <img
-            src="/img/video-poster.png"
-            alt="Victor Vivas presentando su trabajo"
+          <video
+            data-showreel
+            src="/video/showreel-placeholder.mp4"
+            poster="/img/video-poster.png"
             width="473"
             height="522"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            aria-label="Showreel de Victor Vivas"></video>
+          <button
+            class="video__play"
+            type="button"
+            data-showreel-toggle
+            data-state="muted"
+            aria-label="Activar sonido"
+            set:html={Play}
           />
-          <button class="video__play" type="button" aria-label="Reproducir presentación" set:html={Play} />
           <figcaption class="video__caption">
             <span class="t-body-md">Victor Vivas</span>
             <span class="t-body">Product Designer</span>
           </figcaption>
         </figure>
-      </div>
-
-      <div class="dots" aria-hidden="true">
-        <span></span><span></span><span></span>
       </div>
     </section>
 
@@ -262,6 +268,47 @@ const description =
   </main>
 </Base>
 
+<script>
+  // The showreel autoplays muted (browsers block audible autoplay), so the
+  // play button is really a sound toggle. If autoplay is blocked entirely it
+  // falls back to being a genuine play button.
+  const video = document.querySelector<HTMLVideoElement>("[data-showreel]");
+  const toggle = document.querySelector<HTMLButtonElement>("[data-showreel-toggle]");
+
+  if (video && toggle) {
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) video.pause();
+
+    toggle.addEventListener("click", async () => {
+      if (video.paused) {
+        await video.play().catch(() => {});
+      }
+      video.muted = false;
+      toggle.dataset.state = "unmuted";
+      toggle.setAttribute("aria-label", "Silenciar");
+    });
+
+    // Click the reel itself to mute again and bring the button back.
+    video.addEventListener("click", () => {
+      if (video.muted) return;
+      video.muted = true;
+      toggle.dataset.state = "muted";
+      toggle.setAttribute("aria-label", "Activar sonido");
+    });
+
+    // Don't burn CPU/battery decoding a reel nobody is looking at.
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (reduced) return;
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      },
+      { threshold: 0.15 },
+    );
+    io.observe(video);
+  }
+</script>
+
 <style>
   .muted {
     color: var(--muted);
@@ -290,118 +337,10 @@ const description =
     margin-top: 52px;
   }
 
-  .card {
-    width: 462px;
-    flex: none;
+  /* The slider column starts at y=393, the video at y=286 — same 27px gutter,
+     different top offsets, both ending at y=808. */
+  .hero__row > :global(.slider) {
     margin-top: 107px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .card__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 25px;
-  }
-
-  .card__title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--text);
-  }
-
-  /* Group 3515 is a segmented progress ring — two offset ~330° arcs (lime +
-     muted), not concentric circles. Exported from Figma rather than
-     reconstructed, because the arc offsets are not guessable. */
-  .card__rings {
-    width: 25px;
-    height: 25px;
-    flex: none;
-  }
-  .card__rings :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-
-  .card__arrows {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .arrow {
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--text);
-    cursor: pointer;
-    transition: opacity 200ms ease;
-  }
-  .arrow:hover {
-    opacity: 0.7;
-  }
-  .arrow--next {
-    transform: rotate(180deg);
-  }
-  .arrow :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-
-  .card__body {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 16px;
-    background: var(--surface);
-    border-radius: var(--r-md);
-  }
-
-  .card__shot {
-    display: block;
-    height: 251px;
-    background: var(--surface-2);
-    border-radius: var(--r-sm);
-    overflow: hidden;
-  }
-  /* The 437x328 screenshot sits at (-4, -43) inside its 430x251 frame, so the
-     visible crop is the middle band — 59% down, not the top. */
-  .card__shot img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 59%;
-  }
-
-  .card__meta {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-
-  .tag {
-    padding: 6px 8px;
-    border-radius: var(--r-pill);
-    background: var(--surface-2);
-    color: var(--accent);
-    font-size: 12px;
-    line-height: 10px;
-    font-weight: 500;
-  }
-
-  .card__desc {
-    color: var(--text);
   }
 
   .video {
@@ -413,10 +352,17 @@ const description =
     border-radius: var(--r-md);
     overflow: hidden;
   }
-  .video img {
+  .video video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* Autoplay is muted by policy, so the button is a sound toggle rather than
+     a play control. It hides once the reel is running with sound. */
+  .video__play[data-state="unmuted"] {
+    opacity: 0;
+    pointer-events: none;
   }
   /* Rectangle 3990 carries a #1D2222 fill at 33% over the image. */
   .video::after {
@@ -458,20 +404,6 @@ const description =
     display: flex;
     flex-direction: column;
     color: var(--text);
-  }
-
-  .dots {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    width: 462px;
-    margin-top: 10px;
-  }
-  .dots span {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #d9d9d9;
   }
 
   /* ── Approach ─────────────────────────────────────────────────────── */
@@ -829,9 +761,8 @@ const description =
       flex-direction: column;
       gap: 32px;
     }
-    .card,
     .video,
-    .dots {
+    .hero__row > :global(.slider) {
       width: 100%;
       margin-top: 0;
     }
