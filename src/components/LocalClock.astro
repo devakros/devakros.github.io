@@ -1,0 +1,162 @@
+---
+/**
+ * The `Cúcuta, Colombia • 9:45 PM` widget from the hero (Frame 137) and the
+ * footer (Frame 1000003331).
+ *
+ * The time is real, not the 9:45 PM baked into the Figma frame. Colombia has
+ * no DST, so America/Bogota is a stable UTC-5 — but we format via Intl with
+ * the IANA zone rather than hardcoding the offset.
+ *
+ * Rendered server-side first so there's no empty flash, then re-synced and
+ * ticked on the client.
+ */
+interface Props {
+  place?: string;
+  size?: "hero" | "footer";
+}
+const { place = "Cúcuta, Colombia", size = "hero" } = Astro.props;
+
+const TZ = "America/Bogota";
+
+const fmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: TZ,
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+});
+const initialTime = fmt.format(new Date());
+
+// Night runs 18:00–05:59 local; the Figma frame shows the moon at 9:45 PM.
+const hour24 = Number(
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "2-digit", hour12: false }).format(
+    new Date(),
+  ),
+);
+const initialNight = hour24 >= 18 || hour24 < 6;
+---
+
+<div class:list={["clock", `clock--${size}`]} data-clock data-tz={TZ}>
+  <span class="place">{place}</span>
+  <span class="dot" aria-hidden="true"></span>
+  <span class="time-group">
+    <time data-clock-time>{initialTime}</time>
+    <span class="icon" data-clock-icon data-night={initialNight ? "true" : "false"} aria-hidden="true">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.5 14.3A8.6 8.6 0 0 1 9.7 3.5a8.6 8.6 0 1 0 10.8 10.8z" />
+      </svg>
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4.2" />
+        <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6 17 17M7 7 5.4 5.4" />
+      </svg>
+    </span>
+  </span>
+</div>
+
+<style>
+  .clock {
+    display: flex;
+    align-items: center;
+    font-weight: 300;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  /* Hero: Frame 137 — 18px/22.7, 10px gap, 5px accent dot, 18px icon. */
+  .clock--hero {
+    gap: 10px;
+    font-size: 18px;
+    line-height: 22.7px;
+  }
+  .clock--hero .dot {
+    width: 5px;
+    height: 5px;
+    background: var(--accent);
+  }
+  .clock--hero .time-group {
+    gap: 5px;
+  }
+  .clock--hero .icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Footer: 16px/18, 10px gap, neutral #D9D9D9 dot, 16px icon. */
+  .clock--footer {
+    gap: 10px;
+    font-size: 16px;
+    line-height: 18px;
+  }
+  .clock--footer .dot {
+    width: 5px;
+    height: 5px;
+    background: #d9d9d9;
+  }
+  .clock--footer .time-group {
+    gap: 7px;
+  }
+  .clock--footer .icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .dot {
+    flex: none;
+    border-radius: 50%;
+  }
+
+  .time-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .icon {
+    flex: none;
+    color: var(--muted);
+  }
+
+  .icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Only one of the two ever renders; swapped by the data attribute. */
+  .icon[data-night="true"] .sun,
+  .icon[data-night="false"] .moon {
+    display: none;
+  }
+</style>
+
+<script>
+  // One interval drives every clock on the page (hero + footer stay in sync).
+  const clocks = document.querySelectorAll<HTMLElement>("[data-clock]");
+
+  function tick() {
+    for (const clock of clocks) {
+      const tz = clock.dataset.tz || "America/Bogota";
+      const now = new Date();
+
+      const time = new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }).format(now);
+
+      const hour = Number(
+        new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "2-digit", hour12: false }).format(
+          now,
+        ),
+      );
+
+      const timeEl = clock.querySelector<HTMLTimeElement>("[data-clock-time]");
+      if (timeEl && timeEl.textContent !== time) timeEl.textContent = time;
+
+      const iconEl = clock.querySelector<HTMLElement>("[data-clock-icon]");
+      if (iconEl) iconEl.dataset.night = hour >= 18 || hour < 6 ? "true" : "false";
+    }
+  }
+
+  tick();
+  // 20s keeps the minute rollover tight without being wasteful.
+  setInterval(tick, 20_000);
+</script>

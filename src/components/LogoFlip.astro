@@ -1,0 +1,139 @@
+---
+/**
+ * Figma Component 27 (nav, 107x44) / Component 28 (footer, 136x56).
+ *
+ * Two clipped windows, each holding a 2-row stack. The bottom window is
+ * offset right and up so the words interlock. Resting state reads
+ * "victor / vivas"; the stacks slide in opposite directions to reveal
+ * "ux ui / designer".
+ *
+ * The footer instance is the nav instance scaled 1.2727x — every measurement
+ * below derives from `scale`, so both stay in sync.
+ */
+interface Props {
+  scale?: number;
+  href?: string;
+  label?: string;
+}
+const { scale = 1, href = "/", label = "Victor Vivas — UX UI Designer" } = Astro.props;
+
+const row = 26 * scale; // window height / row height
+const font = 21.36529 * scale;
+const offsetX = 22 * scale;
+const offsetY = 18 * scale;
+const width = 107 * scale;
+const height = 44 * scale;
+---
+
+<a
+  class="logo"
+  href={href}
+  aria-label={label}
+  style={`--row:${row}px; --font:${font}px; --ox:${offsetX}px; --oy:${offsetY}px; --w:${width}px; --h:${height}px;`}
+>
+  <span class="win win--top" aria-hidden="true">
+    <span class="stack">
+      <span class="word">ux ui</span>
+      <span class="word">victor</span>
+    </span>
+  </span>
+  <span class="win win--bot" aria-hidden="true">
+    <span class="stack">
+      <span class="word">vivas</span>
+      <span class="word">designer</span>
+    </span>
+  </span>
+</a>
+
+<style>
+  .logo {
+    position: relative;
+    display: block;
+    width: var(--w);
+    height: var(--h);
+    flex: none;
+    color: var(--text);
+    font-weight: 600;
+    font-size: var(--font);
+    line-height: var(--row);
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+
+  .win {
+    position: absolute;
+    height: var(--row);
+    overflow: hidden;
+  }
+
+  .win--top {
+    top: 0;
+    left: 0;
+  }
+
+  .win--bot {
+    top: var(--oy);
+    left: var(--ox);
+  }
+
+  .stack {
+    display: block;
+    /* Rest on the second row for the top window, the first for the bottom —
+       that's what puts "victor / vivas" on screen at load. */
+    will-change: transform;
+  }
+
+  .win--top .stack {
+    transform: translateY(calc(var(--row) * -1));
+    animation: flip-down 6s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+  }
+
+  .win--bot .stack {
+    transform: translateY(0);
+    animation: flip-up 6s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+  }
+
+  .word {
+    display: block;
+    height: var(--row);
+    line-height: var(--row);
+  }
+
+  /* Hold on each state, then swap. Both windows swap on the same beat but
+     travel in opposite directions. */
+  @keyframes flip-down {
+    0%,
+    42% {
+      transform: translateY(calc(var(--row) * -1));
+    }
+    50%,
+    92% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(calc(var(--row) * -1));
+    }
+  }
+
+  @keyframes flip-up {
+    0%,
+    42% {
+      transform: translateY(0);
+    }
+    50%,
+    92% {
+      transform: translateY(calc(var(--row) * -1));
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  /* Reduced motion: hold the resting state, no cycling. */
+  @media (prefers-reduced-motion: reduce) {
+    .win--top .stack,
+    .win--bot .stack {
+      animation: none;
+    }
+  }
+</style>

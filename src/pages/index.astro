@@ -1,0 +1,885 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import LogoFlip from "../components/LogoFlip.astro";
+import LocalClock from "../components/LocalClock.astro";
+
+import Play from "../icons/play.svg?raw";
+import Diamond from "../icons/diamond.svg?raw";
+import Handshake from "../icons/handshake.svg?raw";
+import Signature from "../icons/signature.svg?raw";
+import ArrowCircle from "../icons/arrow-circle.svg?raw";
+import LogoFigma from "../icons/logo-figma.svg?raw";
+import LogoFramer from "../icons/logo-framer.svg?raw";
+import ProgressRing from "../icons/progress-ring.svg?raw";
+import QuoteOpen from "../icons/quote-open.svg?raw";
+import QuoteClose from "../icons/quote-close.svg?raw";
+
+const kpis = [
+  {
+    icon: Diamond,
+    stat: "+8",
+    label: "Años creando soluciones de UX/UI con impacto",
+    body: "Mi sólida trayectoria me capacita para liderar y ejecutar con éxito cualquier tipo de proyecto, alineando siempre los principios de usabilidad y experiencia de usuario con los objetivos de negocio.",
+  },
+  {
+    icon: Handshake,
+    stat: "+4",
+    label: "Empresas que han confiado en mi experiencia",
+    body: "He colaborado con empresas de diversas escalas, desde grandes corporaciones hasta medianas y pequeñas empresas, además de impulsar la estrategia de startups en pleno crecimiento.",
+  },
+  {
+    icon: Signature,
+    stat: "+17",
+    label: "Proyectos donde he dejado mi huella y mi corazón",
+    body: "He participado en proyectos de diferentes escalas y modelos, desde soluciones B2B hasta B2C, con experiencia clave en industrias como proptech, fintech y healthtech, entre otras.",
+  },
+];
+
+// Marquee row (Component 4). Rendered twice for the seamless loop — the Figma
+// frame does the same thing: two identical 910px groups inside a 1890px track.
+const tools = [
+  { name: "Spline", img: "/img/logo-spline.png", size: 34 },
+  { name: "Figma", svg: LogoFigma },
+  { name: "Useberry", img: "/img/logo-useberry.png", size: 38 },
+  { name: "Framer", svg: LogoFramer },
+  { name: "ChatGPT", img: "/img/logo-gpt.png", size: 40 },
+  { name: "Slack", img: "/img/logo-slack.png", size: 38 },
+  { name: "Relume", img: "/img/logo-relume.png", size: 38 },
+];
+
+const testimonial = {
+  quote: [
+    "Victor es el diseñador UI más responsable y creativo que conozco. Resolvió incontables desafíos en los productos de NuHome con su extraordinaria proactividad, al proponer ideas creativas cuyo impacto se reflejó en las métricas de nuestros productos.",
+    "Destaco su atención al detalle, su inclinación a la excelencia y su genuina preocupación por el cumplimiento de las metas y del bienestar del equipo.",
+  ],
+  name: "Santiago Gallo",
+  role: "Cofundador en Verticcal",
+  profileUrl: "#",
+};
+
+// Seven avatars; index 3 is the one Figma shows selected (full opacity, lifted 10px).
+const people = [1, 2, 3, 4, 5, 6, 7].map((n) => ({ src: `/img/avatar-${n}.png` }));
+const activeIndex = 3;
+
+const title = "Victor Vivas — IA Powered product designer";
+const description =
+  "Product designer y estratega de experiencia de usuario. +8 años creando soluciones de UX/UI con impacto para Coca-Cola, Polestar y LeanCore.";
+---
+
+<Base title={title} description={description}>
+  <Nav />
+
+  <main>
+    <!-- ── Hero ───────────────────────────────────────────────────────── -->
+    <section class="hero container">
+      <div class="hero__top">
+        <h1 class="t-h2 hero__title">
+          IA <span class="muted">-</span> Powered product designer <span class="muted"
+            >+ estratega de experiencia de usuario</span
+          >
+        </h1>
+        <LocalClock size="hero" />
+      </div>
+
+      <div class="hero__row" id="proyectos">
+        <article class="card">
+          <header class="card__head">
+            <span class="card__title">
+              <span class="card__rings" aria-hidden="true" set:html={ProgressRing} />
+              <span class="t-body-md">ICP Tool Coca-Cola</span>
+            </span>
+            <span class="card__arrows">
+              <button class="arrow" type="button" aria-label="Proyecto anterior" set:html={ArrowCircle} />
+              <button
+                class="arrow arrow--next"
+                type="button"
+                aria-label="Proyecto siguiente"
+                set:html={ArrowCircle}
+              />
+            </span>
+          </header>
+
+          <a class="card__body" href="/proyectos/coca-cola">
+            <span class="card__shot">
+              <img src="/img/proj-coca.png" alt="ICP Tool para Coca-Cola" width="430" height="251" />
+            </span>
+            <span class="card__meta">
+              <span class="tags">
+                <span class="tag">UI</span>
+                <span class="tag">Prototype</span>
+                <span class="tag">Landing Page</span>
+                <span class="tag">Design System</span>
+              </span>
+              <span class="t-body card__desc">
+                Unificando la gestión de presupuestos de Coca-Cola: de la fragmentación a un sistema
+                escalable.
+              </span>
+            </span>
+          </a>
+        </article>
+
+        <figure class="video">
+          <img
+            src="/img/video-poster.png"
+            alt="Victor Vivas presentando su trabajo"
+            width="473"
+            height="522"
+          />
+          <button class="video__play" type="button" aria-label="Reproducir presentación" set:html={Play} />
+          <figcaption class="video__caption">
+            <span class="t-body-md">Victor Vivas</span>
+            <span class="t-body">Product Designer</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </section>
+
+    <!-- ── Statement + KPIs + tool marquee ────────────────────────────── -->
+    <section class="approach" id="sobre-mi">
+      <p class="t-h1 approach__statement container">
+        Mi enfoque combina estética moderna con principios de usabilidad y diseño tradicional, <span
+          class="muted">creando productos digitales que no son solo plataformas, sino experiencias.</span
+        >
+      </p>
+
+      <div class="kpis container">
+        {
+          kpis.map((kpi) => (
+            <article class="kpi">
+              <span class="kpi__icon" aria-hidden="true" set:html={kpi.icon} />
+              <div class="kpi__headline">
+                <span class="t-stat">{kpi.stat}</span>
+                <span class="t-label">{kpi.label}</span>
+              </div>
+              <p class="t-body kpi__body">{kpi.body}</p>
+            </article>
+          ))
+        }
+      </div>
+
+      <div class="marquee" aria-label="Herramientas que uso">
+        <div class="marquee__track">
+          {
+            [0, 1].map((pass) => (
+              <div class="marquee__group" aria-hidden={pass === 1 ? "true" : undefined}>
+                {tools.map((tool) =>
+                  tool.svg ? (
+                    <span class="tool" title={tool.name} set:html={tool.svg} />
+                  ) : (
+                    <span class="tool">
+                      <img
+                        src={tool.img}
+                        alt={tool.name}
+                        width={tool.size}
+                        height={tool.size}
+                        loading="lazy"
+                      />
+                    </span>
+                  ),
+                )}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── The light band. Everything below y=2036 in the Figma frame. ── -->
+    <section class="light theme-light" data-theme-light id="resumen">
+      <h2 class="t-h2 light__title container">Mira lo que están diciendo de mi...</h2>
+
+      <figure class="quote container">
+        <blockquote class="quote__card">
+          <span class="quote__mark" aria-hidden="true" set:html={QuoteOpen} />
+          <div class="quote__text t-lead">
+            {testimonial.quote.map((p) => <p>{p}</p>)}
+          </div>
+          <span class="quote__mark quote__mark--close" aria-hidden="true" set:html={QuoteClose} />
+        </blockquote>
+
+        <figcaption class="people">
+          <ul class="people__row">
+            {
+              people.map((person, i) => (
+                <li class:list={["avatar", i === activeIndex && "avatar--active"]}>
+                  <img src={person.src} alt="" width="47" height="47" loading="lazy" />
+                </li>
+              ))
+            }
+          </ul>
+
+          <div class="people__detail">
+            <span class="people__name">{testimonial.name}</span>
+            <span class="people__role">{testimonial.role}</span>
+            <a class="people__link" href={testimonial.profileUrl}>
+              Ir a su perfil
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </a>
+          </div>
+        </figcaption>
+      </figure>
+
+      <hr class="rule container" />
+
+      <div class="footer container" id="contacto">
+        <LogoFlip scale={1.2727} href="#" />
+
+        <div class="footer__cols">
+          <div class="footer__col">
+            <a class="t-label footer__primary" href="mailto:hello@victorvivas.com">
+              hello@victorvivas.com
+            </a>
+            <a
+              class="footer__secondary"
+              href="https://www.linkedin.com/"
+              rel="me noopener"
+              target="_blank">LinkedIn</a
+            >
+          </div>
+
+          <div class="footer__col footer__col--right">
+            <a class="t-label footer__primary" href="tel:+573112698813">+57 311 2698813</a>
+            <LocalClock size="footer" place="Colombia, Cucuta" />
+          </div>
+        </div>
+
+        <nav class="footer__nav" aria-label="Pie de página">
+          <a href="#proyectos">Proyectos</a>
+          <span class="sep" aria-hidden="true"></span>
+          <a href="#sobre-mi">Sobre mi</a>
+          <span class="sep" aria-hidden="true"></span>
+          <a href="#resumen">Resumen</a>
+        </nav>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .muted {
+    color: var(--muted);
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────────────── */
+  .hero__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+  }
+
+  .hero__title {
+    max-width: 405px; /* Figma text node is 405x105 — the wrap is deliberate */
+    margin: 0;
+    color: var(--text);
+  }
+
+  /* Card column starts at y=393, video column at y=286 — same 27px gutter,
+     different top offsets, both ending at y=808. */
+  .hero__row {
+    display: flex;
+    align-items: flex-start;
+    gap: 27px;
+    margin-top: 52px;
+  }
+
+  .card {
+    width: 462px;
+    flex: none;
+    margin-top: 107px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 25px;
+  }
+
+  .card__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+  }
+
+  /* Group 3515 is a segmented progress ring — two offset ~330° arcs (lime +
+     muted), not concentric circles. Exported from Figma rather than
+     reconstructed, because the arc offsets are not guessable. */
+  .card__rings {
+    width: 25px;
+    height: 25px;
+    flex: none;
+  }
+  .card__rings :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .card__arrows {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .arrow {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+    transition: opacity 200ms ease;
+  }
+  .arrow:hover {
+    opacity: 0.7;
+  }
+  .arrow--next {
+    transform: rotate(180deg);
+  }
+  .arrow :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+  }
+
+  .card__shot {
+    display: block;
+    height: 251px;
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+  }
+  /* The 437x328 screenshot sits at (-4, -43) inside its 430x251 frame, so the
+     visible crop is the middle band — 59% down, not the top. */
+  .card__shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 59%;
+  }
+
+  .card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .tag {
+    padding: 6px 8px;
+    border-radius: var(--r-pill);
+    background: var(--surface-2);
+    color: var(--accent);
+    font-size: 12px;
+    line-height: 10px;
+    font-weight: 500;
+  }
+
+  .card__desc {
+    color: var(--text);
+  }
+
+  .video {
+    position: relative;
+    width: 473px;
+    height: 522px;
+    flex: none;
+    margin: 0;
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+  .video img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* Rectangle 3990 carries a #1D2222 fill at 33% over the image. */
+  .video::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgb(29 34 34 / 0.33);
+    pointer-events: none;
+  }
+
+  .video__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: 1;
+    width: 66px;
+    height: 66px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #fff;
+    cursor: pointer;
+    transition: scale 250ms ease;
+  }
+  .video__play:hover {
+    scale: 1.06;
+  }
+  .video__play :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .video__caption {
+    position: absolute;
+    left: 26px;
+    bottom: 23px;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+  }
+
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: 462px;
+    margin-top: 10px;
+  }
+  .dots span {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #d9d9d9;
+  }
+
+  /* ── Approach ─────────────────────────────────────────────────────── */
+  .approach {
+    margin-top: 116px;
+    display: flex;
+    flex-direction: column;
+    gap: 127px; /* Frame 148 itemSpacing */
+  }
+
+  .approach__statement {
+    margin: 0 auto;
+    max-width: 917px;
+    text-align: center;
+    color: var(--text);
+  }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 27px;
+  }
+
+  .kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 25px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+  }
+
+  .kpi__icon {
+    width: 34px;
+    height: 34px;
+    color: var(--accent);
+  }
+  .kpi__icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .kpi__headline {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--text);
+  }
+
+  .kpi__body {
+    margin: 0;
+    color: var(--text);
+  }
+
+  /* ── Tool marquee ─────────────────────────────────────────────────── */
+  /* Figma hard-clips at the frame edge — no edge fade. */
+  .marquee {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .marquee__track {
+    display: flex;
+    width: max-content;
+    animation: scroll-left 32s linear infinite;
+  }
+
+  .marquee__group {
+    display: flex;
+    align-items: center;
+    gap: 70px;
+    padding-right: 70px;
+  }
+
+  .tool {
+    display: grid;
+    place-items: center;
+    width: 70px;
+    height: 70px;
+    flex: none;
+    color: #fff;
+  }
+  .tool :global(svg) {
+    max-width: 42px;
+    max-height: 42px;
+  }
+
+  @keyframes scroll-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__track {
+      animation: none;
+    }
+  }
+
+  /* ── Light band ───────────────────────────────────────────────────── */
+  .light {
+    margin-top: 105px;
+    padding: 140px 0 30px;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .light__title {
+    margin: 0 auto 35px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .quote {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    /* Figma's Component 24 gap is 40px measured to the *lifted* active avatar.
+       Our lift is a transform (no layout effect), so the layout gap is 40+10. */
+    gap: 50px;
+    align-items: center;
+  }
+
+  /* Figma lays this out SPACE_BETWEEN at a fixed 322px, which distributes the
+     slack between the quote marks and the text rather than using a set gap. */
+  .quote__card {
+    position: relative;
+    width: 100%;
+    min-height: 322px;
+    margin: 0;
+    padding: 25px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* IcomoonFreeQuotes glyphs — rounded blobs, not typographic quote marks.
+     The SVGs carry their own 0.6 opacity from the Figma frames. */
+  .quote__mark {
+    width: 30px;
+    height: 30px;
+    color: var(--muted);
+  }
+  .quote__mark :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+  .quote__mark--close {
+    align-self: flex-end;
+  }
+
+  .quote__text {
+    max-width: 757px;
+    margin-inline: auto;
+    text-align: center;
+    color: var(--muted);
+  }
+  .quote__text p {
+    margin: 0;
+  }
+  .quote__text p + p {
+    margin-top: 1em;
+  }
+
+  .people {
+    position: relative;
+    width: 687px;
+    max-width: 100%;
+  }
+
+  /* Figma x-positions: 297/382/467 · 607 · 747/832/917 — an 18px gap between
+     the inactive tiles and 73px flanking the selected one, so the detail block
+     below has room. 7*67 + 4*18 + 2*73 = 687, the frame's exact width. */
+  .people__row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .avatar--active {
+    margin-inline: 55px;
+  }
+
+  /* Frame '1'..'7' — 67px tiles with a squircle that squares off at the
+     bottom-left, 60% opacity except the selected one, which also lifts 10px. */
+  .avatar {
+    width: 67px;
+    height: 67px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: var(--surface-2);
+    border-radius: 20px 20px 20px 0;
+    opacity: 0.6;
+    cursor: pointer;
+    transition:
+      opacity 250ms ease,
+      translate 250ms ease;
+  }
+  .avatar img {
+    width: 47px;
+    height: 47px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .avatar--active,
+  .avatar:hover {
+    opacity: 1;
+    translate: 0 -10px;
+  }
+
+  /* Name and role are a single 0-gap group (Frame 123); only the button gets
+     the 20px separation. */
+  .people__detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-top: 3px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .people__name {
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 500;
+  }
+  .people__role {
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 300;
+  }
+
+  .people__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 20px;
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    background: var(--accent);
+    color: #4a5856;
+    font-size: 16px;
+    line-height: 20.2px;
+    overflow: hidden;
+  }
+  .people__link svg {
+    width: 18px;
+    height: 18px;
+    transition: translate 250ms ease;
+  }
+  /* Component 25 stacks two arrow glyphs so the icon slides out and a second
+     slides in on hover. */
+  .people__link:hover svg {
+    translate: 4px -4px;
+  }
+
+  .rule {
+    height: 1px;
+    margin: 95px auto 0;
+    border: 0;
+    background: var(--rule);
+  }
+
+  /* ── Footer ───────────────────────────────────────────────────────── */
+  /* The three footer blocks are absolutely positioned siblings in Figma
+     (y=2986 / 3032 / 3130), not an evenly-gapped stack — so they get their
+     real offsets. The logo's -10px is the overlap Component 28 has with the
+     contact row: the 56px instance overflows its 46px frame. */
+  .footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding-top: 108px;
+  }
+
+  .footer :global(.logo) {
+    margin-bottom: -10px;
+  }
+
+  .footer__cols {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 40px;
+    margin-bottom: 20px;
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  .footer__col--right {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .footer__primary {
+    color: var(--muted);
+    transition: opacity 200ms ease;
+  }
+  .footer__primary:hover {
+    opacity: 0.7;
+  }
+
+  .footer__secondary {
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 300;
+    color: var(--muted);
+  }
+  .footer__secondary:hover {
+    text-decoration: underline;
+  }
+
+  .footer__nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+  }
+  .footer__nav a {
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 300;
+  }
+  .footer__nav a:hover {
+    background: color-mix(in srgb, var(--muted) 10%, transparent);
+  }
+  .footer__nav .sep {
+    width: 1px;
+    height: 12px;
+    background: var(--muted);
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────────────
+     No mobile frames exist in the Figma file, so everything below this line
+     is invented. It stacks the 962px container and keeps the reading order;
+     Victor should review it against real devices. */
+  @media (max-width: 1000px) {
+    .hero__row {
+      flex-direction: column;
+      gap: 32px;
+    }
+    .card,
+    .video,
+    .dots {
+      width: 100%;
+      margin-top: 0;
+    }
+    .video {
+      height: auto;
+      aspect-ratio: 473 / 522;
+    }
+    .kpis {
+      grid-template-columns: 1fr;
+    }
+    .approach {
+      gap: 72px;
+      margin-top: 72px;
+    }
+    .light {
+      margin-top: 72px;
+      padding-top: 72px;
+    }
+    .rule {
+      margin-top: 56px;
+    }
+    .footer {
+      padding-top: 56px;
+    }
+    .people {
+      width: 100%;
+    }
+    .people__row {
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hero__top {
+      flex-direction: column;
+      gap: 20px;
+    }
+    .hero__title {
+      max-width: none;
+    }
+    .footer__cols {
+      flex-direction: column;
+      gap: 28px;
+    }
+    .footer__col--right {
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+</style>

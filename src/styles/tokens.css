@@ -1,0 +1,153 @@
+/* Design tokens extracted from Figma `Portafolio 2024` page 3.0, node 831:184.
+   Values are the literal fills/radii/type scale from the file — do not "round"
+   them without checking the frame first. */
+
+:root {
+  /* Dark is the page default: the top 2036px of the 3198px Home frame. */
+  --bg: #1d2222;
+  --surface: #181c1c;
+  --surface-2: #2a3231;
+  --nav-bg: #1a1e1e;
+  --nav-border: #2a3231;
+  --text: #b3d6d3;
+  --muted: #4a5856;
+  --accent: #dbe976;
+  --on-accent: #1d2222;
+  --rule: #2a3231;
+
+  /* Layout — 1280px frame, 962px content container, 159px side gutters. */
+  --container: 962px;
+  --frame: 1280px;
+
+  --r-sm: 5px;
+  --r-md: 10px;
+  --r-pill: 100px;
+
+  /* @fontsource-variable registers the family as "Outfit Variable" — using a
+     bare "Outfit" silently falls back to system-ui and every text block
+     re-wraps, which throws off the whole vertical rhythm. */
+  --font: "Outfit Variable", "Outfit", system-ui, sans-serif;
+}
+
+/* The scroll-flip band: Rectangle 3994, #FBFBFB, y 2036 → 3198.
+   Same custom properties, light values — so every component inside it
+   re-themes without knowing it moved. */
+.theme-light {
+  --bg: #fbfbfb;
+  --surface: #f6f6f6;
+  --surface-2: #edefef;
+  --nav-bg: #f6f6f6;
+  --nav-border: #e2e5e4;
+  --text: #4a5856;
+  --muted: #4a5856;
+  --accent: #dbe976;
+  --on-accent: #4a5856;
+  --rule: #afb5b4;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #1d2222;
+  color: var(--text);
+  font-family: var(--font);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  width: var(--container);
+  max-width: calc(100% - 48px);
+  margin-inline: auto;
+}
+
+/* Figma sets line-height in px on every text node; default to the ratio the
+   body copy uses (16 -> 20.2) so untagged text doesn't drift. */
+.t-body {
+  font-size: 16px;
+  line-height: 20.2px;
+  font-weight: 300;
+}
+.t-body-md {
+  font-size: 18px;
+  line-height: 22.7px;
+  font-weight: 400;
+}
+.t-lead {
+  font-size: 20px;
+  line-height: 25.2px;
+  font-weight: 400;
+}
+.t-label {
+  font-size: 25px;
+  line-height: 30px;
+  font-weight: 400;
+}
+.t-h2 {
+  font-size: 35px;
+  line-height: 35px;
+  font-weight: 500;
+}
+.t-h1 {
+  font-size: 55px;
+  line-height: 55px;
+  font-weight: 500;
+}
+.t-stat {
+  font-size: 60px;
+  line-height: 45px;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .t-h1 {
+    font-size: 34px;
+    line-height: 38px;
+  }
+  .t-h2 {
+    font-size: 26px;
+    line-height: 30px;
+  }
+  .t-stat {
+    font-size: 46px;
+    line-height: 40px;
+  }
+  .t-label {
+    font-size: 21px;
+    line-height: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

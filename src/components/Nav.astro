@@ -1,0 +1,154 @@
+---
+import LogoFlip from "./LogoFlip.astro";
+
+/**
+ * Figma `menu dark version` (1007:5859) — 962x66, #1A1E1E on a 1px #2A3231
+ * hairline, 10px radius, sits at y=34 and sticks there.
+ *
+ * `menu light version` (942:72, #F6F6F6) is the same component re-themed. It
+ * exists for exactly one reason: the nav crosses the light band that starts at
+ * y=2036, so it inverts on scroll rather than being a user-facing toggle.
+ */
+const links = [
+  { label: "Proyectos", href: "#proyectos" },
+  { label: "Sobre mi", href: "#sobre-mi" },
+  { label: "Resumen", href: "#resumen" },
+];
+---
+
+<div class="nav-wrap">
+  <header class="nav container" data-nav>
+    <LogoFlip scale={1} />
+
+    <nav class="nav__right" aria-label="Principal">
+      {
+        links.map((link, i) => (
+          <>
+            {i > 0 && <span class="sep" aria-hidden="true" />}
+            <a class="nav__link" href={link.href}>
+              {link.label}
+            </a>
+          </>
+        ))
+      }
+      <a class="nav__cta" href="#contacto">¡Hablemos!</a>
+    </nav>
+  </header>
+</div>
+
+<style>
+  /* The wrapper only supplies the 34px offset — it must NOT be sticky itself,
+     or sticky pushes it to top:34px at scroll 0 and the padding stacks on top,
+     landing the nav at y=68 instead of y=34. */
+  .nav-wrap {
+    padding-top: 34px;
+    margin-bottom: 29px; /* hero row starts at y=129; nav bottom is y=100 */
+  }
+
+  .nav {
+    position: sticky;
+    top: 34px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 66px;
+    padding: 10px 13px 10px 20px;
+    background: var(--nav-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: var(--r-md);
+    transition:
+      background-color 400ms ease,
+      border-color 400ms ease,
+      color 400ms ease;
+  }
+
+  /* Applied by the scroll observer once the nav overlaps the light band.
+     Redefining the tokens locally means LogoFlip and the links re-theme
+     without knowing anything about the flip. */
+  .nav.is-light {
+    --nav-bg: #f6f6f6;
+    --nav-border: #e2e5e4;
+    --text: #4a5856;
+    --muted: #9aa5a3;
+    --on-accent: #4a5856;
+  }
+
+  .nav__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav__link {
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 300;
+    color: var(--text);
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+
+  .nav__link:hover,
+  .nav__link:focus-visible {
+    background: color-mix(in srgb, var(--text) 10%, transparent);
+  }
+
+  .sep {
+    width: 1px;
+    height: 12px;
+    background: var(--muted);
+    flex: none;
+  }
+
+  .nav__cta {
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    background: var(--accent);
+    color: #1d2222;
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 400;
+    transition: filter 200ms ease;
+  }
+
+  .nav__cta:hover,
+  .nav__cta:focus-visible {
+    filter: brightness(1.08);
+  }
+
+  @media (max-width: 720px) {
+    .nav {
+      padding: 10px 12px;
+      height: 58px;
+    }
+    /* The three text links collapse; the CTA is the one that has to survive. */
+    .nav__link,
+    .sep {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Flip the nav when it crosses into the light band.
+  //
+  // rootMargin collapses the viewport to a zero-height line at y=67 (the nav's
+  // vertical centre: 34px offset + half of 66px). The light section
+  // intersecting that line is exactly "the nav is now over light".
+  const nav = document.querySelector<HTMLElement>("[data-nav]");
+  const lightSection = document.querySelector<HTMLElement>("[data-theme-light]");
+
+  if (nav && lightSection) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        nav.classList.toggle("is-light", entry.isIntersecting);
+      },
+      { rootMargin: "-67px 0px -100% 0px", threshold: 0 },
+    );
+    observer.observe(lightSection);
+  }
+</script>
