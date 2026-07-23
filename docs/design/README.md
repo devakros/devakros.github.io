@@ -115,6 +115,10 @@ Per Victor: noise background only → the h1 types itself in → a ~1.2s beat �
 everything else resolves out of a heavy blur. Once per session; client-side
 navigations use the page transition instead.
 
+**To see it again: `http://localhost:4321/?intro=1`.** It runs once per session,
+and a hard refresh does *not* clear sessionStorage — only a new tab does. The
+query flag forces it regardless of that or of prefers-reduced-motion.
+
 Two things that are load-bearing and easy to break:
 
 - **`is-intro` is set by an inline script in `<head>`, before first paint.** If
@@ -138,7 +142,9 @@ progresses". Now:
 
 - the showreel autoplays regardless (muted, decorative; the button is the control)
 - the slider still advances, with instant cuts instead of sliding
-- the intro is skipped entirely and the grain holds still
+- the intro keeps its beats but drops typing, blur and movement — a plain
+  opacity fade. Skipping it outright just made the page look inert.
+- the grain holds still
 
 ## Motion references supplied by Victor
 

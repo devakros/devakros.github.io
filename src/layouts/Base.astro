@@ -33,13 +33,27 @@ const { title, description, theme = "dark" } = Astro.props;
         opposite of what Victor asked for. */}
     <script is:inline>
       (function () {
+        var root = document.documentElement;
+        // ?intro=1 forces the full sequence — for reviewing it without having
+        // to open a fresh tab or change an OS setting.
+        var forced = location.search.indexOf("intro=1") > -1;
         var seen = null;
         try {
           seen = sessionStorage.getItem("vv:intro-seen");
         } catch (e) {}
         var reduced =
           window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (!seen && !reduced) document.documentElement.classList.add("is-intro");
+
+        if (forced) {
+          root.classList.add("is-intro", "intro-forced");
+          return;
+        }
+        if (seen) return;
+        // Reduced motion still gets the shape of the intro — heading first,
+        // then the rest fades up — just without typing, blur or movement.
+        // Skipping it entirely made the site look like nothing happened.
+        root.classList.add("is-intro");
+        if (reduced) root.classList.add("intro-plain");
       })();
     </script>
   </head>

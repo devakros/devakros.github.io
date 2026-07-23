@@ -35,6 +35,13 @@
       return;
     }
 
+    // Reduced motion: show the heading immediately, hold, then fade the rest
+    // up. Same beats, none of the motion.
+    if (root.classList.contains("intro-plain")) {
+      window.setTimeout(reveal, 900);
+      return;
+    }
+
     try {
       sessionStorage.setItem(REVEALED, "1");
     } catch {

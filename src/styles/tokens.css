@@ -257,16 +257,32 @@ html:not(.is-intro) [data-intro-title] .ch {
   50%, 100% { opacity: 0; }
 }
 
+/* Reduced motion (and not force-previewing): keep the beats, drop the motion.
+   A plain opacity fade is fine; blur, translate and per-character typing are
+   not. Skipping the intro entirely just made the page look inert. */
+html.intro-plain [data-intro-hide] {
+  filter: none;
+  translate: none;
+  transition: opacity 500ms linear;
+}
+html.intro-plain.is-intro [data-intro-hide] {
+  opacity: 0;
+}
+html.intro-plain [data-intro-title],
+html.intro-plain [data-intro-title] .ch {
+  visibility: visible;
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  [data-intro-hide] {
-    transition: none;
-  }
-  html.is-intro [data-intro-hide] {
-    opacity: 1;
+  html:not(.intro-forced) [data-intro-hide] {
     filter: none;
     translate: none;
   }
-  [data-intro-title] .ch {
+  html:not(.intro-forced) [data-intro-title] .ch {
     opacity: 1;
+  }
+  html:not(.intro-forced) [data-intro-title].is-typing::after {
+    animation: none;
   }
 }
