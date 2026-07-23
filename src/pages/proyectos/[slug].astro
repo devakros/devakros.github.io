@@ -5,7 +5,10 @@ import SiteFooter from "../../components/SiteFooter.astro";
 import { projects } from "../../data/projects";
 
 export function getStaticPaths() {
-  return projects.map((project) => ({
+  // coca-cola has a hand-built page; this route covers the frame-render stubs.
+  return projects
+    .filter((project) => !project.built)
+    .map((project) => ({
     params: { slug: project.slug },
     props: { project },
   }));

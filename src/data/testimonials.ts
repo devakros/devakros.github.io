@@ -5,37 +5,52 @@ export interface Testimonial {
   /** Each string is a paragraph. */
   quote: string[];
   profileUrl: string;
-  /** Copy not yet supplied by Victor — keeps placeholders from shipping unnoticed. */
+  /** INVENTED filler — must be replaced with a real quote or removed before launch. */
   placeholder?: boolean;
 }
 
 /**
- * Only Santiago Gallo's testimonial exists in the Figma file (Component 24).
- * The frame shows seven avatars, so the other six are real headshots from the
- * file with PENDIENTE copy until Victor supplies the quotes.
+ * ⚠️  Only Santiago Gallo's testimonial is real — it is the one quote that
+ * exists in the Figma file (Component 24).
+ *
+ * The other six are INVENTED placeholder copy so the carousel reads correctly
+ * during review. They are attached to real photographs of real people that came
+ * out of Victor's Figma file, which means shipping them as-is would be putting
+ * words in the mouths of identifiable individuals. Before launch each one must
+ * either be replaced with a quote that person actually gave, or deleted.
+ *
+ * `placeholder: true` is the flag to filter on.
  */
 export const testimonials: Testimonial[] = [
   {
-    name: "PENDIENTE",
-    role: "PENDIENTE",
+    name: "Daniela Restrepo",
+    role: "Head of Product en Nubia",
     avatar: "/img/avatar-1.png",
-    quote: ["PENDIENTE: testimonio por confirmar."],
+    quote: [
+      "Victor entra a un proyecto y lo primero que hace es entender el negocio, no la pantalla. Eso cambió por completo la forma en que priorizamos nuestro roadmap.",
+      "Su capacidad para traducir requerimientos difusos en flujos concretos nos ahorró meses de trabajo.",
+    ],
     profileUrl: "#",
     placeholder: true,
   },
   {
-    name: "PENDIENTE",
-    role: "PENDIENTE",
+    name: "Andrés Melo",
+    role: "CTO en Fintrack",
     avatar: "/img/avatar-2.png",
-    quote: ["PENDIENTE: testimonio por confirmar."],
+    quote: [
+      "Trabajar con Victor es de las pocas veces que el handoff no fue una fuente de fricción. Cada componente venía con sus estados, sus medidas y sus casos borde resueltos.",
+      "El equipo de desarrollo dejó de adivinar y empezó a construir.",
+    ],
     profileUrl: "#",
     placeholder: true,
   },
   {
-    name: "PENDIENTE",
-    role: "PENDIENTE",
+    name: "Carolina Duque",
+    role: "Product Manager en Zenda",
     avatar: "/img/avatar-3.png",
-    quote: ["PENDIENTE: testimonio por confirmar."],
+    quote: [
+      "Lo que más valoro es que Victor cuestiona el brief cuando hace falta. No entrega lo que le pides, entrega lo que el problema necesita, y siempre con el argumento por delante.",
+    ],
     profileUrl: "#",
     placeholder: true,
   },
@@ -50,30 +65,37 @@ export const testimonials: Testimonial[] = [
     profileUrl: "#",
   },
   {
-    name: "PENDIENTE",
-    role: "PENDIENTE",
+    name: "Mariana Ochoa",
+    role: "Design Lead en Praxis Health",
     avatar: "/img/avatar-5.png",
-    quote: ["PENDIENTE: testimonio por confirmar."],
+    quote: [
+      "Montó nuestro sistema de diseño desde cero y, más importante, nos enseñó a mantenerlo. Un año después el equipo sigue trabajando sobre esa base sin que se haya degradado.",
+    ],
     profileUrl: "#",
     placeholder: true,
   },
   {
-    name: "PENDIENTE",
-    role: "PENDIENTE",
+    name: "Julián Vergara",
+    role: "Founder en Loopstack",
     avatar: "/img/avatar-6.png",
-    quote: ["PENDIENTE: testimonio por confirmar."],
+    quote: [
+      "Llegamos con una idea y salimos con un producto validado. Victor nos acompañó desde las entrevistas con usuarios hasta el lanzamiento, y en cada etapa supo cuándo empujar y cuándo simplificar.",
+      "Para una startup en etapa temprana, esa claridad vale más que cualquier entregable.",
+    ],
     profileUrl: "#",
     placeholder: true,
   },
   {
-    name: "PENDIENTE",
-    role: "PENDIENTE",
+    name: "Laura Cárdenas",
+    role: "Head of Design en Altamar",
     avatar: "/img/avatar-7.png",
-    quote: ["PENDIENTE: testimonio por confirmar."],
+    quote: [
+      "Es el tipo de diseñador que deja el equipo mejor de lo que lo encontró. Documenta, comparte criterio y sube el estándar de todos los que trabajan a su alrededor.",
+    ],
     profileUrl: "#",
     placeholder: true,
   },
 ];
 
-/** Santiago is the one Figma shows selected. */
+/** Santiago is the one Figma shows selected — and the only real quote. */
 export const defaultTestimonial = 3;

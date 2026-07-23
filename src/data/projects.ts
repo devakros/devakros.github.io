@@ -14,6 +14,8 @@ export interface Project {
   role?: string;
   /** Copy not yet supplied by Victor — keeps placeholders from shipping. */
   placeholder?: boolean;
+  /** True once the case study exists as real markup rather than a frame render. */
+  built?: boolean;
 }
 
 export const projects: Project[] = [
@@ -26,8 +28,9 @@ export const projects: Project[] = [
     desc: "Unificando la gestión de presupuestos de Coca-Cola: de la fragmentación a un sistema escalable.",
     frame: "/img/case/coca-cola.png",
     frameHeight: 3393,
-    year: "2024",
+    year: "2025",
     role: "Product Design",
+    built: true,
   },
   {
     slug: "polestar",

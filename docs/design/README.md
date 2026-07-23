@@ -90,13 +90,22 @@ file, not a layout error — do not "fix" it by shrinking line-height.
   content-scored crops of each frame. Both need Victor.
 - **The showreel is a generated placeholder** (`public/video/showreel-placeholder.mp4`
   — a slow push on the Figma poster frame). Real footage needed.
-- **Testimonial copy for 6 of 7 people is a placeholder.** Only Santiago Gallo's
-  quote exists in Figma; the frame shows seven avatars. The other six read
-  `PENDIENTE` in `src/data/testimonials.ts`.
-- **Case-study bodies are the Figma frame renders**, not built markup. Each
-  frame's own nav is cropped off (130px) so it doesn't duplicate the sticky
-  one, but the frame's inert "Volver" still shows alongside the real one. That
-  goes away when each case study is built as HTML.
+- **⚠️ Six of the seven testimonials are invented.** Only Santiago Gallo's
+  quote exists in Figma. The other six are filler written to make the carousel
+  readable during review — and they are attached to photographs of real,
+  identifiable people that came out of the Figma file. Shipping them as-is
+  would be putting words in those people's mouths. Before launch each must be
+  replaced with a quote that person actually gave, or deleted. Filter on
+  `placeholder: true` in `src/data/testimonials.ts`.
+- **Coca-Cola is built as real markup** (`/proyectos/coca-cola`). Polestar and
+  LeanCore are still frame renders: each frame's own nav is cropped off (130px)
+  so it doesn't duplicate the sticky one, but the frame's inert "Volver" still
+  shows alongside the real one.
+- **Text wraps ~3% narrower than Figma.** Same font (Outfit-Light), same 16px,
+  zero letter-spacing — but the browser fits slightly more per line than
+  Figma's text engine, so long copy columns run a little short (the Coca-Cola
+  body column is 1735px vs 1789px). Do not "fix" this with letter-spacing;
+  it would distort the type to chase an artifact of Figma's renderer.
 - **Nav link hover** is a per-character roll, taken from marrow.au rather than
   from the Figma file, which has no hover states.
 
