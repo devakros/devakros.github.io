@@ -205,11 +205,19 @@ const links = [
   // rootMargin collapses the viewport to a zero-height line at y=67 (the nav's
   // vertical centre: 34px offset + half of 66px). The light section
   // intersecting that line is exactly "the nav is now over light".
-  const nav = document.querySelector<HTMLElement>("[data-nav]");
-  const lightSection = document.querySelector<HTMLElement>("[data-theme-light]");
+  let observer: IntersectionObserver | undefined;
 
-  if (nav && lightSection) {
-    const observer = new IntersectionObserver(
+  function boot() {
+    observer?.disconnect();
+    const nav = document.querySelector<HTMLElement>("[data-nav]");
+    const lightSection = document.querySelector<HTMLElement>("[data-theme-light]");
+    if (!nav) return;
+    // Case-study pages have no light band; make sure a stale light nav doesn't
+    // carry over from Home.
+    nav.classList.remove("is-light");
+    if (!lightSection) return;
+
+    observer = new IntersectionObserver(
       ([entry]) => {
         nav.classList.toggle("is-light", entry.isIntersecting);
       },
@@ -217,4 +225,7 @@ const links = [
     );
     observer.observe(lightSection);
   }
+
+  boot();
+  document.addEventListener("astro:page-load", boot);
 </script>

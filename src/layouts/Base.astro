@@ -1,16 +1,20 @@
 ---
 import "@fontsource-variable/outfit";
 import "../styles/tokens.css";
+import { ClientRouter } from "astro:transitions";
+import Preloader from "../components/Preloader.astro";
 
 interface Props {
   title: string;
   description: string;
+  /** Home is dark at the top; case studies are dark throughout. */
+  theme?: "dark" | "light";
 }
-const { title, description } = Astro.props;
+const { title, description, theme = "dark" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme={theme}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,8 +25,98 @@ const { title, description } = Astro.props;
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+
+    <ClientRouter />
   </head>
   <body>
+    <Preloader />
     <slot />
+
+    <style is:global>
+      /* ── Page transitions ────────────────────────────────────────────────
+         The incoming page rises into place while the outgoing one lifts away.
+         Short enough not to feel like waiting; the easing matches the theme
+         flip and the logo roll so the whole site moves with one character. */
+      @keyframes vt-out {
+        to {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+      }
+      @keyframes vt-in {
+        from {
+          opacity: 0;
+          transform: translateY(28px);
+        }
+      }
+
+      ::view-transition-old(root) {
+        animation: vt-out 340ms cubic-bezier(0.76, 0, 0.24, 1) both;
+      }
+      ::view-transition-new(root) {
+        animation: vt-in 520ms cubic-bezier(0.76, 0, 0.24, 1) both;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+          animation: none;
+        }
+      }
+
+      /* Lock scrolling while the intro splash is up. */
+      html.is-loading,
+      html.is-loading body {
+        overflow: hidden;
+      }
+    </style>
+
+    <script>
+      import Lenis from "lenis";
+
+      // Smooth scroll — the same thing grainandmortar, juanmora and harrygeorge
+      // all use. Lenis drives the real scroll position (rather than transforming
+      // a wrapper), so position:sticky and IntersectionObserver keep working.
+      let lenis: Lenis | null = null;
+      let rafId = 0;
+
+      function startLenis() {
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        stopLenis();
+        lenis = new Lenis({
+          duration: 1.05,
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smoothWheel: true,
+          touchMultiplier: 1.6,
+        });
+        const raf = (time: number) => {
+          lenis?.raf(time);
+          rafId = requestAnimationFrame(raf);
+        };
+        rafId = requestAnimationFrame(raf);
+
+        // In-page anchors need to go through Lenis or they fight it.
+        document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
+          a.addEventListener("click", (e) => {
+            const id = a.getAttribute("href")!.slice(1);
+            const target = id && document.getElementById(id);
+            if (!target) return;
+            e.preventDefault();
+            lenis?.scrollTo(target, { offset: -120 });
+          });
+        });
+      }
+
+      function stopLenis() {
+        cancelAnimationFrame(rafId);
+        lenis?.destroy();
+        lenis = null;
+      }
+
+      startLenis();
+      // ClientRouter swaps the DOM, so rebind against the new document.
+      document.addEventListener("astro:page-load", startLenis);
+      document.addEventListener("astro:before-swap", stopLenis);
+    </script>
   </body>
 </html>

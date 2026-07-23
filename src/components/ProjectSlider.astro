@@ -411,5 +411,16 @@ const CIRC = +(2 * Math.PI * R).toFixed(3);
     startSweep();
   }
 
-  document.querySelectorAll<HTMLElement>("[data-slider]").forEach(initSlider);
+  // ClientRouter swaps the DOM without re-running module scripts, so bind on
+  // astro:page-load (which also fires on first load). The dataset flag stops a
+  // node being wired twice.
+  function boot() {
+    document.querySelectorAll<HTMLElement>("[data-slider]").forEach((el) => {
+      if (el.dataset.ready) return;
+      el.dataset.ready = "1";
+      initSlider(el);
+    });
+  }
+  boot();
+  document.addEventListener("astro:page-load", boot);
 </script>

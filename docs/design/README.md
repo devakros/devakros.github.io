@@ -90,7 +90,13 @@ file, not a layout error — do not "fix" it by shrinking line-height.
   content-scored crops of each frame. Both need Victor.
 - **The showreel is a generated placeholder** (`public/video/showreel-placeholder.mp4`
   — a slow push on the Figma poster frame). Real footage needed.
-- **Avatar switching is presentational only** — states exist, behaviour does not.
+- **Testimonial copy for 6 of 7 people is a placeholder.** Only Santiago Gallo's
+  quote exists in Figma; the frame shows seven avatars. The other six read
+  `PENDIENTE` in `src/data/testimonials.ts`.
+- **Case-study bodies are the Figma frame renders**, not built markup. Each
+  frame's own nav is cropped off (130px) so it doesn't duplicate the sticky
+  one, but the frame's inert "Volver" still shows alongside the real one. That
+  goes away when each case study is built as HTML.
 - **Nav link hover** is a per-character roll, taken from marrow.au rather than
   from the Figma file, which has no hover states.
 
@@ -105,11 +111,18 @@ file, not a layout error — do not "fix" it by shrinking line-height.
 | juanmora.co/work.html | loading screen, page transitions | GSAP + Lenis |
 | andreigorskikh.digital | local time | Framer Motion — **built**, no library needed |
 
-Four of the six are GSAP; three of those add Lenis for smooth scroll. Nothing
-in the current build needs a library yet — the theme flip, logo roll, nav
-hover, slider and clock are all CSS plus the Web Animations API. Adding a
-preloader and cross-page transitions is the point where GSAP + Lenis (or
-Astro's own `<ClientRouter />`) starts to earn its weight.
+All six are now built. Only one library was needed — **Lenis** for smooth
+scroll. Page transitions use Astro's own `<ClientRouter />` (view transitions)
+rather than GSAP/barba, and the preloader, theme flip, logo roll, nav hover,
+slider and clock are CSS plus the Web Animations API.
+
+### ClientRouter and component scripts
+
+`<ClientRouter />` swaps the DOM without re-running module scripts, so every
+interactive component binds on `astro:page-load` (which also fires on first
+load) and guards against double-binding with a `data-ready` flag. If you add a
+component with a `<script>`, follow that pattern or it will silently stop
+working after the first client-side navigation.
 
 ## Assets
 

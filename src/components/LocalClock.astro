@@ -128,10 +128,10 @@ const initialNight = hour24 >= 18 || hour24 < 6;
 
 <script>
   // One interval drives every clock on the page (hero + footer stay in sync).
-  const clocks = document.querySelectorAll<HTMLElement>("[data-clock]");
+  let timer: number | undefined;
 
   function tick() {
-    for (const clock of clocks) {
+    for (const clock of document.querySelectorAll<HTMLElement>("[data-clock]")) {
       const tz = clock.dataset.tz || "America/Bogota";
       const now = new Date();
 
@@ -156,7 +156,14 @@ const initialNight = hour24 >= 18 || hour24 < 6;
     }
   }
 
-  tick();
-  // 20s keeps the minute rollover tight without being wasteful.
-  setInterval(tick, 20_000);
+  function boot() {
+    window.clearInterval(timer);
+    tick();
+    // 20s keeps the minute rollover tight without being wasteful.
+    timer = window.setInterval(tick, 20_000);
+  }
+
+  boot();
+  // ClientRouter replaces the nodes, so re-query after every navigation.
+  document.addEventListener("astro:page-load", boot);
 </script>

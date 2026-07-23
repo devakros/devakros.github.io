@@ -1,0 +1,299 @@
+---
+import QuoteOpen from "../icons/quote-open.svg?raw";
+import QuoteClose from "../icons/quote-close.svg?raw";
+import { testimonials, defaultTestimonial } from "../data/testimonials";
+
+/**
+ * Figma Component 24 (959x536) — the quote card plus the 7-avatar picker.
+ *
+ * Clicking an avatar swaps the quote. The selected tile lifts 10px and goes to
+ * full opacity, and gets 73px of breathing room either side (Figma x-positions
+ * 297/382/467 · 607 · 747/832/917) so the name/role/button block below has room.
+ */
+---
+
+<figure class="quote container" data-testimonials>
+  <blockquote class="quote__card">
+    <span class="quote__mark" aria-hidden="true" set:html={QuoteOpen} />
+    <div class="quote__text t-lead" data-quote-text aria-live="polite">
+      {testimonials[defaultTestimonial].quote.map((p) => <p>{p}</p>)}
+    </div>
+    <span class="quote__mark quote__mark--close" aria-hidden="true" set:html={QuoteClose} />
+  </blockquote>
+
+  <figcaption class="people">
+    <ul class="people__row" role="tablist" aria-label="Testimonios">
+      {
+        testimonials.map((person, i) => (
+          <li>
+            <button
+              class:list={["avatar", i === defaultTestimonial && "avatar--active"]}
+              type="button"
+              role="tab"
+              data-person
+              aria-selected={i === defaultTestimonial ? "true" : "false"}
+              aria-label={person.placeholder ? `Testimonio ${i + 1}` : person.name}
+            >
+              <img src={person.avatar} alt="" width="47" height="47" loading="lazy" />
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="people__detail" data-detail>
+      <span class="people__name" data-name>{testimonials[defaultTestimonial].name}</span>
+      <span class="people__role" data-role>{testimonials[defaultTestimonial].role}</span>
+      <a class="people__link" data-profile href={testimonials[defaultTestimonial].profileUrl}>
+        Ir a su perfil
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </a>
+    </div>
+  </figcaption>
+</figure>
+
+<script>
+  import { testimonials, defaultTestimonial } from "../data/testimonials";
+
+  function boot() {
+  const root = document.querySelector<HTMLElement>("[data-testimonials]");
+  if (root && !root.dataset.ready) {
+    root.dataset.ready = "1";
+    const text = root.querySelector<HTMLElement>("[data-quote-text]")!;
+    const name = root.querySelector<HTMLElement>("[data-name]")!;
+    const role = root.querySelector<HTMLElement>("[data-role]")!;
+    const profile = root.querySelector<HTMLAnchorElement>("[data-profile]")!;
+    const detail = root.querySelector<HTMLElement>("[data-detail]")!;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-person]")];
+    let index = defaultTestimonial;
+
+    function select(next: number) {
+      if (next === index) return;
+      index = next;
+      const t = testimonials[index];
+
+      // Fade out, swap, fade back in — a hard cut on a block of text this size
+      // reads as a glitch.
+      root!.classList.add("is-swapping");
+      window.setTimeout(() => {
+        text.replaceChildren(
+          ...t.quote.map((p) => {
+            const el = document.createElement("p");
+            el.textContent = p;
+            return el;
+          }),
+        );
+        name.textContent = t.name;
+        role.textContent = t.role;
+        profile.href = t.profileUrl;
+        root!.classList.remove("is-swapping");
+      }, 220);
+
+      buttons.forEach((b, i) => {
+        b.setAttribute("aria-selected", String(i === index));
+        b.classList.toggle("avatar--active", i === index);
+      });
+    }
+
+    buttons.forEach((b, i) => b.addEventListener("click", () => select(i)));
+
+    // Left/right arrows move between avatars, per the tablist pattern.
+    root.querySelector("[role=tablist]")?.addEventListener("keydown", (e) => {
+      const key = (e as KeyboardEvent).key;
+      if (key !== "ArrowLeft" && key !== "ArrowRight") return;
+      e.preventDefault();
+      const next = (index + (key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length;
+      select(next);
+      buttons[next].focus();
+    });
+
+    // Keep the card from resizing as quotes of different lengths swap in.
+    const lockHeight = () => {
+      const tallest = testimonials.reduce((max, t) => Math.max(max, t.quote.join(" ").length), 0);
+      detail.style.minHeight = `${detail.offsetHeight}px`;
+      void tallest;
+    };
+    lockHeight();
+  }
+  }
+  boot();
+  document.addEventListener("astro:page-load", boot);
+</script>
+
+<style>
+  .quote {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    /* Figma's 40px gap is measured to the *lifted* active avatar; our lift is a
+       transform (no layout effect), so the layout gap is 40+10. */
+    gap: 50px;
+    align-items: center;
+  }
+
+  /* Figma lays this out SPACE_BETWEEN at a fixed 322px, which distributes the
+     slack between the quote marks and the text rather than using a set gap. */
+  .quote__card {
+    position: relative;
+    width: 100%;
+    min-height: 322px;
+    margin: 0;
+    padding: 25px;
+    background: var(--surface);
+    border-radius: var(--r-md);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* IcomoonFreeQuotes glyphs — rounded blobs, not typographic quote marks.
+     The SVGs carry their own 0.6 opacity from the Figma frames. */
+  .quote__mark {
+    width: 30px;
+    height: 30px;
+    color: var(--muted);
+  }
+  .quote__mark :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+  .quote__mark--close {
+    align-self: flex-end;
+  }
+
+  .quote__text {
+    max-width: 757px;
+    margin-inline: auto;
+    text-align: center;
+    color: var(--muted);
+    transition:
+      opacity 200ms ease,
+      translate 200ms ease;
+  }
+  .quote__text :global(p) {
+    margin: 0;
+  }
+  .quote__text :global(p + p) {
+    margin-top: 1em;
+  }
+
+  .people__detail {
+    transition:
+      opacity 200ms ease,
+      translate 200ms ease;
+  }
+
+  .quote.is-swapping .quote__text,
+  .quote.is-swapping .people__detail {
+    opacity: 0;
+    translate: 0 6px;
+  }
+
+  .people {
+    position: relative;
+    width: 687px;
+    max-width: 100%;
+  }
+
+  .people__row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* 67px tiles with a squircle that squares off at the bottom-left. */
+  .avatar {
+    width: 67px;
+    height: 67px;
+    padding: 0;
+    border: 0;
+    display: grid;
+    place-items: center;
+    background: var(--surface-2);
+    border-radius: 20px 20px 20px 0;
+    opacity: 0.6;
+    cursor: pointer;
+    transition:
+      opacity 250ms ease,
+      translate 250ms ease,
+      margin 320ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .avatar img {
+    width: 47px;
+    height: 47px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .avatar:hover,
+  .avatar:focus-visible {
+    opacity: 1;
+  }
+  .avatar--active {
+    opacity: 1;
+    translate: 0 -10px;
+    /* 73px flanking the selected tile vs 18px elsewhere: 55px extra each side. */
+    margin-inline: 55px;
+  }
+
+  .people__detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-top: 3px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .people__name {
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 500;
+  }
+  .people__role {
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 300;
+  }
+
+  .people__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 20px;
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    background: var(--accent);
+    color: #4a5856;
+    font-size: 16px;
+    line-height: 20.2px;
+    overflow: hidden;
+  }
+  .people__link svg {
+    width: 18px;
+    height: 18px;
+    transition: translate 250ms ease;
+  }
+  .people__link:hover svg {
+    translate: 4px -4px;
+  }
+
+  @media (max-width: 1000px) {
+    .people {
+      width: 100%;
+    }
+    .people__row {
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .avatar--active {
+      margin-inline: 20px;
+    }
+  }
+</style>

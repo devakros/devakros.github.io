@@ -1,0 +1,134 @@
+---
+import LogoFlip from "./LogoFlip.astro";
+import LocalClock from "./LocalClock.astro";
+
+/**
+ * Figma Frame 1000003344 (y=3032) plus the footer nav at y=3130 and the
+ * Component 28 logo at y=2986. Shared by Home and the case studies.
+ */
+interface Props {
+  /** Home links to in-page anchors; case studies need to go back to Home. */
+  home?: boolean;
+}
+const { home = true } = Astro.props;
+const p = (hash: string) => (home ? hash : `/${hash}`);
+---
+
+<div class="footer container" id="contacto">
+  <LogoFlip scale={1.2727} href="/" />
+
+  <div class="footer__cols">
+    <div class="footer__col">
+      <a class="t-label footer__primary" href="mailto:hello@victorvivas.com">hello@victorvivas.com</a>
+      <a class="footer__secondary" href="https://www.linkedin.com/" rel="me noopener" target="_blank"
+        >LinkedIn</a
+      >
+    </div>
+
+    <div class="footer__col footer__col--right">
+      <a class="t-label footer__primary" href="tel:+573112698813">+57 311 2698813</a>
+      <LocalClock size="footer" place="Colombia, Cucuta" />
+    </div>
+  </div>
+
+  <nav class="footer__nav" aria-label="Pie de página">
+    <a href={p("#proyectos")}>Proyectos</a>
+    <span class="sep" aria-hidden="true"></span>
+    <a href={p("#sobre-mi")}>Sobre mi</a>
+    <span class="sep" aria-hidden="true"></span>
+    <a href={p("#resumen")}>Resumen</a>
+  </nav>
+</div>
+
+<style>
+  /* The three blocks are absolutely positioned siblings in Figma (y=2986 /
+     3032 / 3130), not an evenly-gapped stack — so they get their real offsets.
+     The logo's -10px is the overlap Component 28 has with the contact row: the
+     56px instance overflows its 46px frame. */
+  .footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding-top: 108px;
+  }
+
+  .footer :global(.logo) {
+    margin-bottom: -10px;
+  }
+
+  .footer__cols {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 40px;
+    margin-bottom: 20px;
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  .footer__col--right {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .footer__primary {
+    color: var(--muted);
+    transition: opacity 200ms ease;
+  }
+  .footer__primary:hover {
+    opacity: 0.7;
+  }
+
+  .footer__secondary {
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 300;
+    color: var(--muted);
+  }
+  .footer__secondary:hover {
+    text-decoration: underline;
+  }
+
+  .footer__nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+  }
+  .footer__nav a {
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 300;
+  }
+  .footer__nav a:hover {
+    background: color-mix(in srgb, var(--muted) 10%, transparent);
+  }
+  .footer__nav .sep {
+    width: 1px;
+    height: 12px;
+    background: var(--muted);
+  }
+
+  @media (max-width: 1000px) {
+    .footer {
+      padding-top: 56px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .footer__cols {
+      flex-direction: column;
+      gap: 28px;
+    }
+    .footer__col--right {
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+</style>

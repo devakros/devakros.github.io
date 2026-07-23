@@ -1,0 +1,175 @@
+---
+import LogoFlip from "./LogoFlip.astro";
+
+/**
+ * Entry loading screen (harrygeorge.design / ampli.net / juanmora.co).
+ *
+ * Not in the Figma file — built from Victor's palette: the dark surface, the
+ * lime accent for the progress rule, and the same word-flip logo as the nav.
+ *
+ * Shows once per session. Subsequent navigations use the page transition
+ * instead, so returning to Home doesn't replay the whole intro.
+ */
+---
+
+<div class="preloader" data-preloader aria-hidden="true">
+  <div class="preloader__inner">
+    <LogoFlip scale={1.6} href="#" label="Victor Vivas" />
+    <div class="preloader__meter">
+      <span class="preloader__bar" data-preloader-bar></span>
+    </div>
+    <span class="preloader__count" data-preloader-count>0</span>
+  </div>
+</div>
+
+<style>
+  .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    background: #1d2222;
+    /* Clip-path wipe rather than a fade — the page underneath is already
+       painted, so a wipe reveals it instead of cross-dissolving to it. */
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 900ms cubic-bezier(0.76, 0, 0.24, 1);
+  }
+
+  .preloader.is-done {
+    clip-path: inset(0 0 100% 0);
+    pointer-events: none;
+  }
+
+  .preloader__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 34px;
+    transition:
+      opacity 400ms ease,
+      translate 600ms cubic-bezier(0.76, 0, 0.24, 1);
+  }
+
+  .preloader.is-done .preloader__inner {
+    opacity: 0;
+    translate: 0 -16px;
+  }
+
+  .preloader__meter {
+    width: 220px;
+    height: 2px;
+    background: #2a3231;
+    overflow: hidden;
+  }
+
+  .preloader__bar {
+    display: block;
+    width: 0%;
+    height: 100%;
+    background: #dbe976;
+    transition: width 260ms cubic-bezier(0.3, 0, 0.2, 1);
+  }
+
+  .preloader__count {
+    color: #4a5856;
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+  }
+  .preloader__count::after {
+    content: "%";
+  }
+
+  /* The logo shouldn't be a live link on the splash. */
+  .preloader :global(.logo) {
+    pointer-events: none;
+  }
+
+  /* No splash at all if the user has asked for less motion — it's pure
+     decoration and it delays content. */
+  @media (prefers-reduced-motion: reduce) {
+    .preloader {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const el = document.querySelector<HTMLElement>("[data-preloader]");
+  const bar = document.querySelector<HTMLElement>("[data-preloader-bar]");
+  const count = document.querySelector<HTMLElement>("[data-preloader-count]");
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const SEEN = "vv:intro-seen";
+
+  function finish(immediate = false) {
+    if (!el) return;
+    document.documentElement.classList.remove("is-loading");
+    if (immediate) {
+      el.remove();
+      return;
+    }
+    el.classList.add("is-done");
+    el.addEventListener("transitionend", () => el.remove(), { once: true });
+    // Belt and braces: if the transition never fires, don't trap the page.
+    window.setTimeout(() => el.remove(), 1600);
+  }
+
+  if (!el) {
+    // nothing to do
+  } else if (reduced || sessionStorage.getItem(SEEN)) {
+    finish(true);
+  } else {
+    document.documentElement.classList.add("is-loading");
+    sessionStorage.setItem(SEEN, "1");
+
+    // Progress is driven by real asset loading, with a floor so it always
+    // feels like it's moving even on a warm cache.
+    const assets = [...document.images, ...document.querySelectorAll("video")];
+    let done = 0;
+    const total = Math.max(assets.length, 1);
+
+    const paint = (pct: number) => {
+      const v = Math.min(100, Math.round(pct));
+      if (bar) bar.style.width = `${v}%`;
+      if (count) count.textContent = String(v);
+    };
+
+    const bump = () => {
+      done++;
+      paint((done / total) * 100);
+    };
+
+    for (const a of assets) {
+      const media = a as HTMLImageElement & HTMLVideoElement;
+      if (media.complete || media.readyState >= 3) bump();
+      else {
+        media.addEventListener("load", bump, { once: true });
+        media.addEventListener("loadeddata", bump, { once: true });
+        media.addEventListener("error", bump, { once: true });
+      }
+    }
+
+    // Creep forward so the counter never sits still waiting on a slow asset.
+    let creep = 0;
+    const tick = window.setInterval(() => {
+      creep = Math.min(creep + 3, 96);
+      paint(Math.max((done / total) * 100, creep));
+    }, 90);
+
+    const settle = () => {
+      window.clearInterval(tick);
+      paint(100);
+      // Hold at 100 briefly — snapping away the instant it lands reads as a flicker.
+      window.setTimeout(() => finish(), 420);
+    };
+
+    if (document.readyState === "complete") window.setTimeout(settle, 650);
+    else window.addEventListener("load", () => window.setTimeout(settle, 350), { once: true });
+
+    // Hard ceiling: never hold the page hostage to a stalled asset.
+    window.setTimeout(settle, 5000);
+  }
+</script>

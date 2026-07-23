@@ -4,6 +4,9 @@ import Nav from "../components/Nav.astro";
 import LogoFlip from "../components/LogoFlip.astro";
 import LocalClock from "../components/LocalClock.astro";
 import ProjectSlider, { type Slide } from "../components/ProjectSlider.astro";
+import Testimonials from "../components/Testimonials.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { projects } from "../data/projects";
 
 import Play from "../icons/play.svg?raw";
 import Diamond from "../icons/diamond.svg?raw";
@@ -11,40 +14,17 @@ import Handshake from "../icons/handshake.svg?raw";
 import Signature from "../icons/signature.svg?raw";
 import LogoFigma from "../icons/logo-figma.svg?raw";
 import LogoFramer from "../icons/logo-framer.svg?raw";
-import QuoteOpen from "../icons/quote-open.svg?raw";
-import QuoteClose from "../icons/quote-close.svg?raw";
 
-// Slide 1 is verbatim from Figma. Slides 2 and 3 exist as full case-study
-// frames but have no card copy in the file — the imagery is real (cropped from
-// each frame's hero) and the text is PLACEHOLDER pending Victor.
-const projects: Slide[] = [
-  {
-    title: "ICP Tool Coca-Cola",
-    img: "/img/proj-coca.png",
-    alt: "ICP Tool para Coca-Cola",
-    tags: ["UI", "Prototype", "Landing Page", "Design System"],
-    desc: "Unificando la gestión de presupuestos de Coca-Cola: de la fragmentación a un sistema escalable.",
-    href: "/proyectos/coca-cola",
-  },
-  {
-    title: "Polestar",
-    img: "/img/proj-polestar.png",
-    alt: "Caso de estudio Polestar",
-    tags: ["UI", "Web Design", "Motion"],
-    desc: "PENDIENTE: descripción del caso de estudio Polestar.",
-    href: "/proyectos/polestar",
-    placeholder: true,
-  },
-  {
-    title: "LeanCore Studio",
-    img: "/img/proj-leancore.png",
-    alt: "Caso de estudio LeanCore Studio",
-    tags: ["UI", "Design System", "Branding"],
-    desc: "PENDIENTE: descripción del caso de estudio LeanCore Studio.",
-    href: "/proyectos/leancore-studio",
-    placeholder: true,
-  },
-];
+// The slider and the case-study routes read from one source of truth.
+const slides: Slide[] = projects.map((project) => ({
+  title: project.title,
+  img: project.img,
+  alt: project.alt,
+  tags: project.tags,
+  desc: project.desc,
+  href: `/proyectos/${project.slug}`,
+  placeholder: project.placeholder,
+}));
 
 const kpis = [
   {
@@ -79,20 +59,6 @@ const tools = [
   { name: "Relume", img: "/img/logo-relume.png", size: 38 },
 ];
 
-const testimonial = {
-  quote: [
-    "Victor es el diseñador UI más responsable y creativo que conozco. Resolvió incontables desafíos en los productos de NuHome con su extraordinaria proactividad, al proponer ideas creativas cuyo impacto se reflejó en las métricas de nuestros productos.",
-    "Destaco su atención al detalle, su inclinación a la excelencia y su genuina preocupación por el cumplimiento de las metas y del bienestar del equipo.",
-  ],
-  name: "Santiago Gallo",
-  role: "Cofundador en Verticcal",
-  profileUrl: "#",
-};
-
-// Seven avatars; index 3 is the one Figma shows selected (full opacity, lifted 10px).
-const people = [1, 2, 3, 4, 5, 6, 7].map((n) => ({ src: `/img/avatar-${n}.png` }));
-const activeIndex = 3;
-
 const title = "Victor Vivas — IA Powered product designer";
 const description =
   "Product designer y estratega de experiencia de usuario. +8 años creando soluciones de UX/UI con impacto para Coca-Cola, Polestar y LeanCore.";
@@ -114,7 +80,7 @@ const description =
       </div>
 
       <div class="hero__row" id="proyectos">
-        <ProjectSlider slides={projects} />
+        <ProjectSlider slides={slides} />
 
         <figure class="video">
           <video
@@ -199,71 +165,11 @@ const description =
     <section class="light theme-light" data-theme-light id="resumen">
       <h2 class="t-h2 light__title container">Mira lo que están diciendo de mi...</h2>
 
-      <figure class="quote container">
-        <blockquote class="quote__card">
-          <span class="quote__mark" aria-hidden="true" set:html={QuoteOpen} />
-          <div class="quote__text t-lead">
-            {testimonial.quote.map((p) => <p>{p}</p>)}
-          </div>
-          <span class="quote__mark quote__mark--close" aria-hidden="true" set:html={QuoteClose} />
-        </blockquote>
-
-        <figcaption class="people">
-          <ul class="people__row">
-            {
-              people.map((person, i) => (
-                <li class:list={["avatar", i === activeIndex && "avatar--active"]}>
-                  <img src={person.src} alt="" width="47" height="47" loading="lazy" />
-                </li>
-              ))
-            }
-          </ul>
-
-          <div class="people__detail">
-            <span class="people__name">{testimonial.name}</span>
-            <span class="people__role">{testimonial.role}</span>
-            <a class="people__link" href={testimonial.profileUrl}>
-              Ir a su perfil
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
-            </a>
-          </div>
-        </figcaption>
-      </figure>
+      <Testimonials />
 
       <hr class="rule container" />
 
-      <div class="footer container" id="contacto">
-        <LogoFlip scale={1.2727} href="#" />
-
-        <div class="footer__cols">
-          <div class="footer__col">
-            <a class="t-label footer__primary" href="mailto:hello@victorvivas.com">
-              hello@victorvivas.com
-            </a>
-            <a
-              class="footer__secondary"
-              href="https://www.linkedin.com/"
-              rel="me noopener"
-              target="_blank">LinkedIn</a
-            >
-          </div>
-
-          <div class="footer__col footer__col--right">
-            <a class="t-label footer__primary" href="tel:+573112698813">+57 311 2698813</a>
-            <LocalClock size="footer" place="Colombia, Cucuta" />
-          </div>
-        </div>
-
-        <nav class="footer__nav" aria-label="Pie de página">
-          <a href="#proyectos">Proyectos</a>
-          <span class="sep" aria-hidden="true"></span>
-          <a href="#sobre-mi">Sobre mi</a>
-          <span class="sep" aria-hidden="true"></span>
-          <a href="#resumen">Resumen</a>
-        </nav>
-      </div>
+      <SiteFooter />
     </section>
   </main>
 </Base>
@@ -272,10 +178,15 @@ const description =
   // The showreel autoplays muted (browsers block audible autoplay), so the
   // play button is really a sound toggle. If autoplay is blocked entirely it
   // falls back to being a genuine play button.
+  let io: IntersectionObserver | undefined;
+
+  function boot() {
+  io?.disconnect();
   const video = document.querySelector<HTMLVideoElement>("[data-showreel]");
   const toggle = document.querySelector<HTMLButtonElement>("[data-showreel-toggle]");
 
-  if (video && toggle) {
+  if (video && toggle && !video.dataset.ready) {
+    video.dataset.ready = "1";
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) video.pause();
 
@@ -297,7 +208,7 @@ const description =
     });
 
     // Don't burn CPU/battery decoding a reel nobody is looking at.
-    const io = new IntersectionObserver(
+    io = new IntersectionObserver(
       ([entry]) => {
         if (reduced) return;
         if (entry.isIntersecting) video.play().catch(() => {});
@@ -307,6 +218,10 @@ const description =
     );
     io.observe(video);
   }
+  }
+
+  boot();
+  document.addEventListener("astro:page-load", boot);
 </script>
 
 <style>
@@ -520,236 +435,11 @@ const description =
     color: var(--muted);
   }
 
-  .quote {
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    /* Figma's Component 24 gap is 40px measured to the *lifted* active avatar.
-       Our lift is a transform (no layout effect), so the layout gap is 40+10. */
-    gap: 50px;
-    align-items: center;
-  }
-
-  /* Figma lays this out SPACE_BETWEEN at a fixed 322px, which distributes the
-     slack between the quote marks and the text rather than using a set gap. */
-  .quote__card {
-    position: relative;
-    width: 100%;
-    min-height: 322px;
-    margin: 0;
-    padding: 25px;
-    background: var(--surface);
-    border-radius: var(--r-md);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  /* IcomoonFreeQuotes glyphs — rounded blobs, not typographic quote marks.
-     The SVGs carry their own 0.6 opacity from the Figma frames. */
-  .quote__mark {
-    width: 30px;
-    height: 30px;
-    color: var(--muted);
-  }
-  .quote__mark :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-  .quote__mark--close {
-    align-self: flex-end;
-  }
-
-  .quote__text {
-    max-width: 757px;
-    margin-inline: auto;
-    text-align: center;
-    color: var(--muted);
-  }
-  .quote__text p {
-    margin: 0;
-  }
-  .quote__text p + p {
-    margin-top: 1em;
-  }
-
-  .people {
-    position: relative;
-    width: 687px;
-    max-width: 100%;
-  }
-
-  /* Figma x-positions: 297/382/467 · 607 · 747/832/917 — an 18px gap between
-     the inactive tiles and 73px flanking the selected one, so the detail block
-     below has room. 7*67 + 4*18 + 2*73 = 687, the frame's exact width. */
-  .people__row {
-    display: flex;
-    justify-content: center;
-    gap: 18px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .avatar--active {
-    margin-inline: 55px;
-  }
-
-  /* Frame '1'..'7' — 67px tiles with a squircle that squares off at the
-     bottom-left, 60% opacity except the selected one, which also lifts 10px. */
-  .avatar {
-    width: 67px;
-    height: 67px;
-    flex: none;
-    display: grid;
-    place-items: center;
-    background: var(--surface-2);
-    border-radius: 20px 20px 20px 0;
-    opacity: 0.6;
-    cursor: pointer;
-    transition:
-      opacity 250ms ease,
-      translate 250ms ease;
-  }
-  .avatar img {
-    width: 47px;
-    height: 47px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  .avatar--active,
-  .avatar:hover {
-    opacity: 1;
-    translate: 0 -10px;
-  }
-
-  /* Name and role are a single 0-gap group (Frame 123); only the button gets
-     the 20px separation. */
-  .people__detail {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    margin-top: 3px;
-    text-align: center;
-    color: var(--muted);
-  }
-
-  .people__name {
-    font-size: 16px;
-    line-height: 18px;
-    font-weight: 500;
-  }
-  .people__role {
-    font-size: 16px;
-    line-height: 18px;
-    font-weight: 300;
-  }
-
-  .people__link {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    margin-top: 20px;
-    padding: 9px 10px;
-    border-radius: var(--r-sm);
-    background: var(--accent);
-    color: #4a5856;
-    font-size: 16px;
-    line-height: 20.2px;
-    overflow: hidden;
-  }
-  .people__link svg {
-    width: 18px;
-    height: 18px;
-    transition: translate 250ms ease;
-  }
-  /* Component 25 stacks two arrow glyphs so the icon slides out and a second
-     slides in on hover. */
-  .people__link:hover svg {
-    translate: 4px -4px;
-  }
-
   .rule {
     height: 1px;
     margin: 95px auto 0;
     border: 0;
     background: var(--rule);
-  }
-
-  /* ── Footer ───────────────────────────────────────────────────────── */
-  /* The three footer blocks are absolutely positioned siblings in Figma
-     (y=2986 / 3032 / 3130), not an evenly-gapped stack — so they get their
-     real offsets. The logo's -10px is the overlap Component 28 has with the
-     contact row: the 56px instance overflows its 46px frame. */
-  .footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    padding-top: 108px;
-  }
-
-  .footer :global(.logo) {
-    margin-bottom: -10px;
-  }
-
-  .footer__cols {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    gap: 40px;
-    margin-bottom: 20px;
-  }
-
-  .footer__col {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-  }
-  .footer__col--right {
-    align-items: flex-end;
-    text-align: right;
-  }
-
-  .footer__primary {
-    color: var(--muted);
-    transition: opacity 200ms ease;
-  }
-  .footer__primary:hover {
-    opacity: 0.7;
-  }
-
-  .footer__secondary {
-    font-size: 16px;
-    line-height: 18px;
-    font-weight: 300;
-    color: var(--muted);
-  }
-  .footer__secondary:hover {
-    text-decoration: underline;
-  }
-
-  .footer__nav {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--muted);
-  }
-  .footer__nav a {
-    padding: 9px 10px;
-    border-radius: var(--r-sm);
-    font-size: 16px;
-    line-height: 20.2px;
-    font-weight: 300;
-  }
-  .footer__nav a:hover {
-    background: color-mix(in srgb, var(--muted) 10%, transparent);
-  }
-  .footer__nav .sep {
-    width: 1px;
-    height: 12px;
-    background: var(--muted);
   }
 
   /* ── Responsive ─────────────────────────────────────────────────────
@@ -784,16 +474,6 @@ const description =
     .rule {
       margin-top: 56px;
     }
-    .footer {
-      padding-top: 56px;
-    }
-    .people {
-      width: 100%;
-    }
-    .people__row {
-      flex-wrap: wrap;
-      gap: 12px;
-    }
   }
 
   @media (max-width: 720px) {
@@ -803,14 +483,6 @@ const description =
     }
     .hero__title {
       max-width: none;
-    }
-    .footer__cols {
-      flex-direction: column;
-      gap: 28px;
-    }
-    .footer__col--right {
-      align-items: flex-start;
-      text-align: left;
     }
   }
 </style>
