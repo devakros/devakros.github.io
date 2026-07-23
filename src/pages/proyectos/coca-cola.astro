@@ -249,8 +249,9 @@ const description =
     if (!video || !toggle || video.dataset.ready) return;
     video.dataset.ready = "1";
 
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) video.pause();
+    // Autoplay regardless of prefers-reduced-motion: the reel is muted and
+    // decorative, and pausing it made the page look broken. The toggle below
+    // is the control for anyone who wants it stopped.
 
     toggle.addEventListener("click", async () => {
       if (video.paused) await video.play().catch(() => {});
@@ -268,7 +269,7 @@ const description =
 
     io = new IntersectionObserver(
       ([entry]) => {
-        if (reduced) return;
+        // Don't burn CPU decoding a reel nobody is looking at.
         if (entry.isIntersecting) video.play().catch(() => {});
         else video.pause();
       },

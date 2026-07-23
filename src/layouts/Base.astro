@@ -2,7 +2,7 @@
 import "@fontsource-variable/outfit";
 import "../styles/tokens.css";
 import { ClientRouter } from "astro:transitions";
-import Preloader from "../components/Preloader.astro";
+import Intro from "../components/Intro.astro";
 
 interface Props {
   title: string;
@@ -27,9 +27,24 @@ const { title, description, theme = "dark" } = Astro.props;
     <meta property="og:description" content={description} />
 
     <ClientRouter />
+
+    {/* Decide the intro BEFORE first paint. If JS adds `is-intro` later, the
+        page paints sharp for a frame and then animates *into* the blur — the
+        opposite of what Victor asked for. */}
+    <script is:inline>
+      (function () {
+        var seen = null;
+        try {
+          seen = sessionStorage.getItem("vv:intro-seen");
+        } catch (e) {}
+        var reduced =
+          window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (!seen && !reduced) document.documentElement.classList.add("is-intro");
+      })();
+    </script>
   </head>
-  <body>
-    <Preloader />
+  <body class="noise-overlay">
+    <Intro />
     <slot />
 
     <style is:global>
@@ -64,9 +79,9 @@ const { title, description, theme = "dark" } = Astro.props;
         }
       }
 
-      /* Lock scrolling while the intro splash is up. */
-      html.is-loading,
-      html.is-loading body {
+      /* Hold scrolling only while the heading types itself in. */
+      html.is-intro,
+      html.is-intro body {
         overflow: hidden;
       }
     </style>

@@ -164,3 +164,109 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* ── Film grain ───────────────────────────────────────────────────────────
+   Ported from the Luxora landing (src/app/globals.css). Fixed, non-blocking,
+   and stepped rather than smoothly animated so it reads as grain, not drift.
+   Sits under the nav (z-index 100) so it textures content without veiling it. */
+.noise-overlay::before {
+  content: "";
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  opacity: 0.055;
+  z-index: 90;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  animation: grain 0.8s steps(6) infinite;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -15%); }
+  40% { transform: translate(-5%, 15%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 10%); }
+  80% { transform: translate(3%, -15%); }
+  90% { transform: translate(-10%, 5%); }
+}
+
+/* The grain is texture, not motion — but hold it still for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .noise-overlay::before {
+    animation: none;
+  }
+}
+
+/* ── Entry choreography ───────────────────────────────────────────────────
+   Everything except the h1 starts blurred out; the heading types itself in,
+   then the page resolves. `is-revealed` is the settled state. */
+[data-intro-hide] {
+  transition:
+    opacity 900ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    filter 1100ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    translate 1100ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+html.is-intro [data-intro-hide] {
+  opacity: 0;
+  filter: blur(26px);
+  translate: 0 14px;
+}
+
+/* Characters of the typed heading. The heading is held hidden until JS has
+   split it into per-character spans, otherwise the full text flashes first. */
+html.is-intro [data-intro-title] {
+  visibility: hidden;
+}
+html.is-intro [data-intro-title].is-split {
+  visibility: visible;
+}
+
+[data-intro-title] .ch {
+  opacity: 0;
+}
+html.is-intro [data-intro-title] .ch {
+  transition: opacity 90ms linear;
+}
+[data-intro-title] .ch.is-in,
+html:not(.is-intro) [data-intro-title] .ch {
+  opacity: 1;
+}
+
+/* Caret while typing */
+[data-intro-title].is-typing::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 0.78em;
+  margin-left: 2px;
+  translate: 0 0.08em;
+  background: var(--accent);
+  animation: caret 900ms steps(2) infinite;
+}
+@keyframes caret {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-intro-hide] {
+    transition: none;
+  }
+  html.is-intro [data-intro-hide] {
+    opacity: 1;
+    filter: none;
+    translate: none;
+  }
+  [data-intro-title] .ch {
+    opacity: 1;
+  }
+}

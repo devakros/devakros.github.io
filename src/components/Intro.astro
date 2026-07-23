@@ -1,0 +1,101 @@
+---
+/**
+ * Entry choreography, per Victor:
+ *
+ *   1. only the noise background
+ *   2. the h1 types itself in
+ *   3. a beat to let the message land
+ *   4. everything else resolves out of a heavy blur
+ *
+ * Deliberately NOT an overlay — the page itself starts blurred out, so there's
+ * no splash covering content that has already painted. Runs once per session;
+ * afterwards navigation uses the page transition instead.
+ */
+---
+
+<script>
+  const REVEALED = "vv:intro-seen";
+  const CHAR_MS = 26; // per character
+  const HOLD_MS = 1200; // "uno dos segundos para digerir el mensaje"
+
+  function reveal() {
+    document.documentElement.classList.remove("is-intro");
+    document.documentElement.classList.add("is-revealed");
+  }
+
+  function runIntro() {
+    const title = document.querySelector<HTMLElement>("[data-intro-title]");
+    const root = document.documentElement;
+
+    // The inline head script already decided whether the intro runs (it has to
+    // happen before first paint). If it didn't set the flag, or there's no
+    // heading to type, go straight to the settled state.
+    if (!title || !root.classList.contains("is-intro")) {
+      reveal();
+      return;
+    }
+
+    try {
+      sessionStorage.setItem(REVEALED, "1");
+    } catch {
+      /* storage blocked — the intro just replays next visit */
+    }
+
+    // Split into per-character spans, keeping the existing element structure so
+    // the two-tone colouring survives. The text stays real text in the DOM, so
+    // screen readers read the heading normally.
+    const chars: HTMLElement[] = [];
+    const split = (node: Node) => {
+      for (const child of [...node.childNodes]) {
+        if (child.nodeType === Node.TEXT_NODE) {
+          const text = child.textContent ?? "";
+          if (!text.trim() && !text.includes(" ")) continue;
+          const frag = document.createDocumentFragment();
+          for (const ch of text) {
+            if (ch === " ") {
+              // Spaces stay plain text nodes. Wrapping them — or using a
+              // non-breaking space — stops the heading breaking at word
+              // boundaries, so it no longer wraps into its 405px column.
+              frag.appendChild(document.createTextNode(" "));
+              continue;
+            }
+            const span = document.createElement("span");
+            span.className = "ch";
+            span.textContent = ch;
+            chars.push(span);
+            frag.appendChild(span);
+          }
+          child.replaceWith(frag);
+        } else if (child.nodeType === Node.ELEMENT_NODE) {
+          split(child);
+        }
+      }
+    };
+    split(title);
+    // Only now is it safe to show the heading: the characters exist and are
+    // individually hidden, so nothing flashes.
+    title.classList.add("is-split", "is-typing");
+
+    let i = 0;
+    const step = () => {
+      // Reveal a couple of characters per tick so long headings don't drag.
+      for (let n = 0; n < 2 && i < chars.length; n++, i++) chars[i].classList.add("is-in");
+      if (i < chars.length) {
+        window.setTimeout(step, CHAR_MS);
+        return;
+      }
+      title.classList.remove("is-typing");
+      window.setTimeout(reveal, HOLD_MS);
+    };
+    window.setTimeout(step, 380); // a beat of just-the-background first
+
+    // Backstop: never leave the page blurred out if something above fails.
+    window.setTimeout(reveal, 380 + chars.length * CHAR_MS + HOLD_MS + 2000);
+  }
+
+  runIntro();
+  // `astro:page-load` also fires on the FIRST load, which would strip is-intro
+  // before the blur ever applied. `astro:after-swap` fires only on client-side
+  // navigations, which is what we actually want to guard against.
+  document.addEventListener("astro:after-swap", reveal);
+</script>

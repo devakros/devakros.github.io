@@ -71,15 +71,15 @@ const description =
     <!-- ── Hero ───────────────────────────────────────────────────────── -->
     <section class="hero container">
       <div class="hero__top">
-        <h1 class="t-h2 hero__title">
+        <h1 class="t-h2 hero__title" data-intro-title>
           IA <span class="muted">-</span> Powered product designer <span class="muted"
             >+ estratega de experiencia de usuario</span
           >
         </h1>
-        <LocalClock size="hero" />
+        <div data-intro-hide><LocalClock size="hero" /></div>
       </div>
 
-      <div class="hero__row" id="proyectos">
+      <div class="hero__row" id="proyectos" data-intro-hide>
         <ProjectSlider slides={slides} />
 
         <figure class="video">
@@ -112,7 +112,7 @@ const description =
     </section>
 
     <!-- ── Statement + KPIs + tool marquee ────────────────────────────── -->
-    <section class="approach" id="sobre-mi">
+    <section class="approach" id="sobre-mi" data-intro-hide>
       <p class="t-h1 approach__statement container">
         Mi enfoque combina estética moderna con principios de usabilidad y diseño tradicional, <span
           class="muted">creando productos digitales que no son solo plataformas, sino experiencias.</span
@@ -162,7 +162,7 @@ const description =
     </section>
 
     <!-- ── The light band. Everything below y=2036 in the Figma frame. ── -->
-    <section class="light theme-light" data-theme-light id="resumen">
+    <section class="light theme-light" data-theme-light id="resumen" data-intro-hide>
       <h2 class="t-h2 light__title container">Mira lo que están diciendo de mi...</h2>
 
       <Testimonials />
@@ -187,8 +187,9 @@ const description =
 
   if (video && toggle && !video.dataset.ready) {
     video.dataset.ready = "1";
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) video.pause();
+    // Autoplay regardless of prefers-reduced-motion: the reel is muted and
+    // decorative, and pausing it made the page look broken. The toggle below
+    // is the control for anyone who wants it stopped.
 
     toggle.addEventListener("click", async () => {
       if (video.paused) {
@@ -210,7 +211,7 @@ const description =
     // Don't burn CPU/battery decoding a reel nobody is looking at.
     io = new IntersectionObserver(
       ([entry]) => {
-        if (reduced) return;
+        // Don't burn CPU decoding a reel nobody is looking at.
         if (entry.isIntersecting) video.play().catch(() => {});
         else video.pause();
       },

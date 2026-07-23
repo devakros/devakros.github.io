@@ -109,6 +109,37 @@ file, not a layout error — do not "fix" it by shrinking line-height.
 - **Nav link hover** is a per-character roll, taken from marrow.au rather than
   from the Figma file, which has no hover states.
 
+## Entry choreography
+
+Per Victor: noise background only → the h1 types itself in → a ~1.2s beat →
+everything else resolves out of a heavy blur. Once per session; client-side
+navigations use the page transition instead.
+
+Two things that are load-bearing and easy to break:
+
+- **`is-intro` is set by an inline script in `<head>`, before first paint.** If
+  it is added later (from a module script), the page paints sharp for a frame
+  and then animates *into* the blur — backwards.
+- **Spaces in the typed heading must stay plain text nodes.** Wrapping them in
+  spans, or using a non-breaking space, stops the heading breaking at word
+  boundaries and it blows out of its 405px column.
+- The reveal listener is `astro:after-swap`, **not** `astro:page-load` — the
+  latter also fires on the first load and would strip `is-intro` immediately.
+
+The film grain (`.noise-overlay`) is ported from the Luxora landing
+(`src/app/globals.css` there), at lower opacity and below the nav.
+
+## prefers-reduced-motion
+
+Worth knowing when reviewing: if the reviewer's OS has reduced motion on, it
+changes a lot. Earlier builds paused the showreel and disabled slider autoplay
+under that setting, which read as "the video doesn't play and the slider never
+progresses". Now:
+
+- the showreel autoplays regardless (muted, decorative; the button is the control)
+- the slider still advances, with instant cuts instead of sliding
+- the intro is skipped entirely and the grain holds still
+
 ## Motion references supplied by Victor
 
 | Reference | For | Stack it uses |
