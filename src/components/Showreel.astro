@@ -1,0 +1,211 @@
+---
+import Play from "../icons/play.svg?raw";
+
+/**
+ * The muted, looping showreel used on Home (473x522) and on the case studies
+ * (291x358).
+ *
+ * Autoplay is deliberately belt-and-braces. `autoplay` alone is not reliable:
+ * Chrome blocks it under battery saver, data saver, or a low media-engagement
+ * score on a fresh profile, and it silently stays on the poster. So we also
+ * retry on canplay, on entering the viewport, and — as a last resort — on the
+ * visitor's first interaction anywhere on the page.
+ */
+interface Props {
+  src?: string;
+  poster?: string;
+  width: number;
+  height: number;
+  name: string;
+  role: string;
+  /** Larger reels get the bigger play affordance from the frame. */
+  playSize?: number;
+}
+const {
+  src = "/video/showreel-placeholder.mp4",
+  poster = "/img/video-poster.png",
+  width,
+  height,
+  name,
+  role,
+  playSize = 66,
+} = Astro.props;
+---
+
+<figure class="reel" style={`--w:${width}px; --h:${height}px; --play:${playSize}px;`}>
+  <video
+    data-showreel
+    src={src}
+    poster={poster}
+    width={width}
+    height={height}
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+    disablepictureinpicture
+    aria-label={`Showreel de ${name}`}></video>
+
+  <button
+    class="reel__play"
+    type="button"
+    data-showreel-toggle
+    data-state="muted"
+    aria-label="Activar sonido"
+    set:html={Play}
+  />
+
+  <figcaption class="reel__caption">
+    <span class="t-body-md">{name}</span>
+    <span class="t-body">{role}</span>
+  </figcaption>
+</figure>
+
+<style>
+  .reel {
+    position: relative;
+    width: var(--w);
+    height: var(--h);
+    flex: none;
+    margin: 0;
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+
+  .reel video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Rectangle 3990 carries a #1D2222 fill at 33% over the footage. */
+  .reel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgb(29 34 34 / 0.33);
+    pointer-events: none;
+  }
+
+  .reel__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: 1;
+    width: var(--play);
+    height: var(--play);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #fff;
+    cursor: pointer;
+    transition:
+      scale 250ms ease,
+      opacity 300ms ease;
+  }
+  .reel__play:hover {
+    scale: 1.06;
+  }
+  /* Hidden once the reel is running with sound. */
+  .reel__play[data-state="unmuted"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .reel__play :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .reel__caption {
+    position: absolute;
+    left: 18px;
+    bottom: 20px;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+  }
+
+  @media (max-width: 1000px) {
+    .reel {
+      width: 100%;
+      height: auto;
+      aspect-ratio: var(--w) / var(--h);
+    }
+  }
+</style>
+
+<script>
+  let io: IntersectionObserver | undefined;
+  let gestureBound = false;
+
+  function boot() {
+    const video = document.querySelector<HTMLVideoElement>("[data-showreel]");
+    const toggle = document.querySelector<HTMLButtonElement>("[data-showreel-toggle]");
+    if (!video || !toggle) return;
+
+    // Guard BEFORE touching the observer. Disconnecting first and then bailing
+    // on the guard is how this previously ended up with no observer at all:
+    // astro:page-load fires on the initial load too, so the second call tore
+    // down what the first had just set up.
+    if (video.dataset.ready) return;
+    video.dataset.ready = "1";
+    io?.disconnect();
+
+    // The muted *property* is what the autoplay policy checks; the attribute
+    // alone can lose a race against a play() call.
+    video.muted = true;
+
+    const attempt = () => {
+      if (!video.paused) return;
+      video.play().catch(() => {
+        // Blocked. Fall back to starting on the first interaction anywhere.
+        if (gestureBound) return;
+        gestureBound = true;
+        const once = () => {
+          video.muted = true;
+          video.play().catch(() => {});
+        };
+        addEventListener("pointerdown", once, { once: true });
+        addEventListener("keydown", once, { once: true });
+        addEventListener("touchstart", once, { once: true, passive: true });
+      });
+    };
+
+    attempt();
+    video.addEventListener("canplay", attempt, { once: true });
+    video.addEventListener("loadeddata", attempt, { once: true });
+
+    toggle.addEventListener("click", async () => {
+      video.muted = false;
+      await video.play().catch(() => {});
+      toggle.dataset.state = "unmuted";
+      toggle.setAttribute("aria-label", "Silenciar");
+    });
+
+    // Click the reel itself to mute again and bring the button back.
+    video.addEventListener("click", () => {
+      if (video.muted) return;
+      video.muted = true;
+      toggle.dataset.state = "muted";
+      toggle.setAttribute("aria-label", "Activar sonido");
+    });
+
+    // Don't burn CPU decoding a reel nobody is looking at — but always try to
+    // resume when it comes back into view.
+    io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) attempt();
+        else video.pause();
+      },
+      { threshold: 0.15 },
+    );
+    io.observe(video);
+  }
+
+  boot();
+  document.addEventListener("astro:page-load", boot);
+</script>

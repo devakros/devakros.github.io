@@ -6,9 +6,9 @@ import LocalClock from "../components/LocalClock.astro";
 import ProjectSlider, { type Slide } from "../components/ProjectSlider.astro";
 import Testimonials from "../components/Testimonials.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+import Showreel from "../components/Showreel.astro";
 import { projects } from "../data/projects";
 
-import Play from "../icons/play.svg?raw";
 import Diamond from "../icons/diamond.svg?raw";
 import Handshake from "../icons/handshake.svg?raw";
 import Signature from "../icons/signature.svg?raw";
@@ -82,32 +82,7 @@ const description =
       <div class="hero__row" id="proyectos" data-intro-hide>
         <ProjectSlider slides={slides} />
 
-        <figure class="video">
-          <video
-            data-showreel
-            src="/video/showreel-placeholder.mp4"
-            poster="/img/video-poster.png"
-            width="473"
-            height="522"
-            autoplay
-            muted
-            loop
-            playsinline
-            preload="metadata"
-            aria-label="Showreel de Victor Vivas"></video>
-          <button
-            class="video__play"
-            type="button"
-            data-showreel-toggle
-            data-state="muted"
-            aria-label="Activar sonido"
-            set:html={Play}
-          />
-          <figcaption class="video__caption">
-            <span class="t-body-md">Victor Vivas</span>
-            <span class="t-body">Product Designer</span>
-          </figcaption>
-        </figure>
+        <Showreel width={473} height={522} name="Victor Vivas" role="Product Designer" />
       </div>
     </section>
 
@@ -174,56 +149,6 @@ const description =
   </main>
 </Base>
 
-<script>
-  // The showreel autoplays muted (browsers block audible autoplay), so the
-  // play button is really a sound toggle. If autoplay is blocked entirely it
-  // falls back to being a genuine play button.
-  let io: IntersectionObserver | undefined;
-
-  function boot() {
-  io?.disconnect();
-  const video = document.querySelector<HTMLVideoElement>("[data-showreel]");
-  const toggle = document.querySelector<HTMLButtonElement>("[data-showreel-toggle]");
-
-  if (video && toggle && !video.dataset.ready) {
-    video.dataset.ready = "1";
-    // Autoplay regardless of prefers-reduced-motion: the reel is muted and
-    // decorative, and pausing it made the page look broken. The toggle below
-    // is the control for anyone who wants it stopped.
-
-    toggle.addEventListener("click", async () => {
-      if (video.paused) {
-        await video.play().catch(() => {});
-      }
-      video.muted = false;
-      toggle.dataset.state = "unmuted";
-      toggle.setAttribute("aria-label", "Silenciar");
-    });
-
-    // Click the reel itself to mute again and bring the button back.
-    video.addEventListener("click", () => {
-      if (video.muted) return;
-      video.muted = true;
-      toggle.dataset.state = "muted";
-      toggle.setAttribute("aria-label", "Activar sonido");
-    });
-
-    // Don't burn CPU/battery decoding a reel nobody is looking at.
-    io = new IntersectionObserver(
-      ([entry]) => {
-        // Don't burn CPU decoding a reel nobody is looking at.
-        if (entry.isIntersecting) video.play().catch(() => {});
-        else video.pause();
-      },
-      { threshold: 0.15 },
-    );
-    io.observe(video);
-  }
-  }
-
-  boot();
-  document.addEventListener("astro:page-load", boot);
-</script>
 
 <style>
   .muted {
@@ -257,69 +182,6 @@ const description =
      different top offsets, both ending at y=808. */
   .hero__row > :global(.slider) {
     margin-top: 107px;
-  }
-
-  .video {
-    position: relative;
-    width: 473px;
-    height: 522px;
-    flex: none;
-    margin: 0;
-    border-radius: var(--r-md);
-    overflow: hidden;
-  }
-  .video video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Autoplay is muted by policy, so the button is a sound toggle rather than
-     a play control. It hides once the reel is running with sound. */
-  .video__play[data-state="unmuted"] {
-    opacity: 0;
-    pointer-events: none;
-  }
-  /* Rectangle 3990 carries a #1D2222 fill at 33% over the image. */
-  .video::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgb(29 34 34 / 0.33);
-    pointer-events: none;
-  }
-
-  .video__play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-    z-index: 1;
-    width: 66px;
-    height: 66px;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: #fff;
-    cursor: pointer;
-    transition: scale 250ms ease;
-  }
-  .video__play:hover {
-    scale: 1.06;
-  }
-  .video__play :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-
-  .video__caption {
-    position: absolute;
-    left: 26px;
-    bottom: 23px;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    color: var(--text);
   }
 
   /* ── Approach ─────────────────────────────────────────────────────── */
@@ -452,7 +314,6 @@ const description =
       flex-direction: column;
       gap: 32px;
     }
-    .video,
     .hero__row > :global(.slider) {
       width: 100%;
       margin-top: 0;

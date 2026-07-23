@@ -3,7 +3,7 @@ import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
 import ProjectSlider, { type Slide } from "../../components/ProjectSlider.astro";
-import Play from "../../icons/play.svg?raw";
+import Showreel from "../../components/Showreel.astro";
 import { projects, bySlug } from "../../data/projects";
 
 /**
@@ -103,32 +103,7 @@ const description =
             Volver
           </a>
 
-          <figure class="reel">
-            <video
-              data-showreel
-              src="/video/showreel-placeholder.mp4"
-              poster="/img/video-poster.png"
-              width="291"
-              height="358"
-              autoplay
-              muted
-              loop
-              playsinline
-              preload="metadata"
-              aria-label="Victor Vivas sobre este proyecto"></video>
-            <button
-              class="reel__play"
-              type="button"
-              data-showreel-toggle
-              data-state="muted"
-              aria-label="Activar sonido"
-              set:html={Play}
-            />
-            <figcaption class="reel__caption">
-              <span class="t-body-md">Victor Vivas</span>
-              <span class="t-body">Sobre este proyecto</span>
-            </figcaption>
-          </figure>
+          <Showreel width={291} height={358} name="Victor Vivas" role="Sobre este proyecto" />
         </div>
 
         <div class="hero__right">
@@ -237,50 +212,6 @@ const description =
   </main>
 </Base>
 
-<script>
-  // Same showreel behaviour as Home: muted autoplay, button toggles sound,
-  // pauses when scrolled out of view. Re-binds after client-side navigation.
-  let io: IntersectionObserver | undefined;
-
-  function boot() {
-    io?.disconnect();
-    const video = document.querySelector<HTMLVideoElement>("[data-showreel]");
-    const toggle = document.querySelector<HTMLButtonElement>("[data-showreel-toggle]");
-    if (!video || !toggle || video.dataset.ready) return;
-    video.dataset.ready = "1";
-
-    // Autoplay regardless of prefers-reduced-motion: the reel is muted and
-    // decorative, and pausing it made the page look broken. The toggle below
-    // is the control for anyone who wants it stopped.
-
-    toggle.addEventListener("click", async () => {
-      if (video.paused) await video.play().catch(() => {});
-      video.muted = false;
-      toggle.dataset.state = "unmuted";
-      toggle.setAttribute("aria-label", "Silenciar");
-    });
-
-    video.addEventListener("click", () => {
-      if (video.muted) return;
-      video.muted = true;
-      toggle.dataset.state = "muted";
-      toggle.setAttribute("aria-label", "Activar sonido");
-    });
-
-    io = new IntersectionObserver(
-      ([entry]) => {
-        // Don't burn CPU decoding a reel nobody is looking at.
-        if (entry.isIntersecting) video.play().catch(() => {});
-        else video.pause();
-      },
-      { threshold: 0.15 },
-    );
-    io.observe(video);
-  }
-
-  boot();
-  document.addEventListener("astro:page-load", boot);
-</script>
 
 <style>
   /* ── Hero ─────────────────────────────────────────────────────────────
@@ -302,6 +233,10 @@ const description =
   .hero__left {
     display: flex;
     flex-direction: column;
+  }
+  /* Volver ends y=167, the reel starts y=192 */
+  .hero__left > :global(.reel) {
+    margin-top: 25px;
   }
 
   .back {
@@ -326,64 +261,6 @@ const description =
   }
   .back:hover svg {
     translate: -3px 0;
-  }
-
-  .reel {
-    position: relative;
-    width: 291px;
-    height: 358px;
-    margin: 25px 0 0; /* Volver ends y=167, reel starts y=192 */
-    border-radius: var(--r-md);
-    overflow: hidden;
-  }
-  .reel video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .reel::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgb(29 34 34 / 0.33);
-    pointer-events: none;
-  }
-  .reel__play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-    z-index: 1;
-    width: 66px;
-    height: 66px;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: #fff;
-    cursor: pointer;
-    transition:
-      scale 250ms ease,
-      opacity 250ms ease;
-  }
-  .reel__play:hover {
-    scale: 1.06;
-  }
-  .reel__play[data-state="unmuted"] {
-    opacity: 0;
-    pointer-events: none;
-  }
-  .reel__play :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-  .reel__caption {
-    position: absolute;
-    left: 18px;
-    bottom: 20px;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    color: var(--text);
   }
 
   /* Frame 153 — vertical, 20px gaps. */
@@ -633,11 +510,6 @@ const description =
     .case__grid {
       grid-template-columns: 1fr;
       gap: 40px;
-    }
-    .reel {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 291 / 358;
     }
     .case {
       padding: 56px 0 64px;

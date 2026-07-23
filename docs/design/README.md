@@ -88,6 +88,11 @@ file, not a layout error — do not "fix" it by shrinking line-height.
   and LeanCore case-study frames exist, but neither has card copy or a card
   thumbnail in Figma. Descriptions read `PENDIENTE:` and the images are
   content-scored crops of each frame. Both need Victor.
+- **Autoplay is belt-and-braces on purpose.** The `autoplay` attribute alone is
+  not reliable — Chrome blocks it under battery saver, data saver, or a low
+  media-engagement score on a fresh profile, and it fails silently to the
+  poster. `Showreel.astro` also retries on `canplay`, on entering the viewport,
+  and on the visitor's first interaction anywhere. Don't "simplify" that away.
 - **The showreel is a generated placeholder** (`public/video/showreel-placeholder.mp4`
   — a slow push on the Figma poster frame). Real footage needed.
 - **⚠️ Six of the seven testimonials are invented.** Only Santiago Gallo's
