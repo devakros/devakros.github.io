@@ -53,6 +53,14 @@
       return;
     }
 
+    // Repeat visit this session: a quick, quiet reveal — no typing, no long
+    // hold, gentler blur/rise (see intro-lite in tokens.css) — so a reload
+    // still animates in instead of popping, but doesn't replay the whole show.
+    if (root.classList.contains("intro-lite")) {
+      window.setTimeout(reveal, 220);
+      return;
+    }
+
     // Reduced motion: show the heading immediately, hold, then fade the rest
     // up. Same beats, none of the motion.
     if (root.classList.contains("intro-plain")) {

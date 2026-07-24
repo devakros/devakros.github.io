@@ -245,6 +245,29 @@ html.is-intro .nav {
   translate: 0 -22px;
 }
 
+/* ── Repeat-visit "lite" intro ────────────────────────────────────────────
+   Once the full intro has played this session, reloads get this instead of a
+   hard pop-in: no heading typing, no blur, a shorter rise, quicker easing. The
+   transition lives on .intro-lite (which persists past is-intro removal, so it
+   drives the settle); the hidden state is gated on .is-intro so it clears on
+   reveal. More specific than the full-intro rules above, so it wins. */
+html.intro-lite [data-intro-hide],
+html.intro-lite [data-intro-title] {
+  transition:
+    opacity 480ms cubic-bezier(0.16, 1, 0.3, 1) var(--intro-d, 0ms),
+    translate 560ms cubic-bezier(0.16, 1, 0.3, 1) var(--intro-d, 0ms);
+}
+html.intro-lite.is-intro [data-intro-hide] {
+  filter: none;
+  translate: 0 12px;
+}
+/* No per-character typing in lite — the heading fades up with everything else. */
+html.intro-lite.is-intro [data-intro-title] {
+  visibility: visible;
+  opacity: 0;
+  translate: 0 12px;
+}
+
 /* Characters of the typed heading. The heading is held hidden until JS has
    split it into per-character spans, otherwise the full text flashes first. */
 html.is-intro [data-intro-title] {

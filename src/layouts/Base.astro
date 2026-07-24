@@ -51,12 +51,17 @@ const { title, description, theme = "dark" } = Astro.props;
           root.classList.add("is-intro", "intro-forced");
           return;
         }
-        if (seen) return;
         // Reduced motion still gets the shape of the intro — heading first,
         // then the rest fades up — just without typing, blur or movement.
         // Skipping it entirely made the site look like nothing happened.
         root.classList.add("is-intro");
-        if (reduced) root.classList.add("intro-plain");
+        if (reduced) {
+          root.classList.add("intro-plain");
+        } else if (seen) {
+          // Already watched the full intro this session: play the lighter
+          // version on reloads rather than nothing.
+          root.classList.add("intro-lite");
+        }
       })();
     </script>
   </head>
