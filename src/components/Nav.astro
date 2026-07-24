@@ -28,7 +28,7 @@ const links = [
                 holding the letter twice, stacked. On hover they slide up in
                 sequence. The visible copy is aria-hidden and the accessible
                 name comes from the sr-only span. */}
-            <a class="nav__link" href={link.href}>
+            <a class="nav__link" href={link.href} style={`--ni:${i}`}>
               <span class="sr-only">{link.label}</span>
               <span class="roll" aria-hidden="true">
                 {[...link.label].map((ch, c) => (
@@ -44,7 +44,7 @@ const links = [
           </>
         ))
       }
-      <a class="nav__cta" href="#contacto">¡Hablemos!</a>
+      <a class="nav__cta" href="#contacto" data-contact-open>¡Hablemos!</a>
     </nav>
 </header>
 
@@ -91,6 +91,31 @@ const links = [
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+
+  /* Entrance stagger. The bar itself slides down (tokens.css); once it lands,
+     the logo, links and CTA settle in one after another. `both` fill holds each
+     item at its from-state through its delay, so nothing flashes early. Gated
+     on .did-intro — added by the intro script only on the real first-load
+     sequence — so client-side navigations don't replay it. */
+  .nav.did-intro :is(.logo, .nav__link, .nav__cta) {
+    animation: nav-item-in 540ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .nav.did-intro .logo {
+    animation-delay: 150ms;
+  }
+  .nav.did-intro .nav__link {
+    animation-delay: calc(220ms + var(--ni, 0) * 70ms);
+  }
+  .nav.did-intro .nav__cta {
+    animation-delay: 450ms;
+  }
+
+  @keyframes nav-item-in {
+    from {
+      opacity: 0;
+      translate: 0 -7px;
+    }
   }
 
   .nav__link {
@@ -160,6 +185,9 @@ const links = [
     .nav__link:hover .roll__inner,
     .nav__link:focus-visible .roll__inner {
       transform: none;
+    }
+    .nav.did-intro :is(.logo, .nav__link, .nav__cta) {
+      animation: none;
     }
   }
 

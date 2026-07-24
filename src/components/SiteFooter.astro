@@ -1,6 +1,7 @@
 ---
 import LogoFlip from "./LogoFlip.astro";
 import LocalClock from "./LocalClock.astro";
+import { withBase } from "../lib/base";
 
 /**
  * Figma Frame 1000003344 (y=3032) plus the footer nav at y=3130 and the
@@ -11,7 +12,7 @@ interface Props {
   home?: boolean;
 }
 const { home = true } = Astro.props;
-const p = (hash: string) => (home ? hash : `/${hash}`);
+const p = (hash: string) => (home ? hash : withBase(`/${hash}`));
 ---
 
 <div class="footer container" id="contacto">
@@ -20,8 +21,11 @@ const p = (hash: string) => (home ? hash : `/${hash}`);
   <div class="footer__cols">
     <div class="footer__col">
       <a class="t-label footer__primary" href="mailto:hello@victorvivas.com">hello@victorvivas.com</a>
-      <a class="footer__secondary" href="https://www.linkedin.com/" rel="me noopener" target="_blank"
-        >LinkedIn</a
+      <a
+        class="footer__secondary"
+        href="https://www.linkedin.com/in/victorvivasuxui/"
+        rel="me noopener"
+        target="_blank">LinkedIn</a
       >
     </div>
 

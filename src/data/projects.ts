@@ -1,3 +1,5 @@
+import { withBase } from "../lib/base";
+
 export interface Project {
   slug: string;
   title: string;
@@ -59,5 +61,11 @@ export const projects: Project[] = [
     placeholder: true,
   },
 ];
+
+// Make image paths base-aware so they resolve under the GitHub Pages subpath.
+for (const p of projects) {
+  p.img = withBase(p.img);
+  p.frame = withBase(p.frame);
+}
 
 export const bySlug = (slug: string) => projects.find((p) => p.slug === slug);

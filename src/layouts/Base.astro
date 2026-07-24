@@ -3,6 +3,9 @@ import "@fontsource-variable/outfit";
 import "../styles/tokens.css";
 import { ClientRouter } from "astro:transitions";
 import Intro from "../components/Intro.astro";
+import ContactDrawer from "../components/ContactDrawer.astro";
+import LogoFlip from "../components/LogoFlip.astro";
+import { withBase } from "../lib/base";
 
 interface Props {
   title: string;
@@ -20,7 +23,7 @@ const { title, description, theme = "dark" } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
@@ -60,36 +63,59 @@ const { title, description, theme = "dark" } = Astro.props;
   <body class="noise-overlay">
     <Intro />
     <slot />
+    <ContactDrawer />
+
+    {/* Page-transition curtain (harrygeorge / juanmora style): a near-black
+        panel sweeps up to cover the screen carrying the logo, then off the top
+        to reveal the next page. transition:persist keeps it the same node
+        across swaps so a reveal started in astro:after-swap runs on it. */}
+    <div class="curtain" data-curtain aria-hidden="true" transition:persist>
+      <span class="curtain__logo"><LogoFlip scale={1.35} href="#" /></span>
+    </div>
 
     <style is:global>
       /* ── Page transitions ────────────────────────────────────────────────
-         The incoming page rises into place while the outgoing one lifts away.
-         Short enough not to feel like waiting; the easing matches the theme
-         flip and the logo roll so the whole site moves with one character. */
-      @keyframes vt-out {
-        to {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-      }
-      @keyframes vt-in {
-        from {
-          opacity: 0;
-          transform: translateY(28px);
-        }
-      }
-
-      ::view-transition-old(root) {
-        animation: vt-out 340ms cubic-bezier(0.76, 0, 0.24, 1) both;
-      }
+         Per Victor's references (harrygeorge / juanmora / ampli) the transition
+         is a covering curtain, NOT a content crossfade — a fade between two
+         identical near-black pages is invisible anyway. So the root swap itself
+         is instant and happens hidden behind the curtain (below); the curtain is
+         driven by the Web Animations API in the script, sequenced against
+         Astro's transition lifecycle. */
+      ::view-transition-old(root),
       ::view-transition-new(root) {
-        animation: vt-in 520ms cubic-bezier(0.76, 0, 0.24, 1) both;
+        animation: none;
+        mix-blend-mode: normal;
       }
 
+      .curtain {
+        position: fixed;
+        inset: 0;
+        z-index: 400; /* over nav (100) and drawer (200); under the cursor */
+        display: grid;
+        place-items: center;
+        background: #131717;
+        pointer-events: none;
+        /* Rests just below the viewport, out of sight, until a nav starts. */
+        transform: translateY(100%);
+        will-change: transform;
+      }
+      .curtain__logo {
+        opacity: 0;
+        translate: 0 14px;
+      }
+      /* The logo's fade/rise is toggled by the script as the panel covers. */
+      .curtain.is-covering .curtain__logo {
+        opacity: 1;
+        translate: 0 0;
+        transition:
+          opacity 360ms ease 80ms,
+          translate 460ms cubic-bezier(0.16, 1, 0.3, 1) 80ms;
+      }
+
+      /* Reduced motion: no curtain, no root animation — the swap is instant. */
       @media (prefers-reduced-motion: reduce) {
-        ::view-transition-old(root),
-        ::view-transition-new(root) {
-          animation: none;
+        .curtain {
+          display: none;
         }
       }
 
@@ -97,6 +123,81 @@ const { title, description, theme = "dark" } = Astro.props;
       html.is-intro,
       html.is-intro body {
         overflow: hidden;
+      }
+
+      /* Overlay scroll lock. The scrollbar's width is replaced with padding so
+         removing it doesn't shove the whole layout sideways mid-animation —
+         that jump was reading as the panel "stuttering" on open. */
+      html.is-scroll-locked body {
+        overflow: hidden;
+        padding-right: var(--sbw, 0px);
+      }
+
+      /* ── Custom cursor ───────────────────────────────────────────────────
+         A lime dot that follows the pointer and swells into a labelled disc
+         over interactive elements. Only mounted on real hover+fine-pointer
+         devices (the script adds .has-cursor), so touch keeps its native
+         behaviour. The native cursor is hidden only then, and text fields keep
+         their I-beam so typing still feels right. */
+      .cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 250ms ease;
+      }
+      .cursor.is-visible {
+        opacity: 1;
+      }
+      .cursor__ring {
+        position: absolute;
+        display: grid;
+        place-items: center;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--accent);
+        translate: -50% -50%;
+        transition:
+          width 260ms cubic-bezier(0.16, 1, 0.3, 1),
+          height 260ms cubic-bezier(0.16, 1, 0.3, 1),
+          background-color 260ms ease;
+      }
+      .cursor.is-hover .cursor__ring {
+        width: 64px;
+        height: 64px;
+      }
+      .cursor__label {
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: #1d2222;
+        opacity: 0;
+        scale: 0.6;
+        transition:
+          opacity 200ms ease,
+          scale 260ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .cursor.is-hover .cursor__label {
+        opacity: 1;
+        scale: 1;
+      }
+
+      html.has-cursor,
+      html.has-cursor * {
+        cursor: none;
+      }
+      html.has-cursor :is(input, textarea, select) {
+        cursor: text;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .cursor__ring,
+        .cursor__label {
+          transition: none;
+        }
       }
     </style>
 
@@ -126,6 +227,10 @@ const { title, description, theme = "dark" } = Astro.props;
 
         // In-page anchors need to go through Lenis or they fight it.
         document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
+          // The "¡Hablemos!" CTA keeps its #contacto href as a no-JS fallback,
+          // but with JS it opens the contact drawer — don't also scroll to the
+          // footer behind it.
+          if (a.hasAttribute("data-contact-open")) return;
           a.addEventListener("click", (e) => {
             const id = a.getAttribute("href")!.slice(1);
             const target = id && document.getElementById(id);
@@ -142,10 +247,150 @@ const { title, description, theme = "dark" } = Astro.props;
         lenis = null;
       }
 
+      // Overlays (the contact drawer) need the page frozen while they animate.
+      // Lenis keeps driving scroll through its own rAF loop even when the body
+      // is overflow:hidden, so it has to be paused explicitly — otherwise the
+      // page creeps behind the panel and both compete for the same frames.
+      window.addEventListener("vv:scroll-lock", () => lenis?.stop());
+      window.addEventListener("vv:scroll-unlock", () => lenis?.start());
+
       startLenis();
       // ClientRouter swaps the DOM, so rebind against the new document.
       document.addEventListener("astro:page-load", startLenis);
       document.addEventListener("astro:before-swap", stopLenis);
+    </script>
+
+    <script>
+      // Page-transition curtain. A near-black panel with the logo sweeps up to
+      // cover the screen before the DOM swaps, then off the top to reveal the
+      // new page (harrygeorge / juanmora reference). Driven with the Web
+      // Animations API, sequenced against Astro's transition lifecycle.
+      const curtainReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const EASE_COVER = "cubic-bezier(0.7, 0, 0.2, 1)";
+      const EASE_REVEAL = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+      if (!curtainReduced) {
+        // Cover happens INSIDE the loader so Astro waits for the panel to close
+        // before fetching/swapping — the new page loads hidden behind it.
+        document.addEventListener("astro:before-preparation", (event) => {
+          const el = document.querySelector<HTMLElement>(".curtain");
+          if (!el) return;
+          const ev = event as any;
+          const load = ev.loader;
+          ev.loader = async () => {
+            el.getAnimations().forEach((a) => a.cancel());
+            el.classList.add("is-covering");
+            // fill:forwards holds the panel closed while the (async) load runs.
+            await el.animate(
+              [{ transform: "translateY(100%)" }, { transform: "translateY(0%)" }],
+              { duration: 560, easing: EASE_COVER, fill: "forwards" },
+            ).finished;
+            await load();
+          };
+        });
+
+        // New DOM is in place under the covered curtain — reveal it. The panel
+        // sweeps off the TOP and the reveal's forwards-fill is what keeps it
+        // parked there. We deliberately DON'T reset to a static transform:
+        // Astro's persist/view-transition layer overrides plain `transform` on
+        // this element (it loses only to !important or to a running animation),
+        // so a WAAPI forwards-fill is the one reliable way to hold it hidden.
+        // The next navigation's cover() cancels this and re-animates in the
+        // same tick, so there's no uncovered frame in between.
+        document.addEventListener("astro:after-swap", () => {
+          const el = document.querySelector<HTMLElement>(".curtain");
+          if (!el) return;
+          window.scrollTo(0, 0);
+          // fill:both so the closed from-state is held through the 160ms delay.
+          el.animate(
+            [{ transform: "translateY(0%)" }, { transform: "translateY(-100%)" }],
+            { duration: 640, easing: EASE_REVEAL, fill: "both", delay: 160 },
+          ).finished.then(() => el.classList.remove("is-covering"));
+        });
+      }
+    </script>
+
+    <script>
+      // Custom cursor. A lime dot trails the pointer and swells into a labelled
+      // disc over interactive elements. Enabled only on hover+fine-pointer
+      // devices so touch is untouched.
+      const fine = matchMedia("(hover: hover) and (pointer: fine)");
+      if (fine.matches) {
+        document.documentElement.classList.add("has-cursor");
+
+        let cursor: HTMLElement;
+        let labelEl: HTMLElement;
+
+        // The disc only swells over project cards — everywhere else the plain
+        // dot just follows. (Per Victor: keep the hover effect on projects only.)
+        const INTERACTIVE = "[data-slide]";
+        const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        let x = window.innerWidth / 2;
+        let y = window.innerHeight / 2;
+        let cx = x;
+        let cy = y;
+        let shown = false;
+
+        // ClientRouter swaps <body>, taking the cursor node with it — so the
+        // element is (re)built on every load, while the listeners below bind
+        // once and read whatever `cursor`/`labelEl` currently point at.
+        const mount = () => {
+          if (document.querySelector(".cursor")) return;
+          cursor = document.createElement("div");
+          cursor.className = "cursor";
+          cursor.setAttribute("aria-hidden", "true");
+          cursor.innerHTML = '<div class="cursor__ring"><span class="cursor__label"></span></div>';
+          if (shown) cursor.classList.add("is-visible");
+          document.body.appendChild(cursor);
+          labelEl = cursor.querySelector<HTMLElement>(".cursor__label")!;
+        };
+        mount();
+        document.addEventListener("astro:page-load", mount);
+
+        window.addEventListener("mousemove", (e) => {
+          x = e.clientX;
+          y = e.clientY;
+          if (!shown) {
+            shown = true;
+            cursor.classList.add("is-visible");
+          }
+        });
+        // Hide when the pointer leaves the window entirely.
+        document.addEventListener("mouseleave", () => {
+          shown = false;
+          cursor.classList.remove("is-visible");
+        });
+
+        const frame = () => {
+          // Tight follow with only a hint of lag; reduced motion pins it exactly.
+          // (0.2 trailed too far behind and read as "slow".)
+          const k = reduced ? 1 : 0.5;
+          cx += (x - cx) * k;
+          cy += (y - cy) * k;
+          cursor.style.transform = `translate(${cx}px, ${cy}px)`;
+          requestAnimationFrame(frame);
+        };
+        requestAnimationFrame(frame);
+
+        const labelFor = (el: Element) => el.getAttribute("data-cursor-label") || "Ver";
+
+        // Delegated hover — survives client-side navigations without rebinding.
+        document.addEventListener("pointerover", (e) => {
+          const el = (e.target as Element).closest?.(INTERACTIVE);
+          if (!el) return;
+          cursor.classList.add("is-hover");
+          labelEl.textContent = labelFor(el);
+        });
+        document.addEventListener("pointerout", (e) => {
+          const el = (e.target as Element).closest?.(INTERACTIVE);
+          if (!el) return;
+          // Ignore moves between children of the same interactive element.
+          const to = (e as PointerEvent).relatedTarget as Node | null;
+          if (to && el.contains(to)) return;
+          cursor.classList.remove("is-hover");
+        });
+      }
     </script>
   </body>
 </html>

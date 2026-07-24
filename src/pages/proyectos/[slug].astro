@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
 import { projects } from "../../data/projects";
+import { withBase } from "../../lib/base";
 
 export function getStaticPaths() {
   // coca-cola has a hand-built page; this route covers the frame-render stubs.
@@ -31,7 +32,7 @@ const next = projects[(idx + 1) % projects.length];
         visually hidden (the document still needs one) and the only chrome we
         add is the back link. */}
     <header class="case__head container">
-      <a class="case__back" href="/">
+      <a class="case__back" href={withBase("/")}>
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M15 5 8 12l7 7" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
@@ -66,7 +67,7 @@ const next = projects[(idx + 1) % projects.length];
 
     <nav class="case__next container" aria-label="Siguiente proyecto">
       <span class="case__next-label">Siguiente proyecto</span>
-      <a class="case__next-link" href={`/proyectos/${next.slug}`}>
+      <a class="case__next-link" href={withBase(`/proyectos/${next.slug}`)}>
         {next.title}
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>

@@ -15,10 +15,28 @@
 
 <script>
   const REVEALED = "vv:intro-seen";
-  const CHAR_MS = 26; // per character
-  const HOLD_MS = 1200; // "uno dos segundos para digerir el mensaje"
+  // Long enough to read the finished line, short enough that the page doesn't
+  // stall waiting. 1900ms was a dead spot; the reveal now staggers in, so the
+  // motion itself carries the beat that the pause used to have to.
+  const HOLD_MS = 850;
+
+  // Human cadence: each keystroke lands ~20–37ms after the previous one, with a
+  // breath before each new word and the occasional longer hesitation. A fixed
+  // interval reads as an animation; the jitter is what reads as someone typing,
+  // so it survives the speed-up — only the magnitudes are halved.
+  function delayFor(afterSpace: boolean): number {
+    let d = 20 + Math.random() * 17;
+    if (afterSpace) d += 34 + Math.random() * 34;
+    if (Math.random() < 0.05) d += 70 + Math.random() * 85;
+    return d;
+  }
 
   function reveal() {
+    // Stamp the cascade order before dropping is-intro, so each block starts
+    // its transition one step after the one above it.
+    document.querySelectorAll<HTMLElement>("[data-intro-hide]").forEach((el, i) => {
+      el.style.setProperty("--intro-d", `${i * 70}ms`);
+    });
     document.documentElement.classList.remove("is-intro");
     document.documentElement.classList.add("is-revealed");
   }
@@ -52,6 +70,8 @@
     // the two-tone colouring survives. The text stays real text in the DOM, so
     // screen readers read the heading normally.
     const chars: HTMLElement[] = [];
+    const delays: number[] = [];
+    let afterSpace = false;
     const split = (node: Node) => {
       for (const child of [...node.childNodes]) {
         if (child.nodeType === Node.TEXT_NODE) {
@@ -59,17 +79,20 @@
           if (!text.trim() && !text.includes(" ")) continue;
           const frag = document.createDocumentFragment();
           for (const ch of text) {
-            if (ch === " ") {
+            if (/\s/.test(ch)) {
               // Spaces stay plain text nodes. Wrapping them — or using a
               // non-breaking space — stops the heading breaking at word
               // boundaries, so it no longer wraps into its 405px column.
-              frag.appendChild(document.createTextNode(" "));
+              frag.appendChild(document.createTextNode(ch));
+              afterSpace = true;
               continue;
             }
             const span = document.createElement("span");
             span.className = "ch";
             span.textContent = ch;
             chars.push(span);
+            delays.push(delayFor(afterSpace));
+            afterSpace = false;
             frag.appendChild(span);
           }
           child.replaceWith(frag);
@@ -84,20 +107,37 @@
     title.classList.add("is-split", "is-typing");
 
     let i = 0;
+    let caret: HTMLElement | null = null;
     const step = () => {
-      // Reveal a couple of characters per tick so long headings don't drag.
-      for (let n = 0; n < 2 && i < chars.length; n++, i++) chars[i].classList.add("is-in");
+      const span = chars[i];
+      span.classList.add("is-in");
+      // The caret rides along with the last typed letter. Its blink animation
+      // restarts on each new span, so it reads solid while typing and only
+      // blinks during hesitations and the final hold.
+      caret?.classList.remove("is-caret");
+      span.classList.add("is-caret");
+      caret = span;
+      i++;
       if (i < chars.length) {
-        window.setTimeout(step, CHAR_MS);
+        window.setTimeout(step, delays[i]);
         return;
       }
-      title.classList.remove("is-typing");
-      window.setTimeout(reveal, HOLD_MS);
+      // Let the caret blink over the finished line while the message lands.
+      window.setTimeout(() => {
+        caret?.classList.remove("is-caret");
+        title.classList.remove("is-typing");
+        // Opt the nav into its staggered entrance — same tick as reveal() so it
+        // slides in as is-intro drops. Only here (the full typed run), never on
+        // repeat visits or client-side swaps.
+        document.querySelector("[data-nav]")?.classList.add("did-intro");
+        reveal();
+      }, HOLD_MS);
     };
     window.setTimeout(step, 380); // a beat of just-the-background first
 
     // Backstop: never leave the page blurred out if something above fails.
-    window.setTimeout(reveal, 380 + chars.length * CHAR_MS + HOLD_MS + 2000);
+    const typingTotal = delays.reduce((a, b) => a + b, 0);
+    window.setTimeout(reveal, 380 + typingTotal + HOLD_MS + 2000);
   }
 
   runIntro();

@@ -1,0 +1,515 @@
+---
+/**
+ * "¡Hablemos!" contact drawer. Any element with [data-contact-open] opens it;
+ * it slides in from the right over a dimmed page. White panel regardless of the
+ * page theme — it's its own surface, matching the mockup Victor sent.
+ *
+ * Progressive enhancement: with JS off the trigger still falls back to the
+ * footer #contacto anchor (see Nav), so contact info is never unreachable.
+ */
+---
+
+<div class="cd" data-contact hidden>
+  <div class="cd__scrim" data-contact-close></div>
+
+  <aside
+    class="cd__panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cd-title"
+    tabindex="-1"
+  >
+    <button class="cd__close" type="button" data-contact-close aria-label="Cerrar">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M6 6l14 14M20 6L6 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <h2 class="cd__title" id="cd-title">¿Empezamos?</h2>
+    <p class="cd__sub">Estoy listo para escuchar tu propuesta. Escríbeme y hablemos de negocios.</p>
+
+    {/* With JS on, this is intercepted and POSTed to Web3Forms (a real inbox
+        delivery, no mailto). The mailto action is only the no-JS fallback.
+        ⚠️ Set data-access-key to your Web3Forms key (free, tied to your email
+        at web3forms.com) — until then the button falls back to mailto. */}
+    <form
+      class="cd__form"
+      action="mailto:devakross@gmail.com"
+      method="post"
+      enctype="text/plain"
+      data-contact-form
+      data-access-key="REPLACE_WITH_WEB3FORMS_ACCESS_KEY"
+    >
+      <input class="cd__field" type="text" name="nombre" placeholder="Nombre" autocomplete="name" required />
+      <input class="cd__field" type="email" name="correo" placeholder="Correo" autocomplete="email" required />
+      <textarea class="cd__field cd__field--area" name="mensaje" placeholder="¿Qué tienes en mente?" rows="4" required></textarea>
+
+      {/* Web3Forms plumbing. access_key is injected by the script from
+          data-access-key. subject sets the email subject; botcheck is a
+          honeypot — real users never see or fill it. */}
+      <input type="hidden" name="subject" value="Nuevo mensaje desde el portafolio" />
+      <input type="hidden" name="from_name" value="Portafolio Victor Vivas" />
+      <input class="cd__hp" type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+      <div class="cd__actions">
+        <button class="cd__submit" type="submit">
+          <span class="cd__submit-text">Iniciar conversación</span>
+          <span class="rocket" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              {/* Exhaust flame — rendered first so the body sits over it. */}
+              <g class="rocket__flame">
+                <path class="rocket__flame-outer" d="M9.4 14.4h5.2L12 21z" fill="#ff8a3d" />
+                <path class="rocket__flame-inner" d="M10.7 14.9h2.6L12 18.9z" fill="#ffd36b" />
+              </g>
+              <g class="rocket__body">
+                <path
+                  d="M12 2.2c2.7 2.3 4 5.4 4 8.9v3.1H8v-3.1c0-3.5 1.3-6.6 4-8.9Z"
+                  fill="currentColor"
+                />
+                <path d="M8 12.1 5 15.5l3-1.1z" fill="currentColor" />
+                <path d="M16 12.1 19 15.5l-3-1.1z" fill="currentColor" />
+                <circle cx="12" cy="9" r="1.9" fill="#dbe976" />
+              </g>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </form>
+
+    <p class="cd__status" data-status role="status" aria-live="polite" hidden></p>
+
+    <a class="cd__linkedin" href="https://www.linkedin.com/in/victorvivasuxui/" rel="me noopener" target="_blank">
+      LinkedIn <span aria-hidden="true">↗</span>
+    </a>
+  </aside>
+</div>
+
+<style>
+  .cd {
+    position: fixed;
+    inset: 0;
+    z-index: 200; /* above the sticky nav (100) and grain (90) */
+  }
+  .cd[hidden] {
+    display: none;
+  }
+
+  /* No backdrop-filter here — deliberately. It would re-blur the whole viewport
+     on every frame that anything behind it changes, and the film grain
+     (z-index 90) animates its transform ~7×/sec forever, so the blur never
+     stopped recomputing and dragged the whole page (and the cursor) to a halt.
+     A slightly heavier solid dim reads the same and costs nothing. */
+  .cd__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(13, 16, 16, 0.66);
+    opacity: 0;
+    transition: opacity 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .cd__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(560px, 100%);
+    display: flex;
+    flex-direction: column;
+    /* Tightened from 78/64: the title had too much air above it and the side
+       gutters were wider than the fields needed. */
+    padding: 64px 52px 40px;
+    background: #ffffff;
+    color: #3d4745;
+    overflow-y: auto;
+    /* translate3d (not the `translate` property) so the panel is promoted to
+       its own compositor layer and the slide never touches layout. */
+    transform: translate3d(100%, 0, 0);
+    transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+    /* Nothing inside can trigger a reflow of the page behind it. */
+    contain: paint;
+  }
+
+  /* Open state — toggled by the script one frame after unhiding so the
+     transitions actually run. */
+  .cd.is-open .cd__scrim {
+    opacity: 1;
+  }
+  .cd.is-open .cd__panel {
+    transform: translate3d(0, 0, 0);
+  }
+  /* Scoped to the moving window only — a permanent will-change keeps a layer
+     alive for the whole session and costs memory for nothing. */
+  .cd.is-animating .cd__panel {
+    will-change: transform;
+  }
+
+  .cd__close {
+    position: absolute;
+    top: 30px;
+    right: 34px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #3d4745;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      transform 180ms ease;
+  }
+  .cd__close:hover,
+  .cd__close:focus-visible {
+    background: #f1f2f2;
+    transform: rotate(90deg);
+  }
+
+  .cd__title {
+    margin: 0;
+    font-size: 52px;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #37413f;
+  }
+
+  .cd__sub {
+    margin: 16px 0 0;
+    max-width: 22ch;
+    font-size: 24px;
+    line-height: 1.28;
+    font-weight: 500;
+    color: #8b9694;
+  }
+
+  .cd__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 34px;
+  }
+
+  .cd__field {
+    width: 100%;
+    padding: 20px 22px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: #f3f4f4;
+    color: #3d4745;
+    font-family: inherit;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 400;
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease;
+  }
+  .cd__field::placeholder {
+    color: #a7b0ae;
+  }
+  .cd__field:focus {
+    outline: none;
+    background: #eef0ef;
+    border-color: var(--accent);
+  }
+  .cd__field--area {
+    resize: vertical;
+    min-height: 130px;
+  }
+
+  /* Spam honeypot — off-screen, never shown to real users. */
+  .cd__hp {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cd__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+
+  .cd__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 18px 26px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #3d4745;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      filter 180ms ease,
+      transform 180ms ease;
+  }
+  .cd__submit:hover,
+  .cd__submit:focus-visible {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+  .cd__submit[aria-busy="true"] {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  /* ── Rocket ─────────────────────────────────────────────────────────
+     The whole mark is drawn pointing straight up, then rotated 45° so it
+     reads like the 🚀 it replaces — that also swings the exhaust to the
+     lower-left (the rear). The flame flickers continuously; on hover the
+     rocket kicks up-and-right as if it just fired. */
+  .rocket {
+    display: inline-grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    transform: rotate(45deg);
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .rocket svg {
+    width: 22px;
+    height: 22px;
+    overflow: visible;
+  }
+  .rocket__flame {
+    transform-origin: 12px 14.4px;
+    animation: rocket-thrust 240ms ease-in-out infinite;
+  }
+  .cd__submit:hover .rocket,
+  .cd__submit:focus-visible .rocket {
+    transform: translate(3px, -3px) rotate(45deg);
+  }
+  .cd__submit:hover .rocket__flame,
+  .cd__submit:focus-visible .rocket__flame {
+    animation-duration: 150ms;
+  }
+
+  @keyframes rocket-thrust {
+    0%,
+    100% {
+      transform: scaleY(0.72) scaleX(0.94);
+      opacity: 0.82;
+    }
+    50% {
+      transform: scaleY(1.28) scaleX(1.04);
+      opacity: 1;
+    }
+  }
+
+  .cd__status {
+    margin: 16px 0 0;
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  .cd__status[data-state="ok"] {
+    color: #2f8f5b;
+  }
+  .cd__status[data-state="error"] {
+    color: #c2453f;
+  }
+
+  .cd__linkedin {
+    margin-top: auto;
+    padding-top: 34px;
+    align-self: flex-start;
+    font-size: 18px;
+    font-weight: 500;
+    color: #3d4745;
+  }
+  .cd__linkedin:hover,
+  .cd__linkedin:focus-visible {
+    color: #000;
+  }
+
+  @media (max-width: 620px) {
+    .cd__panel {
+      padding: 70px 28px 36px;
+    }
+    .cd__title {
+      font-size: 40px;
+    }
+    .cd__sub {
+      font-size: 20px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cd__scrim,
+    .cd__panel {
+      transition: none;
+    }
+    .cd__close {
+      transition: none;
+    }
+    .rocket,
+    .rocket__flame {
+      transition: none;
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  function initContactDrawer() {
+    const drawer = document.querySelector<HTMLElement>("[data-contact]");
+    if (!drawer || drawer.dataset.bound === "1") return;
+    drawer.dataset.bound = "1";
+
+    const panel = drawer.querySelector<HTMLElement>(".cd__panel");
+    const root = document.documentElement;
+    let lastFocused: HTMLElement | null = null;
+    let timer = 0;
+
+    // Only the panel's own slide counts. transitionend bubbles, so without this
+    // a field's focus transition (or the close button's hover) would fire the
+    // handler and hide the drawer out from under the user.
+    const onPanelEnd = (e: TransitionEvent, run: () => void) => {
+      if (e.target !== panel || e.propertyName !== "transform") return;
+      run();
+    };
+
+    const settle = (e: TransitionEvent) =>
+      onPanelEnd(e, () => {
+        drawer.classList.remove("is-animating");
+        drawer.classList.add("is-settled");
+        panel?.removeEventListener("transitionend", settle);
+      });
+
+    const open = () => {
+      // A close may still be counting down from a previous toggle; letting it
+      // land would hide a drawer that's now opening.
+      window.clearTimeout(timer);
+      panel?.removeEventListener("transitionend", hide);
+
+      lastFocused = document.activeElement as HTMLElement | null;
+
+      // Reserve the scrollbar's width before locking, so the page behind
+      // doesn't shift when it disappears.
+      const sbw = window.innerWidth - root.clientWidth;
+      root.style.setProperty("--sbw", `${sbw}px`);
+      root.classList.add("is-scroll-locked");
+      window.dispatchEvent(new Event("vv:scroll-lock"));
+
+      drawer.hidden = false;
+      // Force a reflow so the from-state paints before we add .is-open,
+      // otherwise the slide/fade transition is skipped.
+      void drawer.offsetWidth;
+      drawer.classList.add("is-open", "is-animating");
+      panel?.addEventListener("transitionend", settle);
+
+      // preventScroll: focusing an element that's still translated offscreen
+      // otherwise makes the browser scroll to chase it, fighting the slide.
+      panel?.focus({ preventScroll: true });
+    };
+
+    const hide = (e: TransitionEvent) => onPanelEnd(e, finishClose);
+
+    function finishClose() {
+      window.clearTimeout(timer);
+      drawer.hidden = true;
+      drawer.classList.remove("is-animating");
+      panel?.removeEventListener("transitionend", hide);
+      root.classList.remove("is-scroll-locked");
+      root.style.removeProperty("--sbw");
+      window.dispatchEvent(new Event("vv:scroll-unlock"));
+    }
+
+    const close = () => {
+      panel?.removeEventListener("transitionend", settle);
+      // Drop the blur first so the slide-out isn't fighting it either.
+      drawer.classList.remove("is-open", "is-settled");
+      drawer.classList.add("is-animating");
+      lastFocused?.focus?.();
+
+      // With transitions off there is no transitionend to wait for.
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        finishClose();
+        return;
+      }
+      panel?.addEventListener("transitionend", hide);
+      // Never get stuck if transitionend doesn't fire (tab hidden, etc).
+      timer = window.setTimeout(finishClose, 700);
+    };
+
+    // ── Form submission ──────────────────────────────────────────────
+    // POST to Web3Forms via fetch so the message lands in the inbox without a
+    // mailto handoff. If no access key is configured, we don't preventDefault
+    // and the native mailto action runs as a fallback.
+    const form = drawer.querySelector<HTMLFormElement>("[data-contact-form]");
+    const submitBtn = form?.querySelector<HTMLButtonElement>(".cd__submit");
+    const submitText = form?.querySelector<HTMLElement>(".cd__submit-text");
+    const status = drawer.querySelector<HTMLElement>("[data-status]");
+
+    const setStatus = (state: "ok" | "error", msg: string) => {
+      if (!status) return;
+      status.hidden = false;
+      status.dataset.state = state;
+      status.textContent = msg;
+    };
+
+    form?.addEventListener("submit", async (e) => {
+      const key = form.dataset.accessKey?.trim();
+      // No real key yet → let the mailto fallback fire.
+      if (!key || key.startsWith("REPLACE_")) return;
+
+      e.preventDefault();
+      const payload = Object.fromEntries(new FormData(form));
+      payload.access_key = key;
+
+      submitBtn?.setAttribute("aria-busy", "true");
+      const label = submitText?.textContent ?? "";
+      if (submitText) submitText.textContent = "Enviando…";
+      status && (status.hidden = true);
+
+      try {
+        const res = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) {
+          form.reset();
+          setStatus("ok", "¡Listo! Tu mensaje ya va en camino. Te respondo pronto.");
+        } else {
+          setStatus("error", data.message || "No se pudo enviar. Intenta de nuevo.");
+        }
+      } catch {
+        setStatus("error", "No se pudo enviar. Revisa tu conexión e intenta de nuevo.");
+      } finally {
+        submitBtn?.removeAttribute("aria-busy");
+        if (submitText) submitText.textContent = label;
+      }
+    });
+
+    // Openers: any [data-contact-open] anywhere on the page.
+    document.querySelectorAll<HTMLElement>("[data-contact-open]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        open();
+      });
+    });
+
+    // Closers: the scrim and the X.
+    drawer.querySelectorAll<HTMLElement>("[data-contact-close]").forEach((el) => {
+      el.addEventListener("click", close);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !drawer.hidden) close();
+    });
+  }
+
+  initContactDrawer();
+  document.addEventListener("astro:page-load", initContactDrawer);
+</script>

@@ -1,3 +1,5 @@
+import { withBase } from "../lib/base";
+
 export interface Testimonial {
   name: string;
   role: string;
@@ -96,6 +98,9 @@ export const testimonials: Testimonial[] = [
     placeholder: true,
   },
 ];
+
+// Base-aware avatar paths for the GitHub Pages subpath.
+for (const t of testimonials) t.avatar = withBase(t.avatar);
 
 /** Santiago is the one Figma shows selected — and the only real quote. */
 export const defaultTestimonial = 3;

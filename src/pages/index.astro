@@ -8,6 +8,7 @@ import Testimonials from "../components/Testimonials.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import Showreel from "../components/Showreel.astro";
 import { projects } from "../data/projects";
+import { withBase } from "../lib/base";
 
 import Diamond from "../icons/diamond.svg?raw";
 import Handshake from "../icons/handshake.svg?raw";
@@ -22,7 +23,7 @@ const slides: Slide[] = projects.map((project) => ({
   alt: project.alt,
   tags: project.tags,
   desc: project.desc,
-  href: `/proyectos/${project.slug}`,
+  href: withBase(`/proyectos/${project.slug}`),
   placeholder: project.placeholder,
 }));
 
@@ -50,14 +51,18 @@ const kpis = [
 // Marquee row (Component 4). Rendered twice for the seamless loop — the Figma
 // frame does the same thing: two identical 910px groups inside a 1890px track.
 const tools = [
-  { name: "Spline", img: "/img/logo-spline.png", size: 34 },
+  { name: "Spline", img: withBase("/img/logo-spline.png"), size: 34 },
   { name: "Figma", svg: LogoFigma },
-  { name: "Useberry", img: "/img/logo-useberry.png", size: 38 },
+  { name: "Useberry", img: withBase("/img/logo-useberry.png"), size: 38 },
   { name: "Framer", svg: LogoFramer },
-  { name: "ChatGPT", img: "/img/logo-gpt.png", size: 40 },
-  { name: "Slack", img: "/img/logo-slack.png", size: 38 },
-  { name: "Relume", img: "/img/logo-relume.png", size: 38 },
+  { name: "ChatGPT", img: withBase("/img/logo-gpt.png"), size: 40 },
+  { name: "Slack", img: withBase("/img/logo-slack.png"), size: 38 },
+  { name: "Relume", img: withBase("/img/logo-relume.png"), size: 38 },
 ];
+
+// Fewer visible slots than logos, so there's always a spare to rotate in
+// without two slots showing the same logo.
+const LOGO_SLOTS = 5;
 
 const title = "Victor Vivas — IA Powered product designer";
 const description =
@@ -109,13 +114,16 @@ const description =
         }
       </div>
 
-      <div class="marquee" aria-label="Herramientas que uso">
-        <div class="marquee__track">
-          {
-            [0, 1].map((pass) => (
-              <div class="marquee__group" aria-hidden={pass === 1 ? "true" : undefined}>
-                {tools.map((tool) =>
-                  tool.svg ? (
+      {/* Static logo wall. Each slot holds every logo stacked; one is visible
+          at a time and the script slowly cross-fades slots to other logos on a
+          staggered timer (see the logowall script). No auto-scroll. */}
+      <div class="logowall container" aria-label="Herramientas que uso" data-logowall>
+        {
+          Array.from({ length: LOGO_SLOTS }).map((_, s) => (
+            <div class="logoslot">
+              {tools.map((tool, t) => (
+                <span class:list={["logoslot__item", t === s && "is-on"]}>
+                  {tool.svg ? (
                     <span class="tool" title={tool.name} set:html={tool.svg} />
                   ) : (
                     <span class="tool">
@@ -127,12 +135,12 @@ const description =
                         loading="lazy"
                       />
                     </span>
-                  ),
-                )}
-              </div>
-            ))
-          }
-        </div>
+                  )}
+                </span>
+              ))}
+            </div>
+          ))
+        }
       </div>
     </section>
 
@@ -149,6 +157,48 @@ const description =
   </main>
 </Base>
 
+<script>
+  // Static logo wall: every few seconds one slot cross-fades to a different
+  // logo. Slots are staggered so they never all change at once, and a logo
+  // that's currently on screen elsewhere is skipped so no two slots match.
+  let wallTimer = 0;
+
+  function bootLogowall() {
+    const wall = document.querySelector<HTMLElement>("[data-logowall]");
+    if (!wall) return;
+    // Reduced motion: leave the wall completely static.
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const slots = [...wall.querySelectorAll<HTMLElement>(".logoslot")];
+    if (!slots.length) return;
+    const total = slots[0].children.length;
+    const slotCount = slots.length;
+    const state = slots.map((_, s) => s % total);
+    let cursor = 0;
+
+    window.clearInterval(wallTimer);
+    wallTimer = window.setInterval(() => {
+      const s = cursor % slotCount;
+      cursor++;
+
+      // Which logos are visible in the *other* slots right now.
+      const shown = new Set(state.filter((_, i) => i !== s));
+      let next = (state[s] + slotCount) % total;
+      let guard = 0;
+      while (shown.has(next) && guard++ < total) next = (next + 1) % total;
+      if (next === state[s]) return;
+
+      slots[s].children[state[s]]?.classList.remove("is-on");
+      slots[s].children[next]?.classList.add("is-on");
+      state[s] = next;
+    }, 1600);
+  }
+
+  // The interval outlives a client-side navigation otherwise.
+  document.addEventListener("astro:before-swap", () => window.clearInterval(wallTimer));
+  bootLogowall();
+  document.addEventListener("astro:page-load", bootLogowall);
+</script>
 
 <style>
   .muted {
@@ -236,24 +286,45 @@ const description =
     color: var(--text);
   }
 
-  /* ── Tool marquee ─────────────────────────────────────────────────── */
-  /* Figma hard-clips at the frame edge — no edge fade. */
-  .marquee {
-    overflow: hidden;
-    width: 100%;
-  }
-
-  .marquee__track {
+  /* ── Tool logo wall ───────────────────────────────────────────────── */
+  .logowall {
     display: flex;
-    width: max-content;
-    animation: scroll-left 32s linear infinite;
-  }
-
-  .marquee__group {
-    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 70px;
-    padding-right: 70px;
+    width: 100%;
+    /* Keeps the row from stretching edge-to-edge on wide viewports. */
+    max-width: 820px;
+    margin-inline: auto;
+  }
+
+  .logoslot {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    flex: none;
+  }
+
+  /* All logos for a slot stack in the same box; the crossfade swaps which one
+     is lit. Outgoing blurs + shrinks as it fades, incoming does the reverse —
+     the closest thing to a "morph" that works across mixed PNG/SVG brand marks
+     (a true path morph isn't possible between unrelated logos). */
+  .logoslot__item {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    filter: blur(7px);
+    transform: scale(0.86);
+    transition:
+      opacity 900ms ease,
+      filter 900ms ease,
+      transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .logoslot__item.is-on {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
   }
 
   .tool {
@@ -261,7 +332,6 @@ const description =
     place-items: center;
     width: 70px;
     height: 70px;
-    flex: none;
     color: #fff;
   }
   .tool :global(svg) {
@@ -269,18 +339,11 @@ const description =
     max-height: 42px;
   }
 
-  @keyframes scroll-left {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .marquee__track {
-      animation: none;
+  @media (max-width: 720px) {
+    .logowall {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 28px;
     }
   }
 
@@ -298,11 +361,13 @@ const description =
     color: var(--muted);
   }
 
+  /* Matches the nav hairline (--nav-border, 1px) rather than the heavier
+     --rule, so it whispers the section break instead of drawing a hard line. */
   .rule {
     height: 1px;
     margin: 95px auto 0;
     border: 0;
-    background: var(--rule);
+    background: var(--nav-border);
   }
 
   /* ── Responsive ─────────────────────────────────────────────────────

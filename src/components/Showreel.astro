@@ -1,5 +1,6 @@
 ---
 import Play from "../icons/play.svg?raw";
+import { withBase } from "../lib/base";
 
 /**
  * The muted, looping showreel used on Home (473x522) and on the case studies
@@ -35,8 +36,8 @@ const {
 <figure class="reel" style={`--w:${width}px; --h:${height}px; --play:${playSize}px;`}>
   <video
     data-showreel
-    src={src}
-    poster={poster}
+    src={withBase(src)}
+    poster={withBase(poster)}
     width={width}
     height={height}
     autoplay
