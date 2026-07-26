@@ -46,7 +46,7 @@ const slides: Slide[] = projects.map((p) => ({
   title: p.title,
   img: p.img,
   alt: p.alt,
-  tags: p.tags,
+  tags: p.cardTags ?? p.tags,
   desc: p.desc,
   href: withBase(`/proyectos/${p.slug}`),
   placeholder: p.placeholder,

@@ -6,7 +6,11 @@ export interface Project {
   /** Card thumbnail for the Home slider. */
   img: string;
   alt: string;
+  /** Tags shown on the case-study hero (from each project's Figma hero). */
   tags: string[];
+  /** Tags shown on the slider card — Victor's card designs differ from the
+   *  hero tags. Falls back to `tags` when omitted. */
+  cardTags?: string[];
   desc: string;
   /** Full case-study frame render, used as the page body until each case
    *  study is built out as real markup. */
@@ -40,7 +44,8 @@ export const projects: Project[] = [
     img: "/img/proj-polestar.png",
     alt: "Caso de estudio Polestar",
     tags: ["UI", "Prototype", "Landing Page", "Design System"],
-    desc: "Rediseño integral de Polestar Pilates: elevando la conversión mediante UX estratégica.",
+    cardTags: ["UX", "UI", "Responsive", "Landing Page", "User Testing"],
+    desc: "Rediseño integral de Polestar Pilates: Elevando la conversión mediante UX estratégica.",
     frame: "/img/case/polestar.png",
     frameHeight: 3847,
     year: "2025",
@@ -53,7 +58,8 @@ export const projects: Project[] = [
     img: "/img/proj-leancore.png",
     alt: "Caso de estudio LeanCore Studio",
     tags: ["UI", "Prototype", "Landing Page", "Design System"],
-    desc: "LeanCore Studio: simplificando la complejidad financiera a través del diseño.",
+    cardTags: ["UI", "WebApp", "Design System"],
+    desc: "LeanCore Studio: Simplificando la complejidad financiera a través del diseño",
     frame: "/img/case/leancore-studio.png",
     frameHeight: 3579,
     year: "2026",
