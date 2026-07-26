@@ -1,0 +1,452 @@
+---
+import Nav from "./Nav.astro";
+import SiteFooter from "./SiteFooter.astro";
+import ProjectSlider, { type Slide } from "./ProjectSlider.astro";
+import Showreel from "./Showreel.astro";
+import { projects } from "../data/projects";
+import { withBase } from "../lib/base";
+
+/**
+ * Shared case-study layout, reconstructed from the Figma frames (page 3.0):
+ * Polestar `964:996` and LeanCore Studio `971:1009`. Same skeleton as the
+ * hand-built Coca-Cola page — dark hero, a wider #212626 two-column body
+ * (450px editorial copy + 678px screenshot stack), the light "next projects"
+ * band, and the shared footer — but driven by data so both pages share it.
+ *
+ * The right-column screenshots stay as exported images: they are the clients'
+ * live products (a Pilates site, a fintech flow-builder), so rebuilding them in
+ * HTML would be reconstructing someone else's product, not Victor's design.
+ */
+export interface Block {
+  /** Muted eyebrow heading (#4A5856, 20/30). */
+  heading: string;
+  /** Prominent lead sentence (#B3D6D3, 25/30). */
+  lead?: string;
+  /** Body paragraphs (16/300). A U+2028 inside a string becomes a line break. */
+  paras?: string[];
+  /** Bulleted points with a bold lead-in term, inline. */
+  bullets?: { term: string; body: string }[];
+}
+
+interface Props {
+  slug: string;
+  title: { base: string; muted: string };
+  tags: string[];
+  intro: string;
+  meta: { year: string; client: string };
+  blocks: Block[];
+  shots: { src: string; alt: string; w: number; h: number }[];
+}
+
+const { slug, title, tags, intro, meta, blocks, shots } = Astro.props;
+const project = projects.find((p) => p.slug === slug)!;
+
+// Same related-projects slider the Coca-Cola page uses.
+const slides: Slide[] = projects.map((p) => ({
+  title: p.title,
+  img: p.img,
+  alt: p.alt,
+  tags: p.tags,
+  desc: p.desc,
+  href: withBase(`/proyectos/${p.slug}`),
+  placeholder: p.placeholder,
+}));
+---
+
+<Nav />
+
+<main>
+  <!-- ── Hero ─────────────────────────────────────────────────────────── -->
+  <section class="hero container">
+    <div class="hero__grid">
+      <div class="hero__left">
+        <a class="back" href={withBase("/")}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M14 5 7.5 12l6.5 7" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          Volver
+        </a>
+
+        <Showreel width={291} height={358} name="Victor Vivas" role="Sobre este proyecto" />
+      </div>
+
+      <div class="hero__right">
+        <h1 class="t-h2 hero__title">
+          {title.base} <span class="muted">{title.muted}</span>
+        </h1>
+
+        <ul class="tags">
+          {tags.map((tag) => <li class="tag">{tag}</li>)}
+        </ul>
+
+        <p class="hero__desc">{intro}</p>
+
+        <p class="hero__meta">
+          <span>{meta.year}</span>
+          <span class="dot" aria-hidden="true"></span>
+          <span>Lanzado por {meta.client}</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Case body ────────────────────────────────────────────────────── -->
+  <section class="case">
+    <div class="case__grid container-wide">
+      <div class="case__copy">
+        {
+          blocks.map((block) => (
+            <section class="block">
+              <h2 class="block__heading">{block.heading}</h2>
+              {block.lead && <p class="block__lead">{block.lead}</p>}
+              {block.paras?.map((para) => <p class="block__para">{para}</p>)}
+              {block.bullets && (
+                <ul class="block__bullets">
+                  {block.bullets.map((b) => (
+                    <li>
+                      <strong>{b.term}</strong> {b.body}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))
+        }
+      </div>
+
+      <div class="case__shots">
+        {
+          shots.map((shot, i) => (
+            <figure class="shot">
+              <img
+                src={shot.src}
+                alt={shot.alt}
+                width={shot.w}
+                height={shot.h}
+                loading={i === 0 ? "eager" : "lazy"}
+              />
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Related projects ─────────────────────────────────────────────── -->
+  <section class="related">
+    <div class="related__grid container">
+      <div class="related__intro">
+        <h2 class="t-h2 related__title">Proyectos clave que he ayudado a hacer realidad</h2>
+        <p class="related__desc">
+          Trabajos seleccionados de proyectos que se lanzaron al mercado. Problemas reales,
+          soluciones reales.
+        </p>
+        <a class="related__cta" href={withBase("/#proyectos")}>
+          Ver todos los proyectos
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </a>
+      </div>
+
+      <ProjectSlider slides={slides} />
+    </div>
+  </section>
+
+  <!-- ── Light footer band ────────────────────────────────────────────── -->
+  <section class="light theme-light" data-theme-light>
+    <hr class="rule container" />
+    <SiteFooter home={false} />
+  </section>
+</main>
+
+<style>
+  /* ── Hero ─────────────────────────────────────────────────────────────
+     Matches the Coca-Cola page: Volver + title share a baseline, the reel
+     drops under the back link. Columns 291 / 600 with a 71px gutter. */
+  .hero {
+    padding-top: 14px;
+  }
+  .hero__grid {
+    display: grid;
+    grid-template-columns: 291px 600px;
+    gap: 71px;
+    align-items: start;
+  }
+  .hero__left {
+    display: flex;
+    flex-direction: column;
+  }
+  .hero__left > :global(.reel) {
+    margin-top: 25px;
+  }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    height: 24px;
+    font-size: 18px;
+    line-height: 22.7px;
+    font-weight: 300;
+    color: var(--text);
+    transition: opacity 200ms ease;
+  }
+  .back svg {
+    width: 20px;
+    height: 20px;
+    transition: translate 200ms ease;
+  }
+  .back:hover {
+    opacity: 0.75;
+  }
+  .back:hover svg {
+    translate: -3px 0;
+  }
+
+  .hero__right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .hero__title {
+    margin: 0;
+    color: var(--text);
+  }
+  .muted {
+    color: var(--muted);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tag {
+    padding: 6px 8px;
+    border-radius: var(--r-pill);
+    background: var(--surface-2);
+    color: var(--accent);
+    font-size: 12px;
+    line-height: 10px;
+    font-weight: 500;
+  }
+
+  .hero__desc {
+    margin: 0;
+    font-size: 18px;
+    line-height: 22.7px;
+    font-weight: 300;
+    color: var(--text);
+  }
+  .hero__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 300;
+    color: var(--text);
+  }
+  .hero__meta .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* ── Case body ────────────────────────────────────────────────────────
+     Full-bleed #212626 band; copy column 450px, shots 678px, 61px gutter. */
+  .case {
+    margin-top: 36px;
+    padding: 83px 0 126px;
+    background: var(--surface-alt);
+  }
+  .case__grid {
+    display: grid;
+    grid-template-columns: 450px 678px;
+    gap: 61px;
+    align-items: start;
+  }
+  .case__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+  }
+  .block {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+  .block__heading {
+    margin: 0;
+    font-size: 20px;
+    line-height: 30px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .block__lead {
+    margin: 0;
+    font-size: 25px;
+    line-height: 30px;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .block__para {
+    margin: 0;
+    white-space: pre-line;
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 300;
+    color: var(--text);
+  }
+
+  /* Bulleted points: a bold lead-in term, a lime dash marker at the column
+     edge (the Figma frames use a "-" dash, not the Coca-Cola pushpin). */
+  .block__bullets {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .block__bullets li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 300;
+    color: var(--text);
+  }
+  .block__bullets li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 9px;
+    height: 1.5px;
+    background: var(--accent);
+  }
+  .block__bullets strong {
+    font-weight: 600;
+  }
+
+  /* Screenshot stack — vertical, 34px gaps. */
+  .case__shots {
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+  }
+  .shot {
+    margin: 0;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .shot img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* ── Related projects ─────────────────────────────────────────────── */
+  .related {
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+  .related__grid {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 130px;
+  }
+  .related__intro {
+    width: 369px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    margin-top: 71px;
+  }
+  .related__title {
+    margin: 0;
+    max-width: 345px;
+    color: var(--muted);
+  }
+  .related__desc {
+    margin: 0;
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 300;
+    color: var(--muted);
+  }
+  .related__cta {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 5px;
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    background: var(--accent);
+    color: #1d2222;
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 400;
+  }
+  .related__cta svg {
+    width: 18px;
+    height: 18px;
+    transition: translate 250ms ease;
+  }
+  .related__cta:hover svg {
+    translate: 4px -4px;
+  }
+
+  /* ── Light footer band ────────────────────────────────────────────── */
+  .light {
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 30px;
+  }
+  .rule {
+    height: 1px;
+    margin: 0 auto;
+    border: 0;
+    background: var(--nav-border);
+  }
+
+  /* ── Responsive (invented — no mobile frames exist; needs review) ───── */
+  @media (max-width: 1240px) {
+    .case__grid {
+      grid-template-columns: minmax(0, 450px) minmax(0, 678px);
+      gap: 40px;
+    }
+  }
+  @media (max-width: 1000px) {
+    .hero__grid,
+    .case__grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .case {
+      padding: 56px 0 64px;
+    }
+    .related {
+      padding-top: 64px;
+      padding-bottom: 64px;
+    }
+    .related__grid {
+      flex-direction: column;
+      gap: 40px;
+    }
+    .related__intro {
+      width: 100%;
+      margin-top: 0;
+    }
+  }
+</style>

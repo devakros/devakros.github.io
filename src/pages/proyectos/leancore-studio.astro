@@ -1,0 +1,104 @@
+---
+import Base from "../../layouts/Base.astro";
+import CaseStudy, { type Block } from "../../components/CaseStudy.astro";
+import { bySlug } from "../../data/projects";
+import { withBase } from "../../lib/base";
+
+/**
+ * Figma node 971:1009 "LeanCore Studio" — 1280x3709, page 3.0. Reconstructed as
+ * real markup (was a frame-render stub). Editorial copy transcribed from the
+ * frame; the four right-column screenshots are crops of the frame's product UI
+ * (the fintech flow-builder). Copy should be spot-checked against Figma once the
+ * API rate limit clears — it was read from the frame render, not text nodes.
+ */
+const project = bySlug("leancore-studio")!;
+
+const blocks: Block[] = [
+  {
+    heading: "El desafío",
+    lead: "UX para la complejidad financiera",
+    bullets: [
+      {
+        term: "La gestión de la carga cognitiva:",
+        body: "La automatización fintech suele ser abrumadora. La decisión estratégica más difícil fue ocultar la complejidad del 'backend' bajo una capa de control sencilla, permitiendo al usuario configurar flujos de trabajo complejos sin necesidad de conocimientos técnicos.",
+      },
+      {
+        term: "Diseño basado en la predictibilidad:",
+        body: "Cada flujo de automatización se diseñó para que el usuario siempre mantenga el control. Se validó la lógica de la interfaz para asegurar que el sistema sea predecible, reduciendo la incertidumbre ante operaciones automatizadas.",
+      },
+    ],
+  },
+  {
+    heading: "Sistema de diseño",
+    lead: "Orden, jerarquía y confianza",
+    paras: [
+      "En una plataforma fintech, la interfaz es sinónimo de seguridad. Creé un sistema de componentes estrictamente ordenado, siguiendo la nomenclatura exacta de los nodos que definí para garantizar la escalabilidad técnica.",
+      "La reutilización de componentes para los flujos de datos asegura que la experiencia del usuario sea consistente, independientemente de qué tan compleja sea la regla de automatización que esté creando.",
+    ],
+  },
+  {
+    heading: "Handoff",
+    lead: "Cuando el diseño habla el lenguaje de los datos",
+    paras: [
+      "La arquitectura de este sistema fintech requirió una coordinación técnica impecable entre diseño y desarrollo.",
+    ],
+    bullets: [
+      {
+        term: "Nomenclatura precisa:",
+        body: "Toda la documentación del diseño respeta los nombres de nodos exactos para evitar errores de implementación en el backend.",
+      },
+      {
+        term: "Especificación de estados:",
+        body: "Definí visualmente cómo debe comportarse el sistema ante errores de procesamiento, garantizando que el usuario siempre reciba un feedback claro y seguro.",
+      },
+    ],
+  },
+  {
+    heading: "Impacto",
+    lead: "Impacto de negocio: Eficiencia y escalabilidad",
+    bullets: [
+      {
+        term: "Control:",
+        body: "Autonomía total del usuario para gestionar reglas financieras complejas sin asistencia técnica.",
+      },
+      {
+        term: "Escalabilidad:",
+        body: "Un sistema de diseño que soporta la adición constante de nuevos nodos y reglas.",
+      },
+      {
+        term: "Confianza:",
+        body: "Interfaz diseñada para minimizar el error humano en la automatización de transacciones.",
+      },
+    ],
+  },
+  {
+    heading: "Reflexión",
+    lead: "Este proyecto reforzó mi visión: un diseñador UI/UX en fintech no solo diseña pantallas, diseña la confianza con la que un usuario confía sus finanzas a un sistema automatizado. El seniority se demuestra al entregar un producto que es técnicamente robusto y humanamente comprensible.",
+  },
+];
+
+const shots = [
+  { src: withBase("/img/case/leancore/shot-1.png"), w: 678, h: 535, alt: "Constructor de flujos de automatización de LeanCore Studio" },
+  { src: withBase("/img/case/leancore/shot-2.png"), w: 678, h: 377, alt: "Estados de advertencia y edición de nodos en el editor" },
+  { src: withBase("/img/case/leancore/shot-3.png"), w: 678, h: 475, alt: "Configuración de un nodo Enviar SMS con variables" },
+  { src: withBase("/img/case/leancore/shot-4.png"), w: 678, h: 475, alt: "Flujo de decisión con asignación de cupo y envío de SMS" },
+];
+
+const description =
+  "LeanCore Studio: simplificando la complejidad financiera a través del diseño — una interfaz de automatización fintech que genera confianza y opera con precisión.";
+---
+
+<Base title={`${project.title} — Victor Vivas`} description={description}>
+  <CaseStudy
+    slug="leancore-studio"
+    title={{
+      base: "LeanCore Studio:",
+      muted: "Simplificando la complejidad financiera a través del diseño",
+    }}
+    tags={project.tags}
+    intro="El reto fue transformar procesos financieros altamente técnicos y abstractos en un sistema de automatización intuitivo. Mi rol como diseñador UX/UI fue diseñar una interfaz que no solo operara con precisión, sino que generara la confianza necesaria para que el usuario automatice sus decisiones financieras."
+    meta={{ year: "2026", client: "LeanCore" }}
+    blocks={blocks}
+    shots={shots}
+  />
+</Base>

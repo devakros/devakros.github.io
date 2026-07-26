@@ -1,0 +1,96 @@
+---
+import Base from "../../layouts/Base.astro";
+import CaseStudy, { type Block } from "../../components/CaseStudy.astro";
+import { bySlug } from "../../data/projects";
+import { withBase } from "../../lib/base";
+
+/**
+ * Figma node 964:996 "Polestar" — 1280x3977, page 3.0. Reconstructed as real
+ * markup (was a frame-render stub). All editorial copy is verbatim from the
+ * frame's text nodes; the four right-column mockups are exported crops of the
+ * frame — they're the client's live Pilates website, not Victor's UI to rebuild.
+ */
+const project = bySlug("polestar")!;
+
+const blocks: Block[] = [
+  {
+    heading: "El desafío: Más allá de la estética",
+    lead: "El problema no era solo visual; era un cuello de botella en el funnel de conversión. Los usuarios abandonaban porque la carga cognitiva era excesiva y la información clave estaba oculta.",
+    bullets: [
+      {
+        term: "Priorización estratégica:",
+        body: "En lugar de rediseñar todo a ciegas, identificamos que el 70% de las fugas ocurrían en el home, por lo que enfocamos el esfuerzo en simplificar la arquitectura de información allí.",
+      },
+      {
+        term: "Impacto de negocio:",
+        body: 'El objetivo fue pasar de una "plataforma informativa" a una "máquina de conversión" donde cada clic tuviera una intención clara.',
+      },
+    ],
+  },
+  {
+    heading: "Validando con usuarios: ¿Por qué este camino?",
+    paras: [
+      "¿Cómo supimos que el nuevo flujo funcionaría? No fue por consenso interno, sino por evidencia. Utilizamos Useberry para testear flujos con usuarios reales. Esto nos permitió validar que la nueva estructura guía al alumno hacia la compra de manera intuitiva, eliminando las fricciones que antes causaban desconfianza.",
+    ],
+  },
+  {
+    heading: "El Sistema de Diseño como motor de escalabilidad",
+    paras: [
+      "Un sistema de diseño robusto es la diferencia entre un proyecto que se rompe al escalar y uno que crece ordenadamente.",
+      "Más allá de 'lo visual', construimos un sistema orientado a la escalabilidad. Incluir estados de carga y componentes reutilizables no solo mejoró la UI, sino que redujo la fricción técnica durante la implementación.",
+    ],
+  },
+  {
+    heading: "Handoff: Colaboración real con Desarrollo",
+    lead: 'El éxito del proyecto dependió de una estrecha colaboración con los 4 desarrolladores del equipo. Nuestro flujo de trabajo evitó que el diseño se "perdiera" en la traducción al código.',
+    paras: [
+      "Entregamos archivos con estados de carga definidos y anotaciones técnicas, asegurando que el equipo de desarrollo no tuviera que adivinar las interacciones, sino que pudieran enfocarse en la eficiencia del producto.",
+    ],
+  },
+  {
+    // NOTE: the Figma frame's "Resultados" intro paragraph is a leftover
+    // duplicate of the Block-1 lead (a copy-paste in the design) — omitted here
+    // rather than reproduce the wrong copy. Victor to supply the real intro.
+    heading: "Resultados (Medibles)",
+    bullets: [
+      {
+        term: "Reducción de fricción:",
+        body: "Optimización del flujo de incorporación (onboarding) para reducir la tasa de rebote.",
+      },
+      {
+        term: "Claridad de información:",
+        body: "Arquitectura de información centrada en lo que el usuario necesita para tomar la decisión de compra.",
+      },
+      {
+        term: "Optimización técnica:",
+        body: "Mejora del rendimiento percibido mediante estados de carga definidos desde el diseño.",
+      },
+    ],
+  },
+];
+
+const shots = [
+  { src: withBase("/img/case/polestar/shot-1.png"), w: 678, h: 535, alt: "App del curso de Pilates de Polestar en un iPhone" },
+  { src: withBase("/img/case/polestar/shot-2.png"), w: 678, h: 528, alt: "Página de inicio rediseñada de Polestar Pilates" },
+  { src: withBase("/img/case/polestar/shot-3.png"), w: 678, h: 535, alt: "Página del curso Mat Teacher de Polestar Pilates" },
+  { src: withBase("/img/case/polestar/shot-4.png"), w: 678, h: 535, alt: "Detalle del programa de formación en la app de Polestar" },
+];
+
+const description =
+  "Rediseño integral de Polestar Pilates: elevando la conversión mediante UX estratégica, de una tasa de rebote del 70% a un funnel enfocado en la venta de cursos.";
+---
+
+<Base title={`${project.title} — Victor Vivas`} description={description}>
+  <CaseStudy
+    slug="polestar"
+    title={{
+      base: "Rediseño integral de Polestar Pilates:",
+      muted: "Elevando la conversión mediante UX estratégica",
+    }}
+    tags={project.tags}
+    intro="Más que un rediseño visual, este proyecto fue una intervención estratégica para transformar una plataforma de educación en Pilates con una tasa de rebote del 70%. Mi rol como UX/UI y Product Owner fue alinear la propuesta de valor con las necesidades reales del usuario para maximizar las ventas de cursos."
+    meta={{ year: "2025", client: "Polestar Pilates" }}
+    blocks={blocks}
+    shots={shots}
+  />
+</Base>
