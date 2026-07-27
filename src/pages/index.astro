@@ -375,24 +375,18 @@ const description =
   }
 
   /* ── Logo band ────────────────────────────────────────────────────────
-     Dark by default. The nav observer toggles .is-light when the nav reaches
-     it, fading the surface (and the logos) from dark to light — the theme
-     switch "arrives" right at the logo row as you scroll. */
+     Scroll-linked theme switch: --t (0 = dark, 1 = light) is driven by the nav
+     script from the band's distance to the nav, so the surface AND the logos
+     interpolate *with the scroll* as the band rises toward the nav — not a
+     snap at a threshold. */
   .logo-band {
+    --t: 0;
     margin-top: 40px;
     padding: 80px 0;
-    background-color: #1d2222;
-    transition: background-color 550ms ease;
-  }
-  .logo-band.is-light {
-    background-color: #fbfbfb;
+    background-color: color-mix(in srgb, #fbfbfb calc(var(--t) * 100%), #1d2222);
   }
   .logo-band .tool {
-    color: #fff;
-    transition: color 550ms ease;
-  }
-  .logo-band.is-light .tool {
-    color: #4a5856;
+    color: color-mix(in srgb, #4a5856 calc(var(--t) * 100%), #fff);
   }
 
   /* ── Light band (testimonials + footer — always light) ──────────────── */

@@ -228,47 +228,61 @@ const links = [
 </style>
 
 <script>
-  // Flip the nav when it crosses into the light band.
+  // Nav theme + logo-band fade, both driven by scroll POSITION (not a threshold
+  // toggle) so the change interpolates smoothly as you scroll.
   //
-  // rootMargin collapses the viewport to a zero-height line at the nav's centre
-  // (y=67). The nav flips exactly when the light band reaches it. The band now
-  // starts ~300px higher (the logo row moved onto the light surface), so this
-  // fires ~300px earlier than before while still being genuinely over light.
-  let observer: IntersectionObserver | undefined;
+  // The logo band (Home) fades dark→light via a scroll-linked --t (0→1) as its
+  // top rises from mid-viewport up to the nav. The nav pill goes light once the
+  // logos are mostly light, or whenever it's over a static light band
+  // (testimonials/footer here, or a case-study footer).
+  let onScroll: (() => void) | undefined;
+  let rafId = 0;
+  const NAV_LINE = 67; // the nav's vertical centre
 
   function boot() {
-    observer?.disconnect();
+    if (onScroll) window.removeEventListener("scroll", onScroll);
+    cancelAnimationFrame(rafId);
+
     const nav = document.querySelector<HTMLElement>("[data-nav]");
-    // The logo band is dark and flips to light as the nav reaches it; the light
-    // band (testimonials + footer) is always light. The nav is light over either.
-    const logoBand = document.querySelector<HTMLElement>("[data-logo-band]");
-    const lightSections = document.querySelectorAll<HTMLElement>("[data-theme-light]");
     if (!nav) return;
-    // Case-study pages have no light band; make sure a stale light nav doesn't
-    // carry over from Home.
     nav.classList.remove("is-light");
-    logoBand?.classList.remove("is-light");
+    const logoBand = document.querySelector<HTMLElement>("[data-logo-band]");
+    const lightSections = [...document.querySelectorAll<HTMLElement>("[data-theme-light]")];
+    logoBand?.style.setProperty("--t", "0");
 
-    const targets: Element[] = [...lightSections];
-    if (logoBand) targets.push(logoBand);
-    if (!targets.length) return;
+    const update = () => {
+      rafId = 0;
+      const vh = window.innerHeight;
+      let light = false;
 
-    const over = new Set<Element>();
-    observer = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) over.add(e.target);
-          else over.delete(e.target);
-          // The logo band fades its own surface dark↔light as it crosses.
-          if (e.target === logoBand) {
-            logoBand.classList.toggle("is-light", e.isIntersecting);
-          }
+      // Logo band: dark until its top passes 55% of the viewport, fully light by
+      // the time it reaches the nav — interpolated with the scroll.
+      if (logoBand) {
+        const top = logoBand.getBoundingClientRect().top;
+        const start = vh * 0.55;
+        let t = (start - top) / (start - NAV_LINE);
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        logoBand.style.setProperty("--t", t.toFixed(3));
+        if (t > 0.5) light = true;
+      }
+
+      // Static light bands: nav is light while one straddles the nav line.
+      for (const s of lightSections) {
+        const r = s.getBoundingClientRect();
+        if (r.top <= NAV_LINE && r.bottom >= NAV_LINE) {
+          light = true;
+          break;
         }
-        nav.classList.toggle("is-light", over.size > 0);
-      },
-      { rootMargin: "-67px 0px -100% 0px", threshold: 0 },
-    );
-    targets.forEach((t) => observer.observe(t));
+      }
+
+      nav.classList.toggle("is-light", light);
+    };
+
+    onScroll = () => {
+      if (!rafId) rafId = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
   }
 
   boot();
