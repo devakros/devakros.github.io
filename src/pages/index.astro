@@ -244,7 +244,9 @@ const description =
 
   .approach__statement {
     margin: 0 auto;
-    max-width: 917px;
+    /* min() so it caps at 917 on desktop but never exceeds the viewport on
+       mobile (the fixed 917px was overriding the .container cap → overflow). */
+    max-width: min(917px, 100%);
     text-align: center;
     color: var(--text);
   }

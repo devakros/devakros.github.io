@@ -30,15 +30,15 @@
 
     {/* With JS on, this is intercepted and POSTed to Web3Forms (a real inbox
         delivery, no mailto). The mailto action is only the no-JS fallback.
-        ⚠️ Set data-access-key to your Web3Forms key (free, tied to your email
-        at web3forms.com) — until then the button falls back to mailto. */}
+        data-access-key is Victor's Web3Forms key — submissions land in the
+        inbox tied to it at web3forms.com. */}
     <form
       class="cd__form"
       action="mailto:devakross@gmail.com"
       method="post"
       enctype="text/plain"
       data-contact-form
-      data-access-key="REPLACE_WITH_WEB3FORMS_ACCESS_KEY"
+      data-access-key="9aa954b0-1f6c-4302-84cd-254384177f69"
     >
       <input class="cd__field" type="text" name="nombre" placeholder="Nombre" autocomplete="name" required />
       <input class="cd__field" type="email" name="correo" placeholder="Correo" autocomplete="email" required />
