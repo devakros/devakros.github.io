@@ -116,12 +116,11 @@ const description =
 
     </section>
 
-    {/* ── The light band. The site switches to light mode AT the logos (the
-        logo row flips dark→light) and stays light through the testimonials and
-        the footer. ── */}
-    <section class="light theme-light" data-theme-light id="resumen" data-intro-hide>
-      {/* Static logo wall — the first thing on the light surface. Each slot
-          holds every logo stacked; the script slowly cross-fades slots. */}
+    {/* ── Logo band. Dark by default; flips to the light surface when the nav
+        reaches it (scroll-driven, see the nav observer), so the light mode
+        "arrives" at the logos. ── */}
+    <section class="logo-band" data-logo-band data-intro-hide>
+      {/* Each slot holds every logo stacked; the script slowly cross-fades. */}
       <div class="logowall container" aria-label="Herramientas que uso" data-logowall>
         {
           Array.from({ length: LOGO_SLOTS }).map((_, s) => (
@@ -147,7 +146,10 @@ const description =
           ))
         }
       </div>
+    </section>
 
+    {/* ── From the testimonials down it's always the light surface. ── */}
+    <section class="light theme-light" data-theme-light id="resumen" data-intro-hide>
       <h2 class="t-h2 light__title container">Mira lo que están diciendo de mi...</h2>
 
       <Testimonials />
@@ -228,11 +230,13 @@ const description =
     align-items: flex-start;
     gap: 27px;
     margin-top: 52px;
-    /* Full-bleed to the viewport edges (per Victor) — breaks out of the 962
-       container so the projects span the whole screen. */
+    /* Enlarged but aligned: the LEFT edge lines up with the nav/title grid
+       (the 962 container's gutter) so it follows the layout, and it extends
+       right toward the viewport edge for the wider projects. */
     width: 100vw;
     margin-left: calc(50% - 50vw);
-    padding-inline: 34px;
+    padding-left: max(24px, calc((100vw - var(--container)) / 2));
+    padding-right: 34px;
     box-sizing: border-box;
   }
 
@@ -370,19 +374,36 @@ const description =
     }
   }
 
-  /* ── Light band (starts at the logos) ─────────────────────────────────
-     The site switches to light mode at the logo row and stays light: logos,
-     testimonials and footer are all on the white surface. */
-  .light {
+  /* ── Logo band ────────────────────────────────────────────────────────
+     Dark by default. The nav observer toggles .is-light when the nav reaches
+     it, fading the surface (and the logos) from dark to light — the theme
+     switch "arrives" right at the logo row as you scroll. */
+  .logo-band {
     margin-top: 40px;
-    padding: 84px 0 30px;
+    padding: 80px 0;
+    background-color: #1d2222;
+    transition: background-color 550ms ease;
+  }
+  .logo-band.is-light {
+    background-color: #fbfbfb;
+  }
+  .logo-band .tool {
+    color: #fff;
+    transition: color 550ms ease;
+  }
+  .logo-band.is-light .tool {
+    color: #4a5856;
+  }
+
+  /* ── Light band (testimonials + footer — always light) ──────────────── */
+  .light {
+    padding: 88px 0 30px;
     background: var(--bg); /* white via .theme-light */
     color: var(--text);
   }
 
   .light__title {
-    /* Gap between the logo row and the testimonials title. */
-    margin: 96px auto 35px;
+    margin: 0 auto 35px;
     text-align: center;
     color: var(--muted);
   }
@@ -420,9 +441,12 @@ const description =
       gap: 72px;
       margin-top: 72px;
     }
-    .light {
+    .logo-band {
       margin-top: 72px;
-      padding-top: 72px;
+      padding: 56px 0;
+    }
+    .light {
+      padding-top: 64px;
     }
     .rule {
       margin-top: 56px;

@@ -239,14 +239,19 @@ const links = [
   function boot() {
     observer?.disconnect();
     const nav = document.querySelector<HTMLElement>("[data-nav]");
-    // Query ALL light bands (querySelectorAll handles one or many); the nav is
-    // light while over any of them.
+    // The logo band is dark and flips to light as the nav reaches it; the light
+    // band (testimonials + footer) is always light. The nav is light over either.
+    const logoBand = document.querySelector<HTMLElement>("[data-logo-band]");
     const lightSections = document.querySelectorAll<HTMLElement>("[data-theme-light]");
     if (!nav) return;
     // Case-study pages have no light band; make sure a stale light nav doesn't
     // carry over from Home.
     nav.classList.remove("is-light");
-    if (!lightSections.length) return;
+    logoBand?.classList.remove("is-light");
+
+    const targets: Element[] = [...lightSections];
+    if (logoBand) targets.push(logoBand);
+    if (!targets.length) return;
 
     const over = new Set<Element>();
     observer = new IntersectionObserver(
@@ -254,12 +259,16 @@ const links = [
         for (const e of entries) {
           if (e.isIntersecting) over.add(e.target);
           else over.delete(e.target);
+          // The logo band fades its own surface dark↔light as it crosses.
+          if (e.target === logoBand) {
+            logoBand.classList.toggle("is-light", e.isIntersecting);
+          }
         }
         nav.classList.toggle("is-light", over.size > 0);
       },
       { rootMargin: "-67px 0px -100% 0px", threshold: 0 },
     );
-    lightSections.forEach((s) => observer.observe(s));
+    targets.forEach((t) => observer.observe(t));
   }
 
   boot();
