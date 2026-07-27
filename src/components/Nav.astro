@@ -230,29 +230,36 @@ const links = [
 <script>
   // Flip the nav when it crosses into the light band.
   //
-  // rootMargin collapses the viewport to a zero-height line at 25% of its
-  // height. The nav flips to light when the light band scrolls up past that
-  // line — i.e. earlier / higher up the page than the nav itself (per Victor),
-  // rather than only once the band reaches the nav.
+  // rootMargin collapses the viewport to a zero-height line at the nav's centre
+  // (y=67). The nav flips exactly when the light band reaches it. The band now
+  // starts ~300px higher (the logo row moved onto the light surface), so this
+  // fires ~300px earlier than before while still being genuinely over light.
   let observer: IntersectionObserver | undefined;
 
   function boot() {
     observer?.disconnect();
     const nav = document.querySelector<HTMLElement>("[data-nav]");
-    const lightSection = document.querySelector<HTMLElement>("[data-theme-light]");
+    // Home has TWO light bands (the logos and the footer) with a dark
+    // testimonials band between them; the nav must be light over either.
+    const lightSections = document.querySelectorAll<HTMLElement>("[data-theme-light]");
     if (!nav) return;
     // Case-study pages have no light band; make sure a stale light nav doesn't
     // carry over from Home.
     nav.classList.remove("is-light");
-    if (!lightSection) return;
+    if (!lightSections.length) return;
 
+    const over = new Set<Element>();
     observer = new IntersectionObserver(
-      ([entry]) => {
-        nav.classList.toggle("is-light", entry.isIntersecting);
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) over.add(e.target);
+          else over.delete(e.target);
+        }
+        nav.classList.toggle("is-light", over.size > 0);
       },
-      { rootMargin: "-25% 0px -75% 0px", threshold: 0 },
+      { rootMargin: "-67px 0px -100% 0px", threshold: 0 },
     );
-    observer.observe(lightSection);
+    lightSections.forEach((s) => observer.observe(s));
   }
 
   boot();

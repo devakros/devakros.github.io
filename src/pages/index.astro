@@ -114,9 +114,13 @@ const description =
         }
       </div>
 
-      {/* Static logo wall. Each slot holds every logo stacked; one is visible
-          at a time and the script slowly cross-fades slots to other logos on a
-          staggered timer (see the logowall script). No auto-scroll. */}
+    </section>
+
+    {/* ── White band: the tool logos. The dark→light switch happens here, above
+        the logos; the testimonials below go back to dark. ── */}
+    <section class="logo-band theme-light" data-theme-light data-intro-hide>
+      {/* Static logo wall on the light surface. Each slot holds every logo
+          stacked; the script slowly cross-fades slots. No auto-scroll. */}
       <div class="logowall container" aria-label="Herramientas que uso" data-logowall>
         {
           Array.from({ length: LOGO_SLOTS }).map((_, s) => (
@@ -144,14 +148,15 @@ const description =
       </div>
     </section>
 
-    <!-- ── The light band. Everything below y=2036 in the Figma frame. ── -->
-    <section class="light theme-light" data-theme-light id="resumen" data-intro-hide>
+    <!-- ── Dark band: testimonials ── -->
+    <section class="testimonials-band" id="resumen" data-intro-hide>
       <h2 class="t-h2 light__title container">Mira lo que están diciendo de mi...</h2>
-
       <Testimonials />
+    </section>
 
+    <!-- ── White band: footer ── -->
+    <section class="footer-band theme-light" data-theme-light data-intro-hide>
       <hr class="rule container" />
-
       <SiteFooter />
     </section>
   </main>
@@ -226,12 +231,29 @@ const description =
     align-items: flex-start;
     gap: 27px;
     margin-top: 52px;
+    /* Full-bleed to the viewport edges (per Victor) — breaks out of the 962
+       container so the projects span the whole screen. */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding-inline: 34px;
+    box-sizing: border-box;
   }
 
-  /* The slider column starts at y=393, the video at y=286 — same 27px gutter,
-     different top offsets, both ending at y=808. */
+  /* Slider + video now grow fluidly to fill the full width instead of their
+     fixed 462/473 px. */
+  .hero__row > :global(.slider),
+  .hero__row > :global(.reel) {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+  /* The slider column keeps its lower start offset from the video. */
   .hero__row > :global(.slider) {
     margin-top: 107px;
+  }
+  .hero__row > :global(.reel) {
+    height: auto;
+    aspect-ratio: 473 / 522;
   }
 
   /* ── Approach ─────────────────────────────────────────────────────── */
@@ -334,7 +356,9 @@ const description =
     place-items: center;
     width: 70px;
     height: 70px;
-    color: #fff;
+    /* The logo row now lives on the light band — currentColor SVG marks (Framer
+       etc.) take the dark text colour so they stay visible on white. */
+    color: var(--text);
   }
   .tool :global(svg) {
     max-width: 42px;
@@ -349,11 +373,25 @@ const description =
     }
   }
 
-  /* ── Light band ───────────────────────────────────────────────────── */
-  .light {
-    margin-top: 105px;
-    padding: 140px 0 30px;
-    background: var(--bg);
+  /* ── Alternating bands ────────────────────────────────────────────────
+     Dark approach → WHITE logos → DARK testimonials → WHITE footer. The two
+     white bands carry .theme-light; the dark testimonials band uses the normal
+     dark tokens but lightens --muted so its copy stays readable on dark. */
+  .logo-band {
+    margin-top: 40px;
+    padding: 84px 0;
+    background: var(--bg); /* white via .theme-light */
+    color: var(--text);
+  }
+  .testimonials-band {
+    padding: 96px 0;
+    background: var(--bg); /* dark */
+    color: var(--text);
+    --muted: #8b9c99;
+  }
+  .footer-band {
+    padding: 56px 0 30px;
+    background: var(--bg); /* white via .theme-light */
     color: var(--text);
   }
 
@@ -367,7 +405,7 @@ const description =
      --rule, so it whispers the section break instead of drawing a hard line. */
   .rule {
     height: 1px;
-    margin: 95px auto 0;
+    margin: 0 auto 44px;
     border: 0;
     background: var(--nav-border);
   }
@@ -396,12 +434,15 @@ const description =
       gap: 72px;
       margin-top: 72px;
     }
-    .light {
+    .logo-band {
       margin-top: 72px;
-      padding-top: 72px;
+      padding: 60px 0;
     }
-    .rule {
-      margin-top: 56px;
+    .testimonials-band {
+      padding: 64px 0;
+    }
+    .footer-band {
+      padding-top: 40px;
     }
   }
 
