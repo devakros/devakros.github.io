@@ -66,6 +66,20 @@ export const projects: Project[] = [
     role: "Product Design",
     built: true,
   },
+  {
+    slug: "leancore-web",
+    title: "LeanCore — Sitio Web",
+    img: "/img/proj-leancore-web.png",
+    alt: "Caso de estudio del sitio web de LeanCore",
+    tags: ["UI", "Prototype", "Landing Page", "Design System"],
+    cardTags: ["UI", "WebApp", "Design System"],
+    desc: "Sitio web de LeanCore: comunicando un producto fintech complejo con un mensaje claro que convierte.",
+    frame: "/img/case/leancore-web.png",
+    frameHeight: 3709,
+    year: "2026",
+    role: "Product Design",
+    built: true,
+  },
 ];
 
 // Make image paths base-aware so they resolve under the GitHub Pages subpath.

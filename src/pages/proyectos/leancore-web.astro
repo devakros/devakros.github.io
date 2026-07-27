@@ -1,0 +1,101 @@
+---
+import Base from "../../layouts/Base.astro";
+import CaseStudy, { type Block } from "../../components/CaseStudy.astro";
+import { bySlug } from "../../data/projects";
+import { withBase } from "../../lib/base";
+
+/**
+ * LeanCore — Sitio Web. Figma frame "LeanCore sitio web" (node 1017:3244). The
+ * marketing-site companion to the LeanCore Studio app case study.
+ *
+ * ⚠️ Two caveats to resolve with Victor:
+ *  - COPY IS A DRAFT. The frame reuses the app case study's copy verbatim, so
+ *    at Victor's request this narrative was written fresh for the marketing-site
+ *    angle. It needs his review/replacement before this is "real".
+ *  - Screenshots are cropped from a downscaled (690px-wide) paste of the frame,
+ *    so they're softer than the other case studies. Re-export at 2x from Figma
+ *    (or drop a 1280px frame) to sharpen. The frame also had blank placeholder
+ *    panels, which were omitted.
+ */
+const project = bySlug("leancore-web")!;
+
+const blocks: Block[] = [
+  {
+    heading: "El desafío",
+    lead: "Traducir un producto complejo en una promesa de tres segundos",
+    paras: [
+      "La automatización financiera intimida: el visitante llega asumiendo una curva de aprendizaje empinada y un riesgo alto. La landing tenía que desarmar esa objeción antes de pedir cualquier acción, no después.",
+    ],
+    bullets: [
+      {
+        term: "Claridad sobre exhaustividad:",
+        body: "En lugar de listar cada funcionalidad, priorizamos un solo mensaje —'mueve dinero, gestiona crédito y escala tu operación'— que resume el valor en una frase.",
+      },
+      {
+        term: "Prueba antes que promesa:",
+        body: "Ubicamos la evidencia (las empresas que ya confían en LeanCore) arriba del pliegue, para respaldar la afirmación desde el primer scroll.",
+      },
+    ],
+  },
+  {
+    heading: "Mensaje y jerarquía",
+    lead: "Una sola idea por pantalla",
+    paras: [
+      "Cada sección responde a una única pregunta del usuario y termina en un único siguiente paso. La jerarquía tipográfica guía la lectura desde la promesa hasta la acción, sin ramificaciones que dispersen la atención.",
+    ],
+  },
+  {
+    heading: "Sistema visual",
+    lead: "Confianza que se ve, no que se dice",
+    paras: [
+      "Construí un sistema de componentes —color, tipografía y espaciado— consistente con el del producto, para que la transición de la landing a la app se sintiera continua.",
+      "El acento verde marca siempre la acción principal, de modo que el ojo sabe en todo momento dónde está el siguiente paso.",
+    ],
+  },
+  {
+    heading: "Conversión",
+    lead: "Diseñada para un solo objetivo: el registro",
+    bullets: [
+      {
+        term: "Un CTA dominante:",
+        body: "Cada bloque converge en la misma acción, reduciendo la fricción de decisión.",
+      },
+      {
+        term: "Mockups en contexto:",
+        body: "Las capturas del producto en dispositivos reales muestran el resultado, no la teoría, acortando la distancia entre interés y prueba.",
+      },
+      {
+        term: "Móvil primero:",
+        body: "El grueso del tráfico llega desde el teléfono, así que la jerarquía se validó primero en pantalla pequeña.",
+      },
+    ],
+  },
+  {
+    heading: "Reflexión",
+    lead: "En un producto técnico, la página de inicio no vende funciones: vende la confianza de que lo complejo se volverá simple. Ese fue el verdadero entregable.",
+  },
+];
+
+const shots = [
+  { src: withBase("/img/case/leancore-web/shot-1.png"), w: 365, h: 290, alt: "Landing de LeanCore en móvil: 'Mueve dinero, gestiona crédito y escala tu operación'" },
+  { src: withBase("/img/case/leancore-web/shot-2.png"), w: 365, h: 257, alt: "Página de inicio de LeanCore en escritorio con el mensaje principal y prueba social" },
+];
+
+const description =
+  "Sitio web de LeanCore: comunicando un producto fintech complejo con un mensaje claro que convierte, del titular a la prueba social y el registro.";
+---
+
+<Base title={`${project.title} — Victor Vivas`} description={description}>
+  <CaseStudy
+    slug="leancore-web"
+    title={{
+      base: "Sitio web de LeanCore:",
+      muted: "del producto complejo a un mensaje que convierte",
+    }}
+    tags={project.tags}
+    intro="El reto no era técnico, sino narrativo: cómo explicar una plataforma de automatización financiera —densa por naturaleza— en los primeros segundos de una landing. Diseñé el sitio de LeanCore para traducir capacidades complejas en una promesa clara y accionable que impulse el registro."
+    meta={{ year: "2026", client: "LeanCore" }}
+    blocks={blocks}
+    shots={shots}
+  />
+</Base>
