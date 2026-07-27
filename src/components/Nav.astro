@@ -230,9 +230,10 @@ const links = [
 <script>
   // Flip the nav when it crosses into the light band.
   //
-  // rootMargin collapses the viewport to a zero-height line at y=67 (the nav's
-  // vertical centre: 34px offset + half of 66px). The light section
-  // intersecting that line is exactly "the nav is now over light".
+  // rootMargin collapses the viewport to a zero-height line at 25% of its
+  // height. The nav flips to light when the light band scrolls up past that
+  // line — i.e. earlier / higher up the page than the nav itself (per Victor),
+  // rather than only once the band reaches the nav.
   let observer: IntersectionObserver | undefined;
 
   function boot() {
@@ -249,7 +250,7 @@ const links = [
       ([entry]) => {
         nav.classList.toggle("is-light", entry.isIntersecting);
       },
-      { rootMargin: "-67px 0px -100% 0px", threshold: 0 },
+      { rootMargin: "-25% 0px -75% 0px", threshold: 0 },
     );
     observer.observe(lightSection);
   }

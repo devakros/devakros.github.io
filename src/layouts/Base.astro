@@ -306,7 +306,7 @@ const ogImage = new URL(withBase("/og-image.png"), origin).href;
             // fill:forwards holds the panel closed while the (async) load runs.
             await el.animate(
               [{ transform: "translateY(100%)" }, { transform: "translateY(0%)" }],
-              { duration: 560, easing: EASE_COVER, fill: "forwards" },
+              { duration: 1060, easing: EASE_COVER, fill: "forwards" },
             ).finished;
             await load();
           };
@@ -327,7 +327,7 @@ const ogImage = new URL(withBase("/og-image.png"), origin).href;
           // fill:both so the closed from-state is held through the 160ms delay.
           el.animate(
             [{ transform: "translateY(0%)" }, { transform: "translateY(-100%)" }],
-            { duration: 640, easing: EASE_REVEAL, fill: "both", delay: 160 },
+            { duration: 1140, easing: EASE_REVEAL, fill: "both", delay: 180 },
           ).finished.then(() => el.classList.remove("is-covering"));
         });
       }

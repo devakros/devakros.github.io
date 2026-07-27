@@ -36,23 +36,23 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
             >
               <img src={person.avatar} alt="" width="47" height="47" loading="lazy" />
             </button>
-            {/* Name rides under its own avatar; only the active one shows (CSS,
-                adjacent-sibling), so no JS swap is needed for it. */}
-            <span class="person__name" aria-hidden="true">{person.name}</span>
+            {/* Name, role and profile link all ride under their own avatar; only
+                the active one shows (CSS adjacent-sibling + visibility), so no JS
+                swap is needed. */}
+            <div class="person__detail">
+              <span class="person__name">{person.name}</span>
+              <span class="person__role">{person.role}</span>
+              <a class="person__link" href={person.profileUrl}>
+                Ir a su perfil
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </a>
+            </div>
           </li>
         ))
       }
     </ul>
-
-    <div class="people__detail" data-detail>
-      <span class="people__role" data-role>{testimonials[defaultTestimonial].role}</span>
-      <a class="people__link" data-profile href={testimonials[defaultTestimonial].profileUrl}>
-        Ir a su perfil
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </a>
-    </div>
   </figcaption>
 </figure>
 
@@ -64,9 +64,6 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
   if (root && !root.dataset.ready) {
     root.dataset.ready = "1";
     const text = root.querySelector<HTMLElement>("[data-quote-text]")!;
-    const role = root.querySelector<HTMLElement>("[data-role]")!;
-    const profile = root.querySelector<HTMLAnchorElement>("[data-profile]")!;
-    const detail = root.querySelector<HTMLElement>("[data-detail]")!;
     const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-person]")];
     let index = defaultTestimonial;
 
@@ -86,8 +83,6 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
             return el;
           }),
         );
-        role.textContent = t.role;
-        profile.href = t.profileUrl;
         root!.classList.remove("is-swapping");
       }, 300);
 
@@ -108,14 +103,6 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
       select(next);
       buttons[next].focus();
     });
-
-    // Keep the card from resizing as quotes of different lengths swap in.
-    const lockHeight = () => {
-      const tallest = testimonials.reduce((max, t) => Math.max(max, t.quote.join(" ").length), 0);
-      detail.style.minHeight = `${detail.offsetHeight}px`;
-      void tallest;
-    };
-    lockHeight();
   }
   }
   boot();
@@ -180,14 +167,7 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
     margin-top: 1em;
   }
 
-  .people__detail {
-    transition:
-      opacity 300ms ease,
-      translate 300ms ease;
-  }
-
-  .quote.is-swapping .quote__text,
-  .quote.is-swapping .people__detail {
+  .quote.is-swapping .quote__text {
     opacity: 0;
     translate: 0 6px;
   }
@@ -196,6 +176,9 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
     position: relative;
     width: 687px;
     max-width: 100%;
+    /* Reserve room for the name/role/button group that sits absolutely
+       positioned under the active avatar. */
+    padding-bottom: 118px;
   }
 
   .people__row {
@@ -215,28 +198,74 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
     justify-content: center;
   }
 
-  .person__name {
+  /* Name + role + profile button all stack directly under the active avatar,
+     centered on the tile so they follow the selection. Only the active tile's
+     group shows (adjacent sibling + visibility for a11y/tab order). */
+  .person__detail {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 12px);
     left: 50%;
-    translate: -50% 4px;
-    white-space: nowrap;
-    font-size: 15px;
-    line-height: 1;
-    font-weight: 500;
-    color: var(--text);
+    translate: -50% 6px;
+    width: max-content;
+    max-width: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: var(--muted);
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     transition:
       opacity 300ms ease,
-      translate 300ms ease;
+      translate 300ms ease,
+      visibility 0s 300ms;
+  }
+  .avatar--active + .person__detail {
+    opacity: 1;
+    visibility: visible;
+    translate: -50% 0;
+    pointer-events: auto;
+    transition:
+      opacity 300ms ease,
+      translate 300ms ease,
+      visibility 0s;
   }
 
-  /* Only the active tile's name shows (adjacent sibling of the active button).
-     The tile is lifted 10px, so its name clears it comfortably. */
-  .avatar--active + .person__name {
-    opacity: 1;
-    translate: -50% 0;
+  .person__name {
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .person__role {
+    margin-top: 2px;
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 300;
+  }
+  .person__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 16px;
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    background: var(--accent);
+    color: #4a5856;
+    font-size: 16px;
+    line-height: 20.2px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .person__link svg {
+    width: 18px;
+    height: 18px;
+    transition: translate 250ms ease;
+  }
+  .person__link:hover svg {
+    translate: 4px -4px;
   }
 
   /* 67px tiles with a squircle that squares off at the bottom-left. */
@@ -273,55 +302,43 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
     margin-inline: 55px;
   }
 
-  .people__detail {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    /* Clears the name label that now sits under the active avatar. */
-    margin-top: 34px;
-    text-align: center;
-    color: var(--muted);
-  }
-
-  .people__role {
-    font-size: 16px;
-    line-height: 18px;
-    font-weight: 300;
-  }
-
-  .people__link {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    margin-top: 20px;
-    padding: 9px 10px;
-    border-radius: var(--r-sm);
-    background: var(--accent);
-    color: #4a5856;
-    font-size: 16px;
-    line-height: 20.2px;
-    overflow: hidden;
-  }
-  .people__link svg {
-    width: 18px;
-    height: 18px;
-    transition: translate 250ms ease;
-  }
-  .people__link:hover svg {
-    translate: 4px -4px;
-  }
-
   @media (max-width: 1000px) {
     .people {
       width: 100%;
     }
+  }
+
+  /* Phones: keep all seven avatars on ONE row (shrunk) instead of wrapping, and
+     center the active name/role/button group under the whole row rather than
+     under its tile — under an edge tile it would run off the screen. */
+  @media (max-width: 620px) {
+    .people {
+      padding-bottom: 128px;
+    }
     .people__row {
-      flex-wrap: wrap;
-      gap: 12px;
+      position: relative;
+      flex-wrap: nowrap;
+      gap: 7px;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 13px 13px 13px 0;
+    }
+    .avatar img {
+      width: 30px;
+      height: 30px;
     }
     .avatar--active {
-      margin-inline: 20px;
+      margin-inline: 12px;
+    }
+    /* Detail is measured against the row (centered), not the tile. */
+    .person {
+      position: static;
+    }
+    .person__detail {
+      top: calc(100% + 16px);
+      max-width: 92vw;
     }
   }
 </style>
