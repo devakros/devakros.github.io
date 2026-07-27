@@ -239,8 +239,8 @@ const links = [
   function boot() {
     observer?.disconnect();
     const nav = document.querySelector<HTMLElement>("[data-nav]");
-    // Home has TWO light bands (the logos and the footer) with a dark
-    // testimonials band between them; the nav must be light over either.
+    // Query ALL light bands (querySelectorAll handles one or many); the nav is
+    // light while over any of them.
     const lightSections = document.querySelectorAll<HTMLElement>("[data-theme-light]");
     if (!nav) return;
     // Case-study pages have no light band; make sure a stale light nav doesn't

@@ -116,11 +116,12 @@ const description =
 
     </section>
 
-    {/* ── White band: the tool logos. The dark→light switch happens here, above
-        the logos; the testimonials below go back to dark. ── */}
-    <section class="logo-band theme-light" data-theme-light data-intro-hide>
-      {/* Static logo wall on the light surface. Each slot holds every logo
-          stacked; the script slowly cross-fades slots. No auto-scroll. */}
+    {/* ── The light band. The site switches to light mode AT the logos (the
+        logo row flips dark→light) and stays light through the testimonials and
+        the footer. ── */}
+    <section class="light theme-light" data-theme-light id="resumen" data-intro-hide>
+      {/* Static logo wall — the first thing on the light surface. Each slot
+          holds every logo stacked; the script slowly cross-fades slots. */}
       <div class="logowall container" aria-label="Herramientas que uso" data-logowall>
         {
           Array.from({ length: LOGO_SLOTS }).map((_, s) => (
@@ -146,17 +147,13 @@ const description =
           ))
         }
       </div>
-    </section>
 
-    <!-- ── Dark band: testimonials ── -->
-    <section class="testimonials-band" id="resumen" data-intro-hide>
       <h2 class="t-h2 light__title container">Mira lo que están diciendo de mi...</h2>
-      <Testimonials />
-    </section>
 
-    <!-- ── White band: footer ── -->
-    <section class="footer-band theme-light" data-theme-light data-intro-hide>
+      <Testimonials />
+
       <hr class="rule container" />
+
       <SiteFooter />
     </section>
   </main>
@@ -373,30 +370,19 @@ const description =
     }
   }
 
-  /* ── Alternating bands ────────────────────────────────────────────────
-     Dark approach → WHITE logos → DARK testimonials → WHITE footer. The two
-     white bands carry .theme-light; the dark testimonials band uses the normal
-     dark tokens but lightens --muted so its copy stays readable on dark. */
-  .logo-band {
+  /* ── Light band (starts at the logos) ─────────────────────────────────
+     The site switches to light mode at the logo row and stays light: logos,
+     testimonials and footer are all on the white surface. */
+  .light {
     margin-top: 40px;
-    padding: 84px 0;
-    background: var(--bg); /* white via .theme-light */
-    color: var(--text);
-  }
-  .testimonials-band {
-    padding: 96px 0;
-    background: var(--bg); /* dark */
-    color: var(--text);
-    --muted: #8b9c99;
-  }
-  .footer-band {
-    padding: 56px 0 30px;
+    padding: 84px 0 30px;
     background: var(--bg); /* white via .theme-light */
     color: var(--text);
   }
 
   .light__title {
-    margin: 0 auto 35px;
+    /* Gap between the logo row and the testimonials title. */
+    margin: 96px auto 35px;
     text-align: center;
     color: var(--muted);
   }
@@ -405,7 +391,7 @@ const description =
      --rule, so it whispers the section break instead of drawing a hard line. */
   .rule {
     height: 1px;
-    margin: 0 auto 44px;
+    margin: 95px auto 0;
     border: 0;
     background: var(--nav-border);
   }
@@ -434,15 +420,12 @@ const description =
       gap: 72px;
       margin-top: 72px;
     }
-    .logo-band {
+    .light {
       margin-top: 72px;
-      padding: 60px 0;
+      padding-top: 72px;
     }
-    .testimonials-band {
-      padding: 64px 0;
-    }
-    .footer-band {
-      padding-top: 40px;
+    .rule {
+      margin-top: 56px;
     }
   }
 
