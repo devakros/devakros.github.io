@@ -31,6 +31,9 @@ export interface Block {
 interface Props {
   slug: string;
   title: { base: string; muted: string };
+  /** Render the muted portion BEFORE the bright one (e.g. a greyed
+      "Rediseño de LeanCore:" leading into the bright headline). */
+  mutedLead?: boolean;
   tags: string[];
   intro: string;
   meta: { year: string; client: string };
@@ -38,7 +41,7 @@ interface Props {
   shots: { src: string; alt: string; w: number; h: number }[];
 }
 
-const { slug, title, tags, intro, meta, blocks, shots } = Astro.props;
+const { slug, title, mutedLead = false, tags, intro, meta, blocks, shots } = Astro.props;
 const project = projects.find((p) => p.slug === slug)!;
 
 // Same related-projects slider the Coca-Cola page uses.
@@ -53,11 +56,11 @@ const slides: Slide[] = projects.map((p) => ({
 }));
 ---
 
-<Nav />
+<Nav wide />
 
 <main>
   <!-- ── Hero ─────────────────────────────────────────────────────────── -->
-  <section class="hero container">
+  <section class="hero container-wide">
     <div class="hero__grid">
       <div class="hero__left">
         <a class="back" href={withBase("/")}>
@@ -72,7 +75,17 @@ const slides: Slide[] = projects.map((p) => ({
 
       <div class="hero__right">
         <h1 class="t-h2 hero__title">
-          {title.base} <span class="muted">{title.muted}</span>
+          {
+            mutedLead ? (
+              <>
+                <span class="muted">{title.muted}</span> {title.base}
+              </>
+            ) : (
+              <>
+                {title.base} <span class="muted">{title.muted}</span>
+              </>
+            )
+          }
         </h1>
 
         <ul class="tags">
@@ -104,7 +117,13 @@ const slides: Slide[] = projects.map((p) => ({
                 <ul class="block__bullets">
                   {block.bullets.map((b) => (
                     <li>
-                      <strong>{b.term}</strong> {b.body}
+                      {b.term ? (
+                        <>
+                          <strong>{b.term}</strong> {b.body}
+                        </>
+                      ) : (
+                        b.body
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -169,7 +188,9 @@ const slides: Slide[] = projects.map((p) => ({
   }
   .hero__grid {
     display: grid;
-    grid-template-columns: 291px 600px;
+    /* Reel stays 291px; the title/intro column grows to fill the wider body
+       container so the hero's right edge lines up with the screenshots below. */
+    grid-template-columns: 291px minmax(0, 1fr);
     gap: 71px;
     align-items: start;
   }

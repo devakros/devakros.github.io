@@ -9,6 +9,13 @@ import LogoFlip from "./LogoFlip.astro";
  * exists for exactly one reason: the nav crosses the light band that starts at
  * y=2036, so it inverts on scroll rather than being a user-facing toggle.
  */
+interface Props {
+  /** Case-study pages use the wider body container so the nav's left/right
+      edges line up with the copy + screenshots below it. */
+  wide?: boolean;
+}
+const { wide = false } = Astro.props;
+
 const links = [
   { label: "Proyectos", href: "#proyectos" },
   { label: "Sobre mi", href: "#sobre-mi" },
@@ -16,7 +23,7 @@ const links = [
 ];
 ---
 
-<header class="nav container" data-nav data-intro-hide>
+<header class:list={["nav", wide ? "container-wide" : "container"]} data-nav data-intro-hide>
     <LogoFlip scale={1} />
 
     <nav class="nav__right" aria-label="Principal">
@@ -228,61 +235,48 @@ const links = [
 </style>
 
 <script>
-  // Nav theme + logo-band fade, both driven by scroll POSITION (not a threshold
-  // toggle) so the change interpolates smoothly as you scroll.
+  // Nav theme + logo-band flip, both driven by the SAME threshold observer so
+  // the logo band's dark→light change matches the nav pill's: a 400ms colour
+  // fade that fires as the section crosses the nav line, not a scroll-linked
+  // interpolation.
   //
-  // The logo band (Home) fades dark→light via a scroll-linked --t (0→1) as its
-  // top rises from mid-viewport up to the nav. The nav pill goes light once the
-  // logos are mostly light, or whenever it's over a static light band
-  // (testimonials/footer here, or a case-study footer).
-  let onScroll: (() => void) | undefined;
-  let rafId = 0;
-  const NAV_LINE = 67; // the nav's vertical centre
+  // The logo band flips light together with the nav as its top crosses the nav
+  // line; the static light bands (testimonials/footer here, or a case-study
+  // footer) also keep the nav light while they straddle that line.
+  let observer: IntersectionObserver | undefined;
 
   function boot() {
-    if (onScroll) window.removeEventListener("scroll", onScroll);
-    cancelAnimationFrame(rafId);
+    observer?.disconnect();
 
     const nav = document.querySelector<HTMLElement>("[data-nav]");
     if (!nav) return;
     nav.classList.remove("is-light");
     const logoBand = document.querySelector<HTMLElement>("[data-logo-band]");
-    const lightSections = [...document.querySelectorAll<HTMLElement>("[data-theme-light]")];
-    logoBand?.style.setProperty("--t", "0");
+    logoBand?.classList.remove("is-light");
 
-    const update = () => {
-      rafId = 0;
-      const vh = window.innerHeight;
-      let light = false;
+    // Everything that turns the nav light as it reaches the nav line. The logo
+    // band additionally flips its OWN colours (dark→light) at the same moment.
+    const targets = [...document.querySelectorAll<HTMLElement>("[data-theme-light]")];
+    if (logoBand) targets.push(logoBand);
+    if (!targets.length) return;
 
-      // Logo band: dark until its top passes 55% of the viewport, fully light by
-      // the time it reaches the nav — interpolated with the scroll.
-      if (logoBand) {
-        const top = logoBand.getBoundingClientRect().top;
-        const start = vh * 0.55;
-        let t = (start - top) / (start - NAV_LINE);
-        t = t < 0 ? 0 : t > 1 ? 1 : t;
-        logoBand.style.setProperty("--t", t.toFixed(3));
-        if (t > 0.5) light = true;
-      }
-
-      // Static light bands: nav is light while one straddles the nav line.
-      for (const s of lightSections) {
-        const r = s.getBoundingClientRect();
-        if (r.top <= NAV_LINE && r.bottom >= NAV_LINE) {
-          light = true;
-          break;
+    const over = new Set<Element>();
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) over.add(e.target);
+          else over.delete(e.target);
+          if (e.target === logoBand) {
+            logoBand!.classList.toggle("is-light", e.isIntersecting);
+          }
         }
-      }
-
-      nav.classList.toggle("is-light", light);
-    };
-
-    onScroll = () => {
-      if (!rafId) rafId = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
+        nav.classList.toggle("is-light", over.size > 0);
+      },
+      // A 1px line at the nav's vertical centre (67px): a section is "over the
+      // nav" precisely while it straddles that line.
+      { rootMargin: "-67px 0px -100% 0px", threshold: 0 },
+    );
+    targets.forEach((t) => observer!.observe(t));
   }
 
   boot();

@@ -116,41 +116,34 @@ const description =
 
     </section>
 
-    {/* ── Logo band. Dark by default; a white layer with dark logos WIPES over
-        it (left→right, scroll-driven via --t) as the nav reaches it — a clean
-        black→light sweep, no colour fade. The script mirrors the base logos
-        into the wipe layer. ── */}
+    {/* ── Logo band. Dark by default; fades to the light surface (like the nav
+        pill does) when the nav reaches it — see the nav observer, which toggles
+        .is-light on both together. ── */}
     <section class="logo-band" data-logo-band data-intro-hide>
-      <div class="logo-band__stage">
-        {/* Base layer: dark surface, white logos. */}
-        <div class="logowall container" aria-label="Herramientas que uso" data-logowall>
-          {
-            Array.from({ length: LOGO_SLOTS }).map((_, s) => (
-              <div class="logoslot">
-                {tools.map((tool, t) => (
-                  <span class:list={["logoslot__item", t === s && "is-on"]}>
-                    {tool.svg ? (
-                      <span class="tool" title={tool.name} set:html={tool.svg} />
-                    ) : (
-                      <span class="tool">
-                        <img
-                          src={tool.img}
-                          alt={tool.name}
-                          width={tool.size}
-                          height={tool.size}
-                          loading="lazy"
-                        />
-                      </span>
-                    )}
-                  </span>
-                ))}
-              </div>
-            ))
-          }
-        </div>
-        {/* Light layer: white surface + dark logos, clip-revealed as you scroll.
-            The logowall script clones the base logos in here. */}
-        <div class="logo-band__wipe" aria-hidden="true"></div>
+      <div class="logowall container" aria-label="Herramientas que uso" data-logowall>
+        {
+          Array.from({ length: LOGO_SLOTS }).map((_, s) => (
+            <div class="logoslot">
+              {tools.map((tool, t) => (
+                <span class:list={["logoslot__item", t === s && "is-on"]}>
+                  {tool.svg ? (
+                    <span class="tool" title={tool.name} set:html={tool.svg} />
+                  ) : (
+                    <span class="tool">
+                      <img
+                        src={tool.img}
+                        alt={tool.name}
+                        width={tool.size}
+                        height={tool.size}
+                        loading="lazy"
+                      />
+                    </span>
+                  )}
+                </span>
+              ))}
+            </div>
+          ))
+        }
       </div>
     </section>
 
@@ -176,32 +169,15 @@ const description =
   function bootLogowall() {
     const wall = document.querySelector<HTMLElement>("[data-logowall]");
     if (!wall) return;
-
-    // Mirror the base logos into the wipe layer so both stay identical; the
-    // white layer just re-colours them dark and is clip-revealed on scroll.
-    const wipe = document.querySelector<HTMLElement>(".logo-band__wipe");
-    let mirror = wipe?.querySelector<HTMLElement>(".logowall") ?? null;
-    if (wipe && !mirror) {
-      mirror = wall.cloneNode(true) as HTMLElement;
-      mirror.removeAttribute("data-logowall");
-      wipe.appendChild(mirror);
-    }
-
     // Reduced motion: leave the wall completely static.
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const slots = [...wall.querySelectorAll<HTMLElement>(".logoslot")];
-    const mirrorSlots = mirror ? [...mirror.querySelectorAll<HTMLElement>(".logoslot")] : [];
     if (!slots.length) return;
     const total = slots[0].children.length;
     const slotCount = slots.length;
     const state = slots.map((_, s) => s % total);
     let cursor = 0;
-
-    const setOn = (s: number, idx: number, on: boolean) => {
-      slots[s].children[idx]?.classList.toggle("is-on", on);
-      mirrorSlots[s]?.children[idx]?.classList.toggle("is-on", on);
-    };
 
     window.clearInterval(wallTimer);
     wallTimer = window.setInterval(() => {
@@ -215,8 +191,8 @@ const description =
       while (shown.has(next) && guard++ < total) next = (next + 1) % total;
       if (next === state[s]) return;
 
-      setOn(s, state[s], false);
-      setOn(s, next, true);
+      slots[s].children[state[s]]?.classList.remove("is-on");
+      slots[s].children[next]?.classList.add("is-on");
       state[s] = next;
     }, 1600);
   }
@@ -379,34 +355,23 @@ const description =
   }
 
   /* ── Logo band ────────────────────────────────────────────────────────
-     Scroll-linked WIPE: a white layer (dark logos) is clip-revealed left→right
-     over the dark base (white logos) as --t goes 0→1. --t is driven by the nav
-     script from the band's distance to the nav. Hard clip edge = a clean
-     black→light sweep with no colour blend. */
+     Dark by default; fades to the light surface exactly like the nav pill —
+     same 400ms colour transition on the background and the logos. The nav
+     observer toggles .is-light on the band and the nav together. */
   .logo-band {
-    --t: 0;
     margin-top: 40px;
     padding: 80px 0;
-    background-color: #1d2222; /* dark base */
+    background-color: #1d2222;
+    transition: background-color 400ms ease;
   }
-  .logo-band__stage {
-    position: relative;
-  }
-  /* Base layer (direct child of the stage): white logos on the dark surface.
-     Scoped with > so it doesn't also hit the cloned logos in the wipe layer. */
-  .logo-band__stage > .logowall .tool {
-    color: #fff;
-  }
-  /* Light layer: full-width white surface + dark logos, revealed by the moving
-     clip edge. */
-  .logo-band__wipe {
-    position: absolute;
-    inset: 0;
+  .logo-band.is-light {
     background-color: #fbfbfb;
-    clip-path: inset(0 calc((1 - var(--t)) * 100%) 0 0);
-    pointer-events: none;
   }
-  .logo-band__wipe .tool {
+  .logo-band .tool {
+    color: #fff;
+    transition: color 400ms ease;
+  }
+  .logo-band.is-light .tool {
     color: #4a5856;
   }
 
