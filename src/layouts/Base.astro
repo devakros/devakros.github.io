@@ -222,6 +222,25 @@ const ogImage = new URL(withBase("/og-image.png"), origin).href;
           transition: none;
         }
       }
+
+      /* ── Scroll reveal ─────────────────────────────────────────────────
+         Anything tagged [data-reveal] starts hidden and rises into place the
+         first time it scrolls into view (the script adds .is-revealed). A
+         per-element --reveal-delay staggers groups. Reduced motion shows
+         everything immediately. */
+      @media (prefers-reduced-motion: no-preference) {
+        [data-reveal] {
+          opacity: 0;
+          translate: 0 32px;
+          transition:
+            opacity 720ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
+            translate 720ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
+        }
+        [data-reveal].is-revealed {
+          opacity: 1;
+          translate: 0 0;
+        }
+      }
     </style>
 
     <script>
@@ -414,6 +433,30 @@ const ogImage = new URL(withBase("/og-image.png"), origin).href;
           cursor.classList.remove("is-hover");
         });
       }
+    </script>
+
+    <script>
+      // Scroll reveal: fade + rise [data-reveal] elements into view once, as
+      // most sites do. Reduced motion skips it (the CSS shows them anyway).
+      function initReveal() {
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const els = document.querySelectorAll<HTMLElement>("[data-reveal]:not(.is-revealed)");
+        if (!els.length) return;
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add("is-revealed");
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: "0px 0px -12% 0px", threshold: 0.12 },
+        );
+        els.forEach((el) => io.observe(el));
+      }
+      initReveal();
+      document.addEventListener("astro:page-load", initReveal);
     </script>
   </body>
 </html>
