@@ -13,11 +13,12 @@ export interface Testimonial {
 /**
  * Real testimonials supplied by Victor (transcribed from his source).
  *
- * ⚠️ Two things to verify with Victor:
- *  - Michelle Penna and Lina Almeida currently carry the SAME quote — one of
- *    them is almost certainly a placeholder that still needs Lina's real words.
- *  - A couple of original typos were kept verbatim ("birllantes" → brillantes,
- *    "habilitadas" → habilidades). Fix at the source if the people are okay with it.
+ * Typos from the source were corrected ("birllantes" → "brillantes",
+ * "habilitadas" → "habilidades", missing accents).
+ *
+ * ⚠️ Still open with Victor:
+ *  - Michelle Penna and Lina Almeida carry the SAME quote in the source — Lina's
+ *    is a placeholder that still needs her real words (can't be fabricated here).
  *  - No profile URLs were provided, so "Ir a su perfil" points nowhere (#).
  */
 export const testimonials: Testimonial[] = [
@@ -47,7 +48,7 @@ export const testimonials: Testimonial[] = [
     role: "Web Developer en Digital FENSA",
     avatar: "/img/avatar-3.png",
     quote: [
-      "Victor, es un gran diseñador, realizó diseños de otro mundo con ideas innovadoras y bastante birllantes, me encanto la forma de trabajar lo detallista que es, es un gran compañero de trabajo y nuestras reuniones eran bastante amenas y divertidas.",
+      "Victor, es un gran diseñador, realizó diseños de otro mundo con ideas innovadoras y bastante brillantes, me encantó la forma de trabajar lo detallista que es, es un gran compañero de trabajo y nuestras reuniones eran bastante amenas y divertidas.",
     ],
     profileUrl: "#",
   },
@@ -66,7 +67,7 @@ export const testimonials: Testimonial[] = [
     role: "Web Developer Junior en Pukara",
     avatar: "/img/avatar-5.png",
     quote: [
-      "Victor, es un gran diseñador, realizó diseños de otro mundo con ideas innovadoras y bastante birllantes, me encanto la forma de trabajar lo detallista que es, es un gran compañero de trabajo y nuestras reuniones eran bastante amenas y divertidas.",
+      "Victor, es un gran diseñador, realizó diseños de otro mundo con ideas innovadoras y bastante brillantes, me encantó la forma de trabajar lo detallista que es, es un gran compañero de trabajo y nuestras reuniones eran bastante amenas y divertidas.",
     ],
     profileUrl: "#",
   },
@@ -75,7 +76,7 @@ export const testimonials: Testimonial[] = [
     role: "Senior Software Engineer",
     avatar: "/img/avatar-6.png",
     quote: [
-      "Trabajar con Victor me demostró que destaca mucho por estar constantemente innovando, buscando entender y mejorar el producto desde la raíz, usando sus habilitadas en UI combinado con psicología con el fin de darle al usuario la mejor experiencia siempre.",
+      "Trabajar con Victor me demostró que destaca mucho por estar constantemente innovando, buscando entender y mejorar el producto desde la raíz, usando sus habilidades en UI combinadas con psicología con el fin de darle al usuario la mejor experiencia siempre.",
       "Me encantó la habilidad que tiene para percibir imperfecciones durante el desarrollo y hacerles saber a los desarrolladores qué pixel mejorar…👌",
     ],
     profileUrl: "#",

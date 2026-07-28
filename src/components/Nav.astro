@@ -272,9 +272,10 @@ const links = [
         }
         nav.classList.toggle("is-light", over.size > 0);
       },
-      // A 1px line at the nav's vertical centre (67px): a section is "over the
-      // nav" precisely while it straddles that line.
-      { rootMargin: "-67px 0px -100% 0px", threshold: 0 },
+      // Detection line 150px BELOW the nav's centre (67 + 150 = 217px): the
+      // switch fires ~150px earlier, so the logo band starts fading to light
+      // while it's still comfortably in view rather than at the last moment.
+      { rootMargin: "-217px 0px -100% 0px", threshold: 0 },
     );
     targets.forEach((t) => observer!.observe(t));
   }

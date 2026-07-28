@@ -359,12 +359,24 @@ const description =
      same 400ms colour transition on the background and the logos. The nav
      observer toggles .is-light on the band and the nav together. */
   .logo-band {
+    position: relative;
     margin-top: 40px;
     padding: 80px 0;
+  }
+  /* The dark→light flip rides on a background LAYER, not on the section itself.
+     The section already owns its `transition` property for the intro reveal
+     (via [data-intro-hide] in tokens.css, which on repeat visits wins the
+     specificity tie) — a second `transition` here is silently clobbered and the
+     background snaps. A dedicated ::before layer fades on its own timeline. */
+  .logo-band::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background-color: #1d2222;
     transition: background-color 400ms ease;
   }
-  .logo-band.is-light {
+  .logo-band.is-light::before {
     background-color: #fbfbfb;
   }
   .logo-band .tool {
