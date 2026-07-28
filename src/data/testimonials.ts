@@ -16,9 +16,10 @@ export interface Testimonial {
  * Typos from the source were corrected ("birllantes" → "brillantes",
  * "habilitadas" → "habilidades", missing accents).
  *
+ * Michelle Penna and Lina Almeida genuinely carry the SAME quote verbatim —
+ * confirmed by Victor, not a placeholder.
+ *
  * ⚠️ Still open with Victor:
- *  - Michelle Penna and Lina Almeida carry the SAME quote in the source — Lina's
- *    is a placeholder that still needs her real words (can't be fabricated here).
  *  - No profile URLs were provided, so "Ir a su perfil" points nowhere (#).
  */
 export const testimonials: Testimonial[] = [
