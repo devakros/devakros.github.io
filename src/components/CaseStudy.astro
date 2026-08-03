@@ -39,8 +39,10 @@ interface Props {
   meta: { year: string; client: string };
   blocks: Block[];
   /** A shot is a screenshot, or — with `video: true` — an autoplaying,
-      muted, looping clip (needs a `poster` still for the first paint). */
-  shots: { src: string; alt: string; w: number; h: number; video?: boolean; poster?: string }[];
+      muted, looping clip (needs a `poster` still for the first paint).
+      `half: true` makes it a half-width tile; two consecutive halves sit
+      side-by-side in one grid row. Everything else spans full width. */
+  shots: { src: string; alt: string; w: number; h: number; video?: boolean; poster?: string; half?: boolean }[];
 }
 
 const { slug, title, mutedLead = false, tags, intro, meta, blocks, shots } = Astro.props;
@@ -139,7 +141,7 @@ const slides: Slide[] = projects.map((p) => ({
         {
           shots.map((shot, i) =>
             shot.video ? (
-              <figure class="shot">
+              <figure class:list={["shot", shot.half && "shot--half", "shot--video"]}>
                 <video
                   src={shot.src}
                   poster={shot.poster}
@@ -154,7 +156,7 @@ const slides: Slide[] = projects.map((p) => ({
                 />
               </figure>
             ) : (
-              <figure class="shot">
+              <figure class:list={["shot", shot.half && "shot--half"]}>
                 <img
                   src={shot.src}
                   alt={shot.alt}
@@ -197,6 +199,28 @@ const slides: Slide[] = projects.map((p) => ({
     <SiteFooter home={false} />
   </section>
 </main>
+
+<script>
+  // Some browsers honour the `autoplay` attribute only inconsistently (data
+  // saver, engagement heuristics), but will play a muted video on an explicit
+  // .play(). Kick each case-study video on load and whenever it scrolls into
+  // view, so the roadmap clip never sits frozen on its poster.
+  function initCaseVideos() {
+    const vids = document.querySelectorAll<HTMLVideoElement>(".case__shots video");
+    vids.forEach((v) => {
+      v.muted = true;
+      const play = () => v.play().catch(() => {});
+      play();
+      const io = new IntersectionObserver(
+        (entries) => entries.forEach((e) => e.isIntersecting && play()),
+        { threshold: 0.2 },
+      );
+      io.observe(v);
+    });
+  }
+  initCaseVideos();
+  document.addEventListener("astro:page-load", initCaseVideos);
+</script>
 
 <style>
   /* ── Hero ─────────────────────────────────────────────────────────────
@@ -376,23 +400,44 @@ const slides: Slide[] = projects.map((p) => ({
     font-weight: 600;
   }
 
-  /* Screenshot stack — vertical, 34px gaps. */
+  /* Screenshot grid — two columns, 34px gaps. Shots span the full width by
+     default (a vertical stack, unchanged for the other case studies); a pair
+     of `.shot--half` tiles shares one row (used by the LeanCore-web grid where
+     the roadmap video sits beside a phone mock). */
   .case__shots {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 34px;
+    align-items: start;
   }
   .shot {
+    grid-column: 1 / -1;
     margin: 0;
     border-radius: var(--r-md);
     overflow: hidden;
     background: var(--surface);
+  }
+  .shot--half {
+    grid-column: span 1;
+    /* Square tile so the two row-mates line up; the video was pre-cropped to
+       1:1 (card only, no letterbox) and the phone is object-fit cropped. */
+    aspect-ratio: 1 / 1;
   }
   .shot img,
   .shot video {
     width: 100%;
     height: auto;
     display: block;
+  }
+  .shot--half img,
+  .shot--half video {
+    height: 100%;
+    object-fit: cover;
+  }
+  /* The roadmap clip is a light card — give its tile a matching light bed so
+     any sub-pixel gap reads as white, not the dark surface. */
+  .shot--video {
+    background: #fbfbfb;
   }
 
   /* ── Related projects ─────────────────────────────────────────────── */
@@ -466,6 +511,22 @@ const slides: Slide[] = projects.map((p) => ({
     .case__grid {
       grid-template-columns: minmax(0, 450px) minmax(0, 678px);
       gap: 40px;
+    }
+  }
+  @media (max-width: 620px) {
+    /* Phones: stack every tile full-width; the half tiles drop their square
+       crop and show at natural size. */
+    .case__shots {
+      grid-template-columns: 1fr;
+    }
+    .shot--half {
+      grid-column: 1 / -1;
+      aspect-ratio: auto;
+    }
+    .shot--half img,
+    .shot--half video {
+      height: auto;
+      object-fit: fill;
     }
   }
   @media (max-width: 1000px) {

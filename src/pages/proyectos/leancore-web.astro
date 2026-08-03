@@ -81,17 +81,23 @@ const blocks: Block[] = [
   },
 ];
 
+// The grid mirrors the Figma frame: a wide phone mock, then a row pairing the
+// roadmap video (the design's white-square slot) with a second phone, then the
+// desktop landing, then the "flujo nativo" panel.
 const shots = [
+  { src: withBase("/img/case/leancore-web/shot-1.png"), w: 365, h: 290, alt: "Landing de LeanCore en móvil: 'Mueve dinero, gestiona crédito y escala tu operación'" },
   {
-    src: withBase("/img/case/leancore-web/roadmap.mp4"),
+    src: withBase("/img/case/leancore-web/roadmap-sq.mp4"),
     poster: withBase("/img/case/leancore-web/roadmap-poster.jpg"),
     video: true,
-    w: 2560,
-    h: 1440,
-    alt: "Recorrido del roadmap del producto LeanCore en movimiento",
+    half: true,
+    w: 1200,
+    h: 1200,
+    alt: "Roadmap del producto LeanCore: despliegue automático de nuevas funciones",
   },
-  { src: withBase("/img/case/leancore-web/shot-1.png"), w: 365, h: 290, alt: "Landing de LeanCore en móvil: 'Mueve dinero, gestiona crédito y escala tu operación'" },
+  { src: withBase("/img/case/leancore-web/shot-3.png"), half: true, w: 185, h: 214, alt: "Detalle móvil de LeanCore: 'Tu operación de crédito empieza hoy'" },
   { src: withBase("/img/case/leancore-web/shot-2.png"), w: 365, h: 257, alt: "Página de inicio de LeanCore en escritorio con el mensaje principal y prueba social" },
+  { src: withBase("/img/case/leancore-web/shot-4.png"), w: 379, h: 284, alt: "Flujo nativo de oportunidades: prospectos calificados con crecimiento de cartera del 97.5%" },
 ];
 
 const description =

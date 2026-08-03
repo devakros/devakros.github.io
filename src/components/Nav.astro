@@ -235,18 +235,25 @@ const links = [
 </style>
 
 <script>
-  // Nav theme + logo-band flip, both driven by the SAME threshold observer so
-  // the logo band's dark→light change matches the nav pill's: a 400ms colour
-  // fade that fires as the section crosses the nav line, not a scroll-linked
-  // interpolation.
+  // The nav pill and the home logo band both go light at the same switch line
+  // (217px), a 400ms colour fade — but they use DIFFERENT triggers on purpose:
   //
-  // The logo band flips light together with the nav as its top crosses the nav
-  // line; the static light bands (testimonials/footer here, or a case-study
-  // footer) also keep the nav light while they straddle that line.
+  //  · Nav: light while any light section straddles the line (observer). As the
+  //    band exits upward the adjacent testimonials band takes over, so the nav
+  //    never flickers.
+  //  · Logo band: LATCHES light the moment its top passes the line and stays
+  //    light as it scrolls up and off. A straddle test would flip it back to
+  //    dark while it's still visible — a black flash right before the light
+  //    section below arrives. Position-only (top ≤ line) has no such gap.
+  const SWITCH = 217;
   let observer: IntersectionObserver | undefined;
+  let onScroll: (() => void) | undefined;
+  let raf = 0;
 
   function boot() {
     observer?.disconnect();
+    if (onScroll) window.removeEventListener("scroll", onScroll);
+    cancelAnimationFrame(raf);
 
     const nav = document.querySelector<HTMLElement>("[data-nav]");
     if (!nav) return;
@@ -254,30 +261,36 @@ const links = [
     const logoBand = document.querySelector<HTMLElement>("[data-logo-band]");
     logoBand?.classList.remove("is-light");
 
-    // Everything that turns the nav light as it reaches the nav line. The logo
-    // band additionally flips its OWN colours (dark→light) at the same moment.
+    // Nav: light whenever a light section (or the logo band) straddles the line.
     const targets = [...document.querySelectorAll<HTMLElement>("[data-theme-light]")];
     if (logoBand) targets.push(logoBand);
-    if (!targets.length) return;
-
-    const over = new Set<Element>();
-    observer = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) over.add(e.target);
-          else over.delete(e.target);
-          if (e.target === logoBand) {
-            logoBand!.classList.toggle("is-light", e.isIntersecting);
+    if (targets.length) {
+      const over = new Set<Element>();
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) over.add(e.target);
+            else over.delete(e.target);
           }
-        }
-        nav.classList.toggle("is-light", over.size > 0);
-      },
-      // Detection line 150px BELOW the nav's centre (67 + 150 = 217px): the
-      // switch fires ~150px earlier, so the logo band starts fading to light
-      // while it's still comfortably in view rather than at the last moment.
-      { rootMargin: "-217px 0px -100% 0px", threshold: 0 },
-    );
-    targets.forEach((t) => observer!.observe(t));
+          nav.classList.toggle("is-light", over.size > 0);
+        },
+        { rootMargin: `-${SWITCH}px 0px -100% 0px`, threshold: 0 },
+      );
+      targets.forEach((t) => observer!.observe(t));
+    }
+
+    // Logo band: position-latched so it never flashes dark on the way out.
+    if (logoBand) {
+      const sync = () => {
+        raf = 0;
+        logoBand.classList.toggle("is-light", logoBand.getBoundingClientRect().top <= SWITCH);
+      };
+      onScroll = () => {
+        if (!raf) raf = requestAnimationFrame(sync);
+      };
+      sync();
+      window.addEventListener("scroll", onScroll, { passive: true });
+    }
   }
 
   boot();
