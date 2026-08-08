@@ -91,10 +91,15 @@ const blocks: Block[] = [
 // broken rather than as a video: it opened on 1.2s of blank grey and closed on
 // 0.8s more, it carried ~66px black bars down both sides, and its poster showed
 // the FINISHED card — so the page painted a complete card and then cut to an
-// empty one the moment playback started. It is now cropped to the card, trimmed
-// to the animation itself, and its poster is frame 0 of the trimmed file, so the
-// poster-to-playback handoff is invisible. Keep those three properties together
-// if you ever re-cut it.
+// empty one the moment playback started.
+//
+// It still read as frozen after all that, and the cause was not playback: the
+// clip simply had nothing visible moving in it. At this tile's 322px, the only
+// change across 13 seconds was a few ~6px ticks, one every two seconds. So it
+// is also retimed 2.4x faster (5.5s). If you re-cut it, keep all of it: cropped
+// to the card, padded square, no dead head or tail, poster == frame 0, and
+// enough motion per second to read at 322px. Judge that last one by pixels
+// changed at display size — `currentTime` advancing proves nothing.
 const shots = [
   { src: withBase("/img/case/leancore-web/shot-1.webp"), w: 1356, h: 1070, alt: "Landing de LeanCore en móvil: 'Mueve dinero, gestiona crédito y escala tu operación'" },
   {

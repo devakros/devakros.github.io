@@ -274,7 +274,25 @@ supplied read as broken rather than as a video, for three reasons at once:
    and then cut to an empty one the instant playback started.
 
 It is now cropped to the card, padded back to square with the clip's own
-`#F5F5F5` so nothing is cut, trimmed to the animation itself (13.1s at 30fps,
-760², 149KB — down from 496KB), and its poster is frame 0 of the trimmed file.
-Keep those properties together if you re-cut it: a poster that does not match
-frame 0 is what makes a working video look broken.
+`#F5F5F5` so nothing is cut, trimmed to the animation itself, retimed 2.4x
+faster, and its poster is frame 0 of the result (5.5s at 30fps, 760², 92KB —
+down from 496KB). Keep those properties together if you re-cut it: a poster
+that does not match frame 0 is what makes a working video look broken.
+
+**Why it is retimed.** Victor reported it still not playing after the recut.
+It was playing — `currentTime` advanced, `readyState` was 4, no error, on both
+the dev server and a production build, with and without reduced motion. The
+real problem is that it had almost no visible motion at the size it renders.
+Measured on the live page with a canvas diff, only 0.06–2.4% of pixels changed
+per 0.7s: across the full 13 seconds the *only* thing that moved was a handful
+of ~6px green ticks appearing about one every two seconds, while the card,
+heading, dropdown and all seven rows stayed pixel-identical. Over a glance you
+saw one tick appear, which reads as a frozen screenshot.
+
+The lesson for any future clip in this grid: **`currentTime` advancing does not
+mean the video reads as playing.** The tile is only 322px, so a UI recording
+whose motion is a few small glyphs will look broken no matter how correct the
+playback is. Check pixels changed per second at the real display size, not the
+media element's state. If a clip still reads as static, the remaining levers
+are cropping tighter into the moving region (costs the card's title) or giving
+the tile more room than the 322px square the grid forces on it.
