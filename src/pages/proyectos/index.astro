@@ -82,12 +82,24 @@ const description =
         the list, so [data-band-trigger] sits on the LAST card: when it
         reaches the switch line the whole list fades to the light surface at
         once. Same single-trigger rule as Home — do not give each card its
-        own trigger, that turns one toggle into four. ── */}
+        own trigger, that turns one toggle into four.
+
+        Each card also carries [data-reveal] (per Victor, 2026-08-08) so it
+        fades and rises in as you scroll to it — the shared mechanism in
+        Base.astro, not a second one. No --reveal-delay: the cards are
+        full-width and enter one at a time, so each already has its own
+        trigger; a stagger would only make the later ones lag behind the
+        scroll. The delay on Home's KPIs exists because those three enter
+        together, side by side. ── */}
     <section class="projects band" data-band>
       <div class="projects__list container-wide">
         {
           projects.map((project, i) => (
-            <article class="pcard" data-band-trigger={i === projects.length - 1 ? "" : undefined}>
+            <article
+              class="pcard"
+              data-reveal
+              data-band-trigger={i === projects.length - 1 ? "" : undefined}
+            >
               <div class="pcard__copy">
                 <h2 class="pcard__title">
                   {project.headline.mutedLead ? (
