@@ -12,6 +12,8 @@ unrelated client work. Do not source anything from them.
 | Polestar | `964:996` | 1280×3977 | Not started |
 | LeanCore Studio | `971:1009` | 1280×3709 | Not started |
 | LeanCore sitio web | `1017:3244` | 1280×3709 | Not started |
+| Proyectos seleccionados | `1127:6636` | — | Built (`/proyectos`) |
+| ↳ its light-mode state | `1127:14284` | — | Built |
 
 ## Tokens
 
@@ -76,6 +78,17 @@ Two mechanisms share one switch line at y=217 (`Nav.astro`):
   whose `rootMargin` collapses the viewport to a zero-height line.
 
 The nav is light when either says the surface under the line is light.
+
+`/proyectos` (frame `1127:6636`) uses the same machinery for the flip its light
+frame `1127:14284` shows: the project list is one `[data-band]` and
+`[data-band-trigger]` sits on the **last card**, so the list turns light as you
+reach the end. Its testimonials/footer band is permanently light, like the
+case-study footers — it is already light in the dark-state frame.
+
+One thing does NOT follow the tokens there: the tag pills stay `#2a3231` with
+`#dbe976` text in both surfaces. Letting them use `var(--surface-2)` puts lime
+on `#edefef` once the band flips, which is unreadable — and the light frame
+keeps them dark anyway.
 
 Two things are load-bearing and easy to undo:
 

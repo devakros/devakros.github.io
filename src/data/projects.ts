@@ -22,6 +22,20 @@ export interface Project {
   placeholder?: boolean;
   /** True once the case study exists as real markup rather than a frame render. */
   built?: boolean;
+
+  /* ── Fields below drive the /proyectos index (frame 1127:6636) ────────
+     They are the SAME strings each case-study hero already shows, lifted
+     here so the index and the case study cannot drift apart. */
+
+  /** Headline split into a bright half and a muted half. `mutedLead` puts the
+      muted half first — Coca-Cola is the one project whose muted clause comes
+      second, which is why this is a flag and not a fixed order. */
+  headline: { base: string; muted: string; mutedLead?: boolean };
+  /** Card body. `**bold**` marks the runs the frame sets in bold. */
+  intro: string;
+  /** Tags as the index frame lists them; differs from both `tags` (case-study
+      hero) and `cardTags` (Home slider), so it gets its own field. */
+  listTags: string[];
 }
 
 export const projects: Project[] = [
@@ -37,6 +51,13 @@ export const projects: Project[] = [
     year: "2025",
     role: "Product Design",
     built: true,
+    headline: {
+      base: "Unificando la gestión de presupuestos de Coca-Cola:",
+      muted: "de la fragmentación a un sistema escalable",
+    },
+    intro:
+      "**Investment Committee Prioritization Tool (ICPT)** es una plataforma desarrollada para **Coca-Cola**, diseñada para gestionar, parametrizar y organizar presupuestos y campañas de manera eficiente alrededor del mundo. Este sistema facilita la toma de decisiones estratégicas dentro del comité de inversión, asegurando una distribución óptima de recursos y alineando las iniciativas con los objetivos empresariales.",
+    listTags: ["UX", "UI", "Prototype", "Landing Page", "Design System"],
   },
   {
     slug: "polestar",
@@ -51,6 +72,14 @@ export const projects: Project[] = [
     year: "2025",
     role: "Product Design",
     built: true,
+    headline: {
+      muted: "Rediseño integral de Polestar Pilates:",
+      base: "Elevando la conversión mediante UX estratégica",
+      mutedLead: true,
+    },
+    intro:
+      "Más que un rediseño visual, este proyecto fue una intervención estratégica para transformar una plataforma de educación en Pilates con una tasa de rebote del 70%. Mi rol como UX/UI y Product Owner fue alinear la propuesta de valor con las necesidades reales del usuario para maximizar las ventas de cursos.",
+    listTags: ["UI", "Prototype", "Landing Page", "Design System"],
   },
   {
     slug: "leancore-studio",
@@ -65,6 +94,14 @@ export const projects: Project[] = [
     year: "2026",
     role: "Product Design",
     built: true,
+    headline: {
+      muted: "LeanCore Studio:",
+      base: "Simplificando la complejidad financiera a través del diseño",
+      mutedLead: true,
+    },
+    intro:
+      "El reto fue transformar procesos financieros altamente técnicos y abstractos en un sistema de automatización intuitivo. Mi rol como diseñador UX/UI fue diseñar una interfaz que no solo operara con precisión, sino que generara la confianza necesaria para que el usuario automatice sus decisiones financieras.",
+    listTags: ["UX", "UI", "WebApp", "Design System", "Prototype"],
   },
   {
     slug: "leancore-web",
@@ -79,6 +116,14 @@ export const projects: Project[] = [
     year: "2026",
     role: "Product Design",
     built: true,
+    headline: {
+      muted: "Rediseño de LeanCore:",
+      base: "Arquitectura de información y UI minimalista para la confianza fintech",
+      mutedLead: true,
+    },
+    intro:
+      "En el sector fintech, la interfaz es sinónimo de seguridad. El rediseño integral de LeanCore se centró en eliminar el ruido visual para transmitir absoluta confianza y profesionalismo, reestructurando y filtrando la información clave para que los usuarios comprendan su ecosistema de productos sin fricción.",
+    listTags: ["UX", "UI", "Prototype", "Landing Page", "Design System"],
   },
 ];
 

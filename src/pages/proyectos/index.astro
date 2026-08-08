@@ -1,0 +1,386 @@
+---
+import Base from "../../layouts/Base.astro";
+import Nav from "../../components/Nav.astro";
+import Showreel from "../../components/Showreel.astro";
+import Testimonials from "../../components/Testimonials.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import { projects } from "../../data/projects";
+import { withBase } from "../../lib/base";
+
+/**
+ * Figma `Proyectos seleccionados` (1127:6636), with the light-mode state of
+ * its lower half at 1127:14284.
+ *
+ * The index of every case study: a dark hero with the showreel, then one row
+ * per project — copy panel left, product shot right — then the light
+ * testimonials + footer band the case studies also use.
+ *
+ * Every string here comes from `src/data/projects.ts`, which now carries the
+ * same headline/intro/tags each case-study hero already shows. Do not retype
+ * the copy into this file: the whole point is that the index cannot drift away
+ * from the page it links to.
+ *
+ * ⚠️ Built from Victor's screenshots of the two frames, not from the Figma
+ * API — the file's API quota was exhausted (429, ~48h cooldown) throughout.
+ * Spacing and the exact card split are therefore judged by eye against those
+ * screenshots and want a pass against the real frame once the quota resets.
+ */
+
+// Sector tags for the page as a whole, from the frame's hero.
+const pageTags = ["Fintech", "Salud y bienestar", "B2B", "B2C", "Tecnológico"];
+
+// `intro` carries **bold** runs (the frame bolds the product and client names
+// in the Coca-Cola card). Split on them rather than shipping raw HTML.
+const boldSplit = (text: string) =>
+  text.split(/(\*\*[^*]+\*\*)/).map((part) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? { bold: true, text: part.slice(2, -2) }
+      : { bold: false, text: part },
+  );
+
+const title = "Proyectos seleccionados — Victor Vivas";
+const description =
+  "Una colección de casos de estudio donde la estrategia de producto, la arquitectura de información y el diseño UI resuelven problemas complejos de negocio.";
+---
+
+<Base title={title} description={description}>
+  <Nav wide />
+
+  <main>
+    <!-- ── Hero ───────────────────────────────────────────────────────── -->
+    <section class="hero container-wide">
+      <a class="back" href={withBase("/")}>
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M14 5 7.5 12l6.5 7" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        Volver
+      </a>
+
+      <div class="hero__grid">
+        <div class="hero__left">
+          <h1 class="t-h2 hero__title">
+            <span class="muted">Proyectos seleccionados:</span> Estrategia, diseño e impacto real
+          </h1>
+
+          <ul class="tags">
+            {pageTags.map((tag) => <li class="tag">{tag}</li>)}
+          </ul>
+
+          <p class="hero__desc">
+            Una colección de casos de estudio donde la estrategia de producto, la arquitectura de
+            información y el diseño UI se unen para resolver problemas complejos de negocio y
+            transformar la experiencia de los usuarios.
+          </p>
+        </div>
+
+        <Showreel width={473} height={289} name="Victor Vivas" role="Sobre este proyecto" />
+      </div>
+    </section>
+
+    {/* ── Project rows ─────────────────────────────────────────────────
+        One scroll band. Per frame 1127:14284 the flip happens at the END of
+        the list, so [data-band-trigger] sits on the LAST card: when it
+        reaches the switch line the whole list fades to the light surface at
+        once. Same single-trigger rule as Home — do not give each card its
+        own trigger, that turns one toggle into four. ── */}
+    <section class="projects band" data-band>
+      <div class="projects__list container-wide">
+        {
+          projects.map((project, i) => (
+            <article class="pcard" data-band-trigger={i === projects.length - 1 ? "" : undefined}>
+              <div class="pcard__copy">
+                <h2 class="pcard__title">
+                  {project.headline.mutedLead ? (
+                    <>
+                      <span class="muted">{project.headline.muted}</span> {project.headline.base}
+                    </>
+                  ) : (
+                    <>
+                      {project.headline.base} <span class="muted">{project.headline.muted}</span>
+                    </>
+                  )}
+                </h2>
+
+                <ul class="tags">
+                  {project.listTags.map((tag) => (
+                    <li class="tag">{tag}</li>
+                  ))}
+                </ul>
+
+                <p class="pcard__desc">
+                  {boldSplit(project.intro).map((part) =>
+                    part.bold ? <strong>{part.text}</strong> : part.text,
+                  )}
+                </p>
+
+                <a class="pcard__cta" href={withBase(`/proyectos/${project.slug}`)}>
+                  Ver proyecto
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </a>
+              </div>
+
+              <div class="pcard__shot">
+                <img src={project.img} alt={project.alt} width="860" height="502" loading={i === 0 ? "eager" : "lazy"} />
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    {/* ── Testimonials + footer. Permanently light here, exactly like the
+        case-study footers — it is already light in the dark-state frame. ── */}
+    <section class="light theme-light" data-theme-light id="resumen">
+      <h2 class="t-h2 light__title container">Mira lo que están diciendo de mi...</h2>
+
+      <Testimonials />
+
+      <hr class="rule container" />
+
+      <SiteFooter home={false} />
+    </section>
+  </main>
+</Base>
+
+<style>
+  .muted {
+    color: var(--muted);
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────────────── */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    gap: 27px;
+    padding-top: 14px;
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    height: 24px;
+    font-size: 18px;
+    line-height: 22.7px;
+    font-weight: 300;
+    color: var(--text);
+    transition: opacity 200ms ease;
+  }
+  .back:hover {
+    opacity: 0.7;
+  }
+  .back svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Copy column left, reel right — the reel keeps its designed size so the
+     footage reads correctly, and the copy takes the remaining width. */
+  .hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 473px;
+    gap: 71px;
+    align-items: start;
+  }
+
+  .hero__left {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .hero__title {
+    margin: 0;
+    max-width: 600px;
+    color: var(--text);
+  }
+
+  .hero__desc {
+    margin: 0;
+    max-width: 600px;
+    font-size: 18px;
+    line-height: 22.7px;
+    font-weight: 300;
+    color: var(--text);
+  }
+
+  /* ── Tag pills (shared by the hero and every card) ─────────────────── */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Fixed dark pill in BOTH surfaces, not var(--surface-2). The light frame
+     (1127:14284) keeps these dark with lime text; letting them follow the
+     token would put #dbe976 on #edefef once the band flips, which is lime on
+     near-white and unreadable. */
+  .tag {
+    padding: 6px 8px;
+    border-radius: var(--r-pill);
+    background: #2a3231;
+    color: #dbe976;
+    font-size: 12px;
+    line-height: 10px;
+    font-weight: 500;
+  }
+
+  /* ── Project rows ─────────────────────────────────────────────────── */
+  .projects {
+    margin-top: 100px;
+    padding: 60px 0;
+  }
+
+  .projects__list {
+    display: flex;
+    flex-direction: column;
+    gap: 27px;
+  }
+
+  /* Copy panel and shot are two halves of one rounded card, so the radius
+     lives on the card and the halves are clipped by it. */
+  /* min-height keeps the four rows reading as one set — the copy runs from
+     three to six lines, which otherwise makes each card a different height. */
+  .pcard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    min-height: 440px;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .pcard__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 40px;
+    background: var(--surface);
+  }
+
+  .pcard__title {
+    margin: 0;
+    font-size: 25px;
+    line-height: 30px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .pcard__desc {
+    margin: 0;
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 300;
+    color: var(--text);
+  }
+  .pcard__desc strong {
+    font-weight: 600;
+  }
+
+  .pcard__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: auto;
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    background: var(--accent);
+    color: #1d2222;
+    font-size: 16px;
+    line-height: 20.2px;
+    font-weight: 400;
+    transition: filter 200ms ease;
+  }
+  .pcard__cta:hover {
+    filter: brightness(1.08);
+  }
+  .pcard__cta svg {
+    width: 18px;
+    height: 18px;
+    transition: translate 250ms ease;
+  }
+  .pcard__cta:hover svg {
+    translate: 3px -3px;
+  }
+
+  /* The shot bleeds to the card's edges; `cover` keeps every project's
+     thumbnail filling its half whatever its native ratio (Coca-Cola's is
+     4:3, the rest are ~1.7:1). */
+  .pcard__shot {
+    background: var(--surface-2);
+  }
+  .pcard__shot img {
+    width: 100%;
+    height: 100%;
+    min-height: 320px;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Light band ───────────────────────────────────────────────────── */
+  .light {
+    padding: 88px 0 30px;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .light__title {
+    margin: 0 auto 35px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .rule {
+    height: 1px;
+    margin: 95px auto 0;
+    border: 0;
+    background: var(--nav-border);
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────────────
+     No mobile frames exist for this page either, so everything below is
+     invented and wants Victor's review. */
+  @media (max-width: 1100px) {
+    .hero__grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .hero__title,
+    .hero__desc {
+      max-width: none;
+    }
+    .projects {
+      margin-top: 72px;
+      padding: 48px 0;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .pcard {
+      grid-template-columns: 1fr;
+    }
+    /* Shot first on narrow screens: it identifies the project faster than
+       the headline does. */
+    .pcard__shot {
+      order: -1;
+    }
+    .pcard__shot img {
+      min-height: 0;
+      aspect-ratio: 860 / 502;
+      height: auto;
+    }
+    .pcard__copy {
+      padding: 28px;
+    }
+    .rule {
+      margin-top: 56px;
+    }
+  }
+</style>
