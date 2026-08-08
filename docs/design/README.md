@@ -165,7 +165,14 @@ file, not a layout error — do not "fix" it by shrinking line-height.
   a swap log. Reproducing this needs a real browser profile with autoplay
   restrictions in force. The hardening is worth having regardless; do not treat
   the cause as settled.
-- **The showreel is a generated placeholder** (`public/video/showreel-placeholder.mp4`
+- **The showreel is stand-in footage**, not Victor's real reel — he supplied it
+  on 2026-08-08 as "we'll change it in the future but for now that works".
+  `public/video/showreel-2026.mp4`, centre-cropped from a 1920x1080 source to
+  the 946x1044 portrait the slot expects, 10s at 25fps, 943KB, poster is its
+  own frame 0. He offered it as a 4.6MB animated WebP; the mp4 re-encode of the
+  original is 5x smaller, since WebP handles real footage badly (4.4MB for the
+  same framing at 640px/12fps). Replaced the earlier generated placeholder
+  (`public/video/showreel-placeholder.mp4`
   — a slow push on the Figma poster frame). Real footage needed.
 - **⚠️ Six of the seven testimonials are invented.** Only Santiago Gallo's
   quote exists in Figma. The other six are filler written to make the carousel

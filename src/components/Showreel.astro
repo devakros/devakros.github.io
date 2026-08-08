@@ -11,6 +11,18 @@ import { withBase } from "../lib/base";
  * score on a fresh profile, and it silently stays on the poster. So we also
  * retry on canplay, on entering the viewport, and — as a last resort — on the
  * visitor's first interaction anywhere on the page.
+ *
+ * The footage is Victor's stand-in clip (2026-08-08), centre-cropped from a
+ * 1920x1080 source to the 946x1044 portrait this slot expects, 10s at 25fps,
+ * 943KB. He supplied it as a 4.6MB animated WebP; re-encoding the ORIGINAL mp4
+ * instead is 5x smaller, because WebP is built for graphics and handles real
+ * footage badly — the same framing came out at 4.4MB as WebP even at 640px and
+ * 12fps. This element also has a sound toggle, which only a <video> can serve.
+ *
+ * The poster is frame 0 of this exact file, so the poster-to-playback handoff
+ * is invisible. Keep that true if you re-cut it, and give the new file a NEW
+ * NAME — the previous clip and poster were replaced under their old filenames
+ * elsewhere in this project and browsers kept serving the stale copies.
  */
 interface Props {
   src?: string;
@@ -23,8 +35,8 @@ interface Props {
   playSize?: number;
 }
 const {
-  src = "/video/showreel-placeholder.mp4",
-  poster = "/img/video-poster.png",
+  src = "/video/showreel-2026.mp4",
+  poster = "/img/showreel-poster-2026.jpg",
   width,
   height,
   name,
