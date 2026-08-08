@@ -15,8 +15,25 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
 <figure class="quote container" data-testimonials>
   <blockquote class="quote__card">
     <span class="quote__mark" aria-hidden="true" set:html={QuoteOpen} />
-    <div class="quote__text t-lead" data-quote-text aria-live="polite">
-      {testimonials[defaultTestimonial].quote.map((p) => <p>{p}</p>)}
+    {/* Every quote is rendered, all in the SAME grid cell. The card is
+        therefore always as tall as the longest one, so switching testimonials
+        cannot resize it and nothing below it jumps. Rendering only the active
+        quote is what caused that: five of the six sit at 322px and Alejandro's
+        four-paragraph one at 442px, a 120px jolt on every swap. */}
+    <div class="quote__stack" data-quote-stack aria-live="polite">
+      {
+        testimonials.map((person, i) => (
+          <div
+            class:list={["quote__text", "t-lead", i === defaultTestimonial && "is-on"]}
+            data-quote
+            aria-hidden={i === defaultTestimonial ? undefined : "true"}
+          >
+            {person.quote.map((p) => (
+              <p>{p}</p>
+            ))}
+          </div>
+        ))
+      }
     </div>
     <span class="quote__mark quote__mark--close" aria-hidden="true" set:html={QuoteClose} />
   </blockquote>
@@ -57,34 +74,29 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
 </figure>
 
 <script>
-  import { testimonials, defaultTestimonial } from "../data/testimonials";
+  import { defaultTestimonial } from "../data/testimonials";
 
   function boot() {
   const root = document.querySelector<HTMLElement>("[data-testimonials]");
   if (root && !root.dataset.ready) {
     root.dataset.ready = "1";
-    const text = root.querySelector<HTMLElement>("[data-quote-text]")!;
+    const quotes = [...root.querySelectorAll<HTMLElement>("[data-quote]")];
     const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-person]")];
     let index = defaultTestimonial;
 
     function select(next: number) {
       if (next === index) return;
       index = next;
-      const t = testimonials[index];
 
-      // Fade out, swap, fade back in — a hard cut on a block of text this size
-      // reads as a glitch. Slowed per Victor so the swap has more weight.
-      root!.classList.add("is-swapping");
-      window.setTimeout(() => {
-        text.replaceChildren(
-          ...t.quote.map((p) => {
-            const el = document.createElement("p");
-            el.textContent = p;
-            return el;
-          }),
-        );
-        root!.classList.remove("is-swapping");
-      }, 300);
+      // Every quote is already in the DOM, so this is a cross-fade between two
+      // stacked elements rather than a text replacement. The card cannot
+      // change height, so nothing below it moves.
+      quotes.forEach((q, i) => {
+        const on = i === index;
+        q.classList.toggle("is-on", on);
+        if (on) q.removeAttribute("aria-hidden");
+        else q.setAttribute("aria-hidden", "true");
+      });
 
       buttons.forEach((b, i) => {
         b.setAttribute("aria-selected", String(i === index));
@@ -151,25 +163,51 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
     align-self: flex-end;
   }
 
-  .quote__text {
+  /* One cell, every quote in it. The grid takes the height of its tallest
+     child whether or not that child is the visible one, which is exactly the
+     fixed height we want — and it stays correct if a quote is edited, with no
+     hard-coded number to keep in sync. `visibility` rather than `display` is
+     load-bearing: a hidden child still has to occupy the cell to hold the
+     height open. */
+  .quote__stack {
+    display: grid;
+    width: 100%;
     max-width: 757px;
     margin-inline: auto;
+  }
+
+  .quote__text {
+    grid-area: 1 / 1;
+    /* The cell is as tall as the LONGEST quote, so short ones must centre in
+       it or they hang off the top with dead space under them. */
+    align-self: center;
     text-align: center;
     color: var(--muted);
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 6px;
+    /* Delay visibility to the end of the fade going out, and apply it
+       immediately coming in, so the outgoing quote is never clickable/readable
+       while it is still fading. */
     transition:
       opacity 300ms ease,
-      translate 300ms ease;
+      translate 300ms ease,
+      visibility 0s 300ms;
+  }
+  .quote__text.is-on {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+    transition:
+      opacity 300ms ease,
+      translate 300ms ease,
+      visibility 0s;
   }
   .quote__text :global(p) {
     margin: 0;
   }
   .quote__text :global(p + p) {
     margin-top: 1em;
-  }
-
-  .quote.is-swapping .quote__text {
-    opacity: 0;
-    translate: 0 6px;
   }
 
   .people {
