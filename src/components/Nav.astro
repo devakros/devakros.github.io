@@ -60,8 +60,36 @@ const links = [
           </>
         ))
       }
+      {/* Below 720px the three links above are hidden and this replaces them.
+          Two bars rather than the usual three: the logo mark is already two
+          stacked words, so two reads as part of the same system. */}
+      <button
+        class="nav__burger"
+        type="button"
+        data-nav-toggle
+        aria-expanded="false"
+        aria-controls="nav-menu"
+        aria-label="Abrir menú"
+      >
+        <span class="nav__burger-box" aria-hidden="true"><span /><span /></span>
+      </button>
+
       <a class="nav__cta" href="#contacto" data-contact-open>¡Hablemos!</a>
     </nav>
+
+    {/* Drops out of the nav pill itself rather than covering the screen — the
+        menu is three links, and a full-screen takeover for three links is
+        theatre. Inherits --nav-bg/--text so it re-themes with the pill when the
+        scroll bands flip to light. */}
+    <div class="nav__menu" id="nav-menu" data-nav-menu hidden>
+      {
+        links.map((link) => (
+          <a class="nav__menu-link" href={link.href}>
+            {link.label}
+          </a>
+        ))
+      }
+    </div>
 </header>
 
 <style>
@@ -230,14 +258,113 @@ const links = [
     filter: brightness(1.08);
   }
 
+  /* ── Mobile menu ──────────────────────────────────────────────────────
+     The burger and its panel only exist below 720px, where the inline links
+     are hidden. Before this the bar offered no navigation at all on a phone —
+     only ¡Hablemos! — and the three links lived solely in the footer. */
+  .nav__burger {
+    display: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-sm);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .nav__burger-box {
+    display: grid;
+    gap: 5px;
+    width: 20px;
+  }
+  .nav__burger-box span {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition:
+      transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 160ms ease;
+  }
+  /* Two bars cross into an X. translateY is half the 5px gap plus the 2px bar,
+     so they meet exactly on the centre line. */
+  .nav__burger[aria-expanded="true"] .nav__burger-box span:first-child {
+    transform: translateY(3.5px) rotate(45deg);
+  }
+  .nav__burger[aria-expanded="true"] .nav__burger-box span:last-child {
+    transform: translateY(-3.5px) rotate(-45deg);
+  }
+
+  .nav__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    border: 1px solid var(--nav-border);
+    border-radius: var(--r-md);
+    background: var(--nav-bg);
+    /* The pill is z-index 100 and this hangs below it; lift it over the grain
+       (90) and page content the same way. */
+    z-index: 1;
+    opacity: 0;
+    translate: 0 -8px;
+    transition:
+      opacity 220ms ease,
+      translate 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .nav__menu[hidden] {
+    display: none;
+  }
+  .nav__menu.is-open {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .nav__menu-link {
+    padding: 14px 12px;
+    border-radius: var(--r-sm);
+    color: var(--text);
+    font-size: 17px;
+    line-height: 22px;
+    font-weight: 300;
+    transition: background-color 200ms ease;
+  }
+  .nav__menu-link:hover,
+  .nav__menu-link:focus-visible {
+    background: color-mix(in srgb, var(--text) 10%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav__menu,
+    .nav__burger-box span {
+      transition: none;
+    }
+  }
+
   @media (max-width: 720px) {
     .nav {
       padding: 10px 12px;
       height: 58px;
     }
-    /* The three text links collapse; the CTA is the one that has to survive. */
+    /* The three text links collapse into the burger menu below. */
     .nav__link,
     .sep {
+      display: none;
+    }
+    .nav__burger {
+      display: grid;
+    }
+  }
+
+  /* Above the breakpoint the inline links are back, so the panel must never
+     appear — including if a resize happens while it is open. */
+  @media (min-width: 721px) {
+    .nav__menu {
       display: none;
     }
   }
@@ -274,6 +401,70 @@ const links = [
   let observer: IntersectionObserver | undefined;
   let onScroll: (() => void) | undefined;
   let raf = 0;
+
+  // ── Mobile menu ────────────────────────────────────────────────────────
+  // Closes the panel from anywhere. Kept at module scope because the document
+  // level listeners below are bound ONCE, while the panel itself is a new
+  // element after every client-side navigation.
+  let closeMenu: (() => void) | undefined;
+  let docBound = false;
+
+  function bootMenu() {
+    const toggle = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
+    const menu = document.querySelector<HTMLElement>("[data-nav-menu]");
+    if (!toggle || !menu) return;
+    // bootMenu runs at module scope AND on astro:page-load, which both fire on
+    // the initial load. Without this the toggle collects two click listeners
+    // and every tap opens then instantly closes the panel — it looked like the
+    // button did nothing at all.
+    if (toggle.dataset.ready) return;
+    toggle.dataset.ready = "1";
+
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
+      if (open) {
+        menu.hidden = false;
+        // One frame between unhiding and the class, or the transition has no
+        // start value to animate from. Same reason ContactDrawer does it.
+        requestAnimationFrame(() => menu.classList.add("is-open"));
+      } else {
+        menu.classList.remove("is-open");
+        // Wait out the fade before hiding, unless motion is reduced.
+        const done = () => (menu.hidden = true);
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) done();
+        else window.setTimeout(done, 220);
+      }
+    };
+
+    closeMenu = () => {
+      if (toggle.getAttribute("aria-expanded") === "true") setOpen(false);
+    };
+
+    // Bound to the fresh elements each swap, so these die with the old DOM.
+    toggle.addEventListener("click", () =>
+      setOpen(toggle.getAttribute("aria-expanded") !== "true"),
+    );
+    menu.addEventListener("click", (e) => {
+      if ((e.target as Element).closest("a")) closeMenu?.();
+    });
+
+    if (docBound) return;
+    docBound = true;
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeMenu?.();
+    });
+    document.addEventListener("click", (e) => {
+      const t = e.target as Element;
+      // Anything outside the nav closes it; the toggle handles itself above.
+      if (!t.closest?.("[data-nav-menu], [data-nav-toggle]")) closeMenu?.();
+    });
+    // A resize past the breakpoint hides the panel via CSS, so its state has
+    // to be reset or the burger comes back reading "expanded".
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 720) closeMenu?.();
+    });
+  }
 
   function boot() {
     observer?.disconnect();
@@ -334,5 +525,11 @@ const links = [
   }
 
   boot();
-  document.addEventListener("astro:page-load", boot);
+  bootMenu();
+  document.addEventListener("astro:page-load", () => {
+    boot();
+    bootMenu();
+  });
+  // A route change must not leave the panel open over the new page.
+  document.addEventListener("astro:before-swap", () => closeMenu?.());
 </script>

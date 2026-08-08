@@ -154,19 +154,14 @@ const {
 <script>
   let io: IntersectionObserver | undefined;
   let gestureBound = false;
+  // Whatever `attempt` currently points at, so the listeners at the bottom can
+  // resume the reel without re-running setup.
+  let resume: (() => void) | undefined;
 
   function boot() {
     const video = document.querySelector<HTMLVideoElement>("[data-showreel]");
     const toggle = document.querySelector<HTMLButtonElement>("[data-showreel-toggle]");
     if (!video || !toggle) return;
-
-    // Guard BEFORE touching the observer. Disconnecting first and then bailing
-    // on the guard is how this previously ended up with no observer at all:
-    // astro:page-load fires on the initial load too, so the second call tore
-    // down what the first had just set up.
-    if (video.dataset.ready) return;
-    video.dataset.ready = "1";
-    io?.disconnect();
 
     // The muted *property* is what the autoplay policy checks; the attribute
     // alone can lose a race against a play() call.
@@ -188,7 +183,26 @@ const {
       });
     };
 
+    // Publish the CURRENT element's attempt() before the setup guard, so the
+    // listeners at the bottom can always resume even when setup is skipped.
+    resume = attempt;
     attempt();
+
+    // Everything below is one-time wiring. The guard used to sit at the very
+    // top of boot() and returned before attempt() even existed — which is why
+    // the reel stopped after a back navigation (per Victor, 2026-08-08).
+    // ClientRouter can restore a cached DOM on popstate, and that DOM carries
+    // BOTH data-ready="1" and a video the observer had paused on the way out,
+    // so boot() bailed and nothing ever restarted it. Setup stays guarded;
+    // resuming no longer is.
+    if (video.dataset.ready) return;
+    video.dataset.ready = "1";
+    // Only disconnect once we know we are about to re-observe. Disconnecting
+    // above the guard is how this previously ended up with no observer at all:
+    // astro:page-load fires on the initial load too, so the second call tore
+    // down what the first had just set up.
+    io?.disconnect();
+
     video.addEventListener("canplay", attempt, { once: true });
     video.addEventListener("loadeddata", attempt, { once: true });
 
@@ -221,4 +235,16 @@ const {
 
   boot();
   document.addEventListener("astro:page-load", boot);
+
+  // The reel is paused whenever it scrolls out of view, so anything that
+  // returns the visitor to a page where it is already on screen has to restart
+  // it. astro:after-swap covers a restored DOM, pageshow covers the browser's
+  // own bfcache on a full back/forward, and visibilitychange covers coming
+  // back to a backgrounded tab. All three are cheap: attempt() returns
+  // immediately when the video is already playing.
+  document.addEventListener("astro:after-swap", () => resume?.());
+  window.addEventListener("pageshow", () => resume?.());
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) resume?.();
+  });
 </script>
