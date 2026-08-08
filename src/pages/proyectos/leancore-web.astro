@@ -11,9 +11,11 @@ import { withBase } from "../../lib/base";
  * Copy is Victor's own (transcribed from the page frame he supplied): the
  * "Rediseño de LeanCore — arquitectura de información y UI minimalista" angle.
  *
- * ⚠️ Screenshots are cropped from a downscaled (690px-wide) paste of the frame,
- * so they're softer than the other case studies. Re-export at 2x from Figma
- * (or drop a 1280px frame) to sharpen.
+ * Screenshots come straight from the Figma frame (file E8WlEJRIernyQ6J487Fimj,
+ * frame 1017:3244), rendered at 3x and resampled to 2x of their display size,
+ * then stored as WebP. The earlier set was cropped from a 690px-wide paste and
+ * was soft enough to turn the client logo row into grey blobs. Do not re-crop
+ * from a screenshot — render the node.
  */
 const project = bySlug("leancore-web")!;
 
@@ -84,20 +86,29 @@ const blocks: Block[] = [
 // The grid mirrors the Figma frame: a wide phone mock, then a row pairing the
 // roadmap video (the design's white-square slot) with a second phone, then the
 // desktop landing, then the "flujo nativo" panel.
+//
+// The roadmap clip was recut on 2026-08-07. The source Victor supplied read as
+// broken rather than as a video: it opened on 1.2s of blank grey and closed on
+// 0.8s more, it carried ~66px black bars down both sides, and its poster showed
+// the FINISHED card — so the page painted a complete card and then cut to an
+// empty one the moment playback started. It is now cropped to the card, trimmed
+// to the animation itself, and its poster is frame 0 of the trimmed file, so the
+// poster-to-playback handoff is invisible. Keep those three properties together
+// if you ever re-cut it.
 const shots = [
-  { src: withBase("/img/case/leancore-web/shot-1.png"), w: 365, h: 290, alt: "Landing de LeanCore en móvil: 'Mueve dinero, gestiona crédito y escala tu operación'" },
+  { src: withBase("/img/case/leancore-web/shot-1.webp"), w: 1356, h: 1070, alt: "Landing de LeanCore en móvil: 'Mueve dinero, gestiona crédito y escala tu operación'" },
   {
     src: withBase("/img/case/leancore-web/roadmap-sq.mp4"),
     poster: withBase("/img/case/leancore-web/roadmap-poster.jpg"),
     video: true,
     half: true,
-    w: 1200,
-    h: 1200,
+    w: 760,
+    h: 760,
     alt: "Roadmap del producto LeanCore: despliegue automático de nuevas funciones",
   },
-  { src: withBase("/img/case/leancore-web/shot-3.png"), half: true, w: 185, h: 214, alt: "Detalle móvil de LeanCore: 'Tu operación de crédito empieza hoy'" },
-  { src: withBase("/img/case/leancore-web/shot-2.png"), w: 365, h: 257, alt: "Página de inicio de LeanCore en escritorio con el mensaje principal y prueba social" },
-  { src: withBase("/img/case/leancore-web/shot-4.png"), w: 379, h: 284, alt: "Flujo nativo de oportunidades: prospectos calificados con crecimiento de cartera del 97.5%" },
+  { src: withBase("/img/case/leancore-web/shot-3.webp"), half: true, w: 644, h: 826, alt: "Detalle móvil de LeanCore: 'Tu operación de crédito empieza hoy'" },
+  { src: withBase("/img/case/leancore-web/shot-2.webp"), w: 1356, h: 950, alt: "Página de inicio de LeanCore en escritorio con el mensaje principal y prueba social" },
+  { src: withBase("/img/case/leancore-web/shot-4.webp"), w: 1356, h: 900, alt: "Flujo nativo de oportunidades: prospectos calificados con crecimiento de cartera del 97.5%" },
 ];
 
 const description =
