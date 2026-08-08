@@ -26,7 +26,7 @@ export const testimonials: Testimonial[] = [
   {
     name: "Pedro Sanin",
     role: "CEO Blaster",
-    avatar: "/img/avatar-1.png",
+    avatar: "/img/avatar-1.webp",
     quote: [
       "Victor is a great U/UI designer. He's fast, really fast, but thorough, attentive to details and precise. He was also great to have on our team, always had a good attitude, and happy to share his skills with the rest of our team. I highly recommend him, both as a professional, and as a person.",
     ],
@@ -35,7 +35,7 @@ export const testimonials: Testimonial[] = [
   {
     name: "Alejandro Malagón",
     role: "Product Lead",
-    avatar: "/img/avatar-2.png",
+    avatar: "/img/avatar-2.webp",
     quote: [
       "Working with Victor was a great experience, the type of experience that you believe people can create great products with business impact through teamwork.",
       "We collaborate on a very complex product that allowed a Fortune 100 company to manage finances across the globe on product trio mindset where Victor brought value on understanding the user and business problems and land useful solutions within the product experience.",
@@ -47,7 +47,7 @@ export const testimonials: Testimonial[] = [
   {
     name: "Michelle Penna",
     role: "Web Developer en Digital FENSA",
-    avatar: "/img/avatar-3.png",
+    avatar: "/img/avatar-3.webp",
     quote: [
       "Victor, es un gran diseñador, realizó diseños de otro mundo con ideas innovadoras y bastante brillantes, me encantó la forma de trabajar lo detallista que es, es un gran compañero de trabajo y nuestras reuniones eran bastante amenas y divertidas.",
     ],
@@ -56,7 +56,7 @@ export const testimonials: Testimonial[] = [
   {
     name: "Eduardo Méndez",
     role: "Cofundador en Pukara",
-    avatar: "/img/avatar-4.png",
+    avatar: "/img/avatar-4.webp",
     quote: [
       "Víctor es el diseñador UI más ingenioso y comprometido que he tenido el placer de trabajar. En Pukara, enfrentó y superó innumerables retos en nuestros productos, siempre con una actitud proactiva y aportando ideas innovadoras que realmente marcaron la diferencia en nuestros resultados.",
       "Admiro su meticulosa atención al detalle, su pasión por la excelencia, y su sincera dedicación tanto al logro de los objetivos como al bienestar del equipo.",
@@ -66,7 +66,7 @@ export const testimonials: Testimonial[] = [
   {
     name: "Lina Almeida",
     role: "Web Developer Junior en Pukara",
-    avatar: "/img/avatar-5.png",
+    avatar: "/img/avatar-5.webp",
     quote: [
       "Victor, es un gran diseñador, realizó diseños de otro mundo con ideas innovadoras y bastante brillantes, me encantó la forma de trabajar lo detallista que es, es un gran compañero de trabajo y nuestras reuniones eran bastante amenas y divertidas.",
     ],
@@ -75,7 +75,7 @@ export const testimonials: Testimonial[] = [
   {
     name: "Henry Cabello",
     role: "Senior Software Engineer",
-    avatar: "/img/avatar-6.png",
+    avatar: "/img/avatar-6.webp",
     quote: [
       "Trabajar con Victor me demostró que destaca mucho por estar constantemente innovando, buscando entender y mejorar el producto desde la raíz, usando sus habilidades en UI combinadas con psicología con el fin de darle al usuario la mejor experiencia siempre.",
       "Me encantó la habilidad que tiene para percibir imperfecciones durante el desarrollo y hacerles saber a los desarrolladores qué pixel mejorar…👌",

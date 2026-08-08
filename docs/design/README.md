@@ -73,6 +73,15 @@ Two mechanisms share one switch line at y=217 (`Nav.astro`):
   them back to dark while the wall is still on screen, which flashes black. A
   20px dead zone below the line stops a trackpad resting on the boundary from
   re-triggering the fade every frame.
+
+  **y=217 is not always reachable**, and the script clamps for it. The line
+  assumes the page can scroll far enough to bring the trigger up to it, which
+  fails when the viewport is tall relative to the content BELOW the trigger: on
+  Home at 1080×1900, scrolled to the very bottom, the trigger's top is still
+  419, so the flip never fired and the light state — the entire point of the
+  band — never appeared. When the line is out of reach the script uses the
+  highest position the page can actually deliver, plus a lead-in. Where the real
+  line is reachable this computes to exactly y=217 and nothing changes.
 - **`[data-theme-light]`** — the case-study footers, permanently light. They
   only tell the nav to invert, so they keep the original `IntersectionObserver`
   whose `rootMargin` collapses the viewport to a zero-height line.
@@ -148,12 +157,11 @@ file, not a layout error — do not "fix" it by shrinking line-height.
   poster. `Showreel.astro` also retries on `canplay`, on entering the viewport,
   and on the visitor's first interaction anywhere. Don't "simplify" that away.
 
-  **`CaseStudy.astro` now uses the same pattern** (2026-08-07). It previously
-  had a weaker copy: `preload="metadata"`, a single `play()` whose rejection was
-  swallowed, no `canplay` retry, no gesture fallback, and a fresh
-  `IntersectionObserver` leaked on every client-side navigation. Victor reported
-  the LeanCore roadmap clip playing on refresh but not on navigation, which is
-  the shape of a one-shot `play()` that got refused once and never tried again.
+  **`CaseStudy.astro` no longer has any media element** (2026-08-08). It briefly
+  carried this same hardening, then the one clip on those pages became an
+  animated WebP and the `<video>` branch and its script were removed outright —
+  see the `shots` prop comment in `CaseStudy.astro` for why. Nothing on a case
+  study needs autoplay any more; only `Showreel.astro` does.
 
   ⚠️ **The mechanism is not confirmed.** The failure does not reproduce in
   Playwright's Chromium, which launches with
@@ -270,7 +278,7 @@ out of a downscaled paste of a frame rather than exported from it:
   of their display size, stored as WebP. The old PNGs were soft enough to turn
   the client logo row in `shot-2` into grey blobs. WebP holds 2x detail at the
   same weight the soft PNGs cost.
-- `public/img/avatar-1..6.png` — re-cropped from the original uploads behind
+- `public/img/avatar-1..6.webp` — re-cropped from the original uploads behind
   the `personas` frame (`I996:5577;996:5191`), which range from 200px to 800px
   square. The old 96px files were cut out of the dark card, so each disc
   carried a dark crescent. **The Figma order is not the shipping order**: the
@@ -282,37 +290,26 @@ out of a downscaled paste of a frame rather than exported from it:
 
 ### The LeanCore roadmap clip
 
-`roadmap-sq.mp4` is Victor's own asset, not a Figma node — the design has only
-a `#E0E0E0` placeholder square (`1017:20490`) in that slot. The file Victor
-supplied read as broken rather than as a video, for three reasons at once:
+It is now `roadmap-v3.webp`, an animated WebP rendered by a plain `<img>` —
+there is no `<video>` on the case-study pages at all. `CaseStudy.astro`'s
+`shots` prop comment records why at length; the short version is that the clip
+played in every environment that could be tested and never for Victor, and an
+`<img>` has none of the surfaces that could have been responsible.
 
-1. it opened on 1.2s of blank grey and closed on 0.8s more, so a glance during
-   the loop often caught an empty square;
-2. it carried ~66px hard black bars down both sides, which the light tile has
-   no way to hide;
-3. its poster showed the **finished** card, so the page painted a complete card
-   and then cut to an empty one the instant playback started.
+Getting there took four passes, and each one fixed something real:
 
-It is now cropped to the card, padded back to square with the clip's own
-`#F5F5F5` so nothing is cut, trimmed to the animation itself, retimed 2.4x
-faster, and its poster is frame 0 of the result (5.5s at 30fps, 760², 92KB —
-down from 496KB). Keep those properties together if you re-cut it: a poster
-that does not match frame 0 is what makes a working video look broken.
+1. The source opened on 1.2s of blank grey and closed on 0.8s more, and carried
+   ~66px black bars down both sides, which the light tile cannot hide.
+2. Its poster showed the FINISHED card, so the page painted a complete card and
+   then cut to an empty one the instant playback started.
+3. It had almost no visible motion at the tile's real 322px — measured with a
+   canvas diff, 0.06-2.4% of pixels changed per 0.7s, which is a still image to
+   a human. Hence the 2.4x retime.
+4. Every recut shipped under the SAME filename, so browsers that had cached the
+   original kept serving it and none of the fixes reached him. The re-exported
+   stills escaped only because `.png` -> `.webp` changed their URLs by accident.
 
-**Why it is retimed.** Victor reported it still not playing after the recut.
-It was playing — `currentTime` advanced, `readyState` was 4, no error, on both
-the dev server and a production build, with and without reduced motion. The
-real problem is that it had almost no visible motion at the size it renders.
-Measured on the live page with a canvas diff, only 0.06–2.4% of pixels changed
-per 0.7s: across the full 13 seconds the *only* thing that moved was a handful
-of ~6px green ticks appearing about one every two seconds, while the card,
-heading, dropdown and all seven rows stayed pixel-identical. Over a glance you
-saw one tick appear, which reads as a frozen screenshot.
+**Rename the file whenever you replace it**, and judge "does it read as
+playing" by pixels changed at display size — `currentTime` advancing proves
+nothing. See the memory note `verify-video-plays-by-frames-not-currenttime`.
 
-The lesson for any future clip in this grid: **`currentTime` advancing does not
-mean the video reads as playing.** The tile is only 322px, so a UI recording
-whose motion is a few small glyphs will look broken no matter how correct the
-playback is. Check pixels changed per second at the real display size, not the
-media element's state. If a clip still reads as static, the remaining levers
-are cropping tighter into the moving region (costs the card's title) or giving
-the tile more room than the 322px square the grid forces on it.

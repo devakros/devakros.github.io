@@ -161,7 +161,13 @@ const {
   function boot() {
     const video = document.querySelector<HTMLVideoElement>("[data-showreel]");
     const toggle = document.querySelector<HTMLButtonElement>("[data-showreel-toggle]");
-    if (!video || !toggle) return;
+    if (!video || !toggle) {
+      // Clear it, or the listeners at the bottom keep calling play() on the
+      // PREVIOUS page's detached <video> — and the closure holds that element
+      // and its media buffer alive for the rest of the session.
+      resume = undefined;
+      return;
+    }
 
     // The muted *property* is what the autoplay policy checks; the attribute
     // alone can lose a race against a play() call.

@@ -505,10 +505,28 @@ const links = [
     if (trigger && bands.length) {
       const sync = () => {
         raf = 0;
+        const se = document.scrollingElement || document.documentElement;
         const top = trigger.getBoundingClientRect().top;
+
+        // The switch line is not always reachable. It assumes the page can
+        // scroll far enough to bring the trigger up to y=217, and on a viewport
+        // tall relative to the content BELOW the trigger it cannot: on Home at
+        // 1080x1900, scrolled to the very bottom, the trigger's top is still
+        // 419. `lit` then never became true and the light state — the whole
+        // point of the band — never appeared at all.
+        //
+        // So when the line is out of reach, use the highest position the page
+        // can actually deliver, plus a lead-in so the change still happens
+        // while you are scrolling rather than exactly at the last pixel. On
+        // every viewport where the real line IS reachable this computes to
+        // SWITCH and nothing about the tuned behaviour changes.
+        const maxScroll = Math.max(0, se.scrollHeight - window.innerHeight);
+        const lowestReachableTop = top + se.scrollTop - maxScroll;
+        const line = Math.max(SWITCH, Math.min(lowestReachableTop + 120, window.innerHeight / 2));
+
         // Only commit on a definite cross; inside the dead zone, hold.
-        if (top <= SWITCH) lit = true;
-        else if (top > SWITCH + HYSTERESIS) lit = false;
+        if (top <= line) lit = true;
+        else if (top > line + HYSTERESIS) lit = false;
         bands.forEach((band) => band.classList.toggle("is-light", lit));
         syncNav();
       };
