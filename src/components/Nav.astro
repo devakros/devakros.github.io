@@ -1,5 +1,6 @@
 ---
 import LogoFlip from "./LogoFlip.astro";
+import { withBase } from "../lib/base";
 
 /**
  * Figma `menu dark version` (1007:5859) — 962x66, #1A1E1E on a 1px #2A3231
@@ -16,9 +17,17 @@ interface Props {
 }
 const { wide = false } = Astro.props;
 
+// Only Home carries #sobre-mi, so off Home that link has to go back to Home
+// first — otherwise it sets the hash and nothing happens. Every page has a
+// #resumen (the light testimonials/footer band), so that one stays in-page.
+// "Proyectos" now goes to the /proyectos index rather than Home's slider
+// anchor: it is a real page, and the anchor only existed on Home anyway.
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const onHome = Astro.url.pathname.replace(/\/$/, "") === BASE;
+
 const links = [
-  { label: "Proyectos", href: "#proyectos" },
-  { label: "Sobre mi", href: "#sobre-mi" },
+  { label: "Proyectos", href: withBase("/proyectos") },
+  { label: "Sobre mi", href: onHome ? "#sobre-mi" : withBase("/#sobre-mi") },
   { label: "Resumen", href: "#resumen" },
 ];
 ---

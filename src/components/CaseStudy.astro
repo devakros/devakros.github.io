@@ -187,7 +187,9 @@ const slides: Slide[] = projects.map((p) => ({
   </section>
 
   <!-- ── Light footer band ────────────────────────────────────────────── -->
-  <section class="light theme-light" data-theme-light>
+  {/* id="resumen" so the nav's Resumen link works here too — it is an
+      in-page anchor on every page. */}
+  <section class="light theme-light" data-theme-light id="resumen">
     <hr class="rule container" />
     <SiteFooter home={false} />
   </section>
