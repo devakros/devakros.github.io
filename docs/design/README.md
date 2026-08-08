@@ -42,11 +42,52 @@ covers y=2036→3198. `menu light version` exists because the sticky nav crosses
 that boundary — it is **not** a user-facing theme toggle, and all four case
 study frames are dark.
 
-Implementation: every colour is a CSS custom property; `.theme-light` on the
-lower section redefines them. The nav inverts via an `IntersectionObserver`
-whose `rootMargin` collapses the viewport to a zero-height line at y=67 (the
-nav's vertical centre), so "the light section intersects that line" is exactly
-"the nav is now over light".
+**The build goes further than the frame, at Victor's request (2026-08-07).**
+Figma flips one surface. The build flips three, and they all change together:
+
+| Band | Element | Was |
+|---|---|---|
+| 1 | `.approach` — statement + KPIs | permanently dark |
+| 2 | `.logo-band` — the tool wall | already flipped, alone |
+| 3 | `.light` — testimonials + footer | permanently light |
+
+**The toggle belongs at the brand logos and nowhere else.** `.logo-band` carries
+`[data-band-trigger]`; when its top crosses the switch line all three bands fade
+in the same 400ms, so the whole screen changes at once. It reverses on the way
+back up. The hero above band 1 stays dark always, and the case-study pages are
+untouched.
+
+Giving each band its own trigger is the obvious implementation and it is wrong —
+it was built that way first and Victor rejected it. Measuring each band against
+the line staggers one toggle into three separate events spread down the page.
+Band 1 would change ~900px before the logos and band 3 ~230px after, so the
+reader meets the change twice more in places nothing marks as a boundary.
+
+Two mechanisms share one switch line at y=217 (`Nav.astro`):
+
+- **`[data-band]` + `[data-band-trigger]`** — the three Home bands and the one
+  element that decides for all of them. Position-only (top ≤ line), so the bands
+  stay light once the wall has scrolled up and off; a straddle test would flip
+  them back to dark while the wall is still on screen, which flashes black. A
+  20px dead zone below the line stops a trackpad resting on the boundary from
+  re-triggering the fade every frame.
+- **`[data-theme-light]`** — the case-study footers, permanently light. They
+  only tell the nav to invert, so they keep the original `IntersectionObserver`
+  whose `rootMargin` collapses the viewport to a zero-height line.
+
+The nav is light when either says the surface under the line is light.
+
+Two things are load-bearing and easy to undo:
+
+- **The fade rides on a `::before` layer, never on the section.** Every band
+  also carries `[data-intro-hide]`, which owns the element's own `transition`
+  for the intro reveal — a second `transition` on the section is silently
+  clobbered and the colour snaps.
+- **A band's border box must equal its light surface**, because the trigger
+  reads `getBoundingClientRect().top`. Space bands with padding, not margin.
+  This is why `.approach` carries `margin-top: 46px; padding-top: 70px` rather
+  than the original `margin-top: 116px`, and why `.logo-band` lost its
+  `margin-top: 40px` to `.approach`'s `padding-bottom`.
 
 ## Verifying pixel accuracy
 
@@ -93,6 +134,24 @@ file, not a layout error — do not "fix" it by shrinking line-height.
   media-engagement score on a fresh profile, and it fails silently to the
   poster. `Showreel.astro` also retries on `canplay`, on entering the viewport,
   and on the visitor's first interaction anywhere. Don't "simplify" that away.
+
+  **`CaseStudy.astro` now uses the same pattern** (2026-08-07). It previously
+  had a weaker copy: `preload="metadata"`, a single `play()` whose rejection was
+  swallowed, no `canplay` retry, no gesture fallback, and a fresh
+  `IntersectionObserver` leaked on every client-side navigation. Victor reported
+  the LeanCore roadmap clip playing on refresh but not on navigation, which is
+  the shape of a one-shot `play()` that got refused once and never tried again.
+
+  ⚠️ **The mechanism is not confirmed.** The failure does not reproduce in
+  Playwright's Chromium, which launches with
+  `--autoplay-policy=no-user-gesture-required`, so autoplay there can never be
+  blocked and both paths always work. Patching `HTMLMediaElement.prototype.play`
+  to reject every call showed the clip still playing, i.e. the browser's own
+  autoplay started it — so "ClientRouter adopts the element and the autoplay
+  attribute does not re-run" is NOT the explanation, despite looking like it in
+  a swap log. Reproducing this needs a real browser profile with autoplay
+  restrictions in force. The hardening is worth having regardless; do not treat
+  the cause as settled.
 - **The showreel is a generated placeholder** (`public/video/showreel-placeholder.mp4`
   — a slow push on the Figma poster frame). Real footage needed.
 - **⚠️ Six of the seven testimonials are invented.** Only Santiago Gallo's
@@ -181,3 +240,41 @@ Raster assets in `public/img/` and vectors in `src/icons/` are exported from
 the file, never redrawn. Two were wrong when reconstructed by eye and are
 worth flagging: `progress-ring.svg` is two offset ~330° arcs, not concentric
 circles; the quote marks are Icomoon glyph blobs, not typographic quotes.
+
+**Render the node, do not crop a screenshot.** Both asset sets that Victor
+called out as looking bad on 2026-08-07 had the same cause — they were cropped
+out of a downscaled paste of a frame rather than exported from it:
+
+- `public/img/case/leancore-web/shot-*.webp` — re-rendered from nodes
+  `1017:3299`, `1017:7203`, `1017:7201` and `1017:9177` at 3x, resampled to 2x
+  of their display size, stored as WebP. The old PNGs were soft enough to turn
+  the client logo row in `shot-2` into grey blobs. WebP holds 2x detail at the
+  same weight the soft PNGs cost.
+- `public/img/avatar-1..6.png` — re-cropped from the original uploads behind
+  the `personas` frame (`I996:5577;996:5191`), which range from 200px to 800px
+  square. The old 96px files were cut out of the dark card, so each disc
+  carried a dark crescent. **The Figma order is not the shipping order**: the
+  file holds seven avatars and the site ships six, because `figma-4` is
+  Santiago Gallo — the only testimonial that exists in Figma, and one Victor
+  replaced. The mapping is 1←`figma-3`, 2←`figma-2`, 3←`figma-5`, 4←`figma-6`,
+  5←`figma-1`, 6←`figma-7`. These are real, identifiable people with attributed
+  quotes; verify a face against `src/data/testimonials.ts` before re-cutting.
+
+### The LeanCore roadmap clip
+
+`roadmap-sq.mp4` is Victor's own asset, not a Figma node — the design has only
+a `#E0E0E0` placeholder square (`1017:20490`) in that slot. The file Victor
+supplied read as broken rather than as a video, for three reasons at once:
+
+1. it opened on 1.2s of blank grey and closed on 0.8s more, so a glance during
+   the loop often caught an empty square;
+2. it carried ~66px hard black bars down both sides, which the light tile has
+   no way to hide;
+3. its poster showed the **finished** card, so the page painted a complete card
+   and then cut to an empty one the instant playback started.
+
+It is now cropped to the card, padded back to square with the clip's own
+`#F5F5F5` so nothing is cut, trimmed to the animation itself (13.1s at 30fps,
+760², 149KB — down from 496KB), and its poster is frame 0 of the trimmed file.
+Keep those properties together if you re-cut it: a poster that does not match
+frame 0 is what makes a working video look broken.

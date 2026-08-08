@@ -151,7 +151,7 @@ const slides: Slide[] = projects.map((p) => ({
                   muted
                   loop
                   playsinline
-                  preload="metadata"
+                  preload="auto"
                   aria-label={shot.alt}
                 />
               </figure>
@@ -201,23 +201,67 @@ const slides: Slide[] = projects.map((p) => ({
 </main>
 
 <script>
-  // Some browsers honour the `autoplay` attribute only inconsistently (data
-  // saver, engagement heuristics), but will play a muted video on an explicit
-  // .play(). Kick each case-study video on load and whenever it scrolls into
-  // view, so the roadmap clip never sits frozen on its poster.
+  // Same belt-and-braces autoplay as Showreel.astro, and for a sharper reason
+  // here: on a CLIENT-SIDE navigation the `autoplay` attribute does nothing.
+  // A full page load starts the video through the parser's autoplay path, but
+  // ClientRouter adopts an already-parsed element into the live document, which
+  // does not re-run that algorithm — the element arrives in the DOM paused with
+  // `autoplay` still set. Instrumenting the swap shows it plainly:
+  //
+  //   astro:after-swap   video paused=true   <- in the document, autoplay set
+  //   astro:page-load    video paused=false  <- only our explicit play() ran it
+  //
+  // So on navigation, playback rests entirely on the call below. The previous
+  // version made that call exactly once and swallowed the rejection, so any
+  // browser that refused it (battery saver, data saver, a low media-engagement
+  // score) left the clip frozen on its poster with no second chance — which is
+  // why it looked fine on refresh and dead on navigation. Retry on canplay, on
+  // entering the viewport, and on the visitor's first interaction.
+  //
+  // These clips are NOT paused when they scroll out of view, unlike the
+  // showreel: a failed resume is the exact symptom being fixed here, and a
+  // 13s 760² loop is cheap enough that never pausing is the safer trade.
+  let caseIo: IntersectionObserver | undefined;
+  let caseGestureBound = false;
+
   function initCaseVideos() {
-    const vids = document.querySelectorAll<HTMLVideoElement>(".case__shots video");
-    vids.forEach((v) => {
+    const vids = [...document.querySelectorAll<HTMLVideoElement>(".case__shots video")];
+    // Guard per element, BEFORE touching the observer — astro:page-load also
+    // fires on the initial load, so tearing down first would leave the second
+    // call with no observer at all (the bug Showreel.astro documents).
+    const fresh = vids.filter((v) => !v.dataset.ready);
+    if (!fresh.length) return;
+    caseIo?.disconnect();
+
+    const attempt = (v: HTMLVideoElement) => {
+      if (!v.paused) return;
+      // The muted PROPERTY is what the autoplay policy checks; the attribute
+      // alone can lose a race against a play() call.
       v.muted = true;
-      const play = () => v.play().catch(() => {});
-      play();
-      const io = new IntersectionObserver(
-        (entries) => entries.forEach((e) => e.isIntersecting && play()),
-        { threshold: 0.2 },
-      );
-      io.observe(v);
+      v.play().catch(() => {
+        if (caseGestureBound) return;
+        caseGestureBound = true;
+        const once = () => vids.forEach((el) => { el.muted = true; el.play().catch(() => {}); });
+        addEventListener("pointerdown", once, { once: true });
+        addEventListener("keydown", once, { once: true });
+        addEventListener("touchstart", once, { once: true, passive: true });
+      });
+    };
+
+    fresh.forEach((v) => {
+      v.dataset.ready = "1";
+      attempt(v);
+      v.addEventListener("canplay", () => attempt(v), { once: true });
+      v.addEventListener("loadeddata", () => attempt(v), { once: true });
     });
+
+    caseIo = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && attempt(e.target as HTMLVideoElement)),
+      { threshold: 0.2 },
+    );
+    vids.forEach((v) => caseIo!.observe(v));
   }
+
   initCaseVideos();
   document.addEventListener("astro:page-load", initCaseVideos);
 </script>
