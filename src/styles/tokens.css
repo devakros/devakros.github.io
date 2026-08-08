@@ -34,8 +34,14 @@
 
 /* The scroll-flip band: Rectangle 3994, #FBFBFB, y 2036 → 3198.
    Same custom properties, light values — so every component inside it
-   re-themes without knowing it moved. */
-.theme-light {
+   re-themes without knowing it moved.
+
+   `.theme-light` is the STATIC light surface (the case-study footers, which
+   never move). `.band.is-light` is the SCROLLED one — the nav script adds
+   `.is-light` as each band crosses the switch line. Both land on the same
+   token values, so a component cannot tell which one it sits in. */
+.theme-light,
+.band.is-light {
   --bg: #fbfbfb;
   --surface: #f6f6f6;
   --surface-alt: #f1f2f2;
@@ -47,6 +53,40 @@
   --accent: #dbe976;
   --on-accent: #4a5856;
   --rule: #afb5b4;
+}
+
+/* ── Scroll bands ─────────────────────────────────────────────────────────
+   Home stacks three of these below the hero: the statement/KPI block, the
+   logo wall, and the testimonials/footer block. Each one starts dark and
+   fades to the light surface when ITS top crosses the switch line, so the
+   light washes down the page one band at a time (and back up on scroll up).
+
+   Two rules make this work, and both are easy to undo by accident:
+
+   1. The fade rides on a ::before LAYER, never on the section itself. Every
+      band also carries [data-intro-hide], which owns the element's own
+      `transition` property for the intro reveal — a second `transition` on
+      the section is silently clobbered and the colour snaps instead of
+      fading. The layer has its own timeline and is safe.
+   2. A band's BORDER BOX must equal its light surface, edge to edge, because
+      the script triggers on `getBoundingClientRect().top`. Space bands with
+      padding, not margin — a margin gap would flip the colour while the nav
+      still sits over the neighbour's surface. */
+.band {
+  position: relative;
+}
+
+.band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: #1d2222;
+  transition: background-color 400ms ease;
+}
+
+.band.is-light::before {
+  background-color: #fbfbfb;
 }
 
 *,

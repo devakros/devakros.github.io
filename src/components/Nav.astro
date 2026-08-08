@@ -235,61 +235,92 @@ const links = [
 </style>
 
 <script>
-  // The nav pill and the home logo band both go light at the same switch line
-  // (217px), a 400ms colour fade — but they use DIFFERENT triggers on purpose:
+  // Everything re-themes against one horizontal line at y=217 (the nav's own
+  // vertical centre once it has stuck). Two mechanisms feed it:
   //
-  //  · Nav: light while any light section straddles the line (observer). As the
-  //    band exits upward the adjacent testimonials band takes over, so the nav
-  //    never flickers.
-  //  · Logo band: LATCHES light the moment its top passes the line and stays
-  //    light as it scrolls up and off. A straddle test would flip it back to
-  //    dark while it's still visible — a black flash right before the light
-  //    section below arrives. Position-only (top ≤ line) has no such gap.
+  //  · [data-band] — Home's three surfaces: the statement/KPI block, the logo
+  //    wall, and the testimonials/footer block. They all flip TOGETHER, and
+  //    ONE element decides when: the logo wall, marked [data-band-trigger].
+  //    The whole screen is meant to toggle as the brand logos reach the line —
+  //    per Victor the change belongs at the logos and nowhere else, so do not
+  //    give the other two bands their own trigger. Measuring each band against
+  //    the line individually is the obvious implementation and it is wrong: it
+  //    staggers the change into three separate events down the page.
+  //
+  //    The test is position-only (top ≤ line), so the bands stay light once the
+  //    wall has scrolled up and off; a straddle test would flip them back to
+  //    dark while the wall is still on screen, which flashes black. It reverses
+  //    on the way back up — the bands toggle both ways.
+  //  · [data-theme-light] — the case-study footers, which are permanently
+  //    light and never flip. They only need to tell the nav to invert, so
+  //    they keep the straddle observer.
+  //
+  // The nav follows whatever surface is under the line: light once the bands
+  // have flipped, or while a static light section straddles it.
   const SWITCH = 217;
+  // Dead zone below the line. Without it a trackpad resting on the boundary
+  // re-triggers the 400ms fade every frame and the band strobes.
+  const HYSTERESIS = 20;
+
   let observer: IntersectionObserver | undefined;
   let onScroll: (() => void) | undefined;
   let raf = 0;
 
   function boot() {
     observer?.disconnect();
-    if (onScroll) window.removeEventListener("scroll", onScroll);
+    if (onScroll) {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    }
     cancelAnimationFrame(raf);
 
     const nav = document.querySelector<HTMLElement>("[data-nav]");
     if (!nav) return;
     nav.classList.remove("is-light");
-    const logoBand = document.querySelector<HTMLElement>("[data-logo-band]");
-    logoBand?.classList.remove("is-light");
 
-    // Nav: light whenever a light section (or the logo band) straddles the line.
-    const targets = [...document.querySelectorAll<HTMLElement>("[data-theme-light]")];
-    if (logoBand) targets.push(logoBand);
-    if (targets.length) {
-      const over = new Set<Element>();
+    const bands = [...document.querySelectorAll<HTMLElement>("[data-band]")];
+    bands.forEach((b) => b.classList.remove("is-light"));
+
+    const trigger = document.querySelector<HTMLElement>("[data-band-trigger]");
+    const statics = [...document.querySelectorAll<HTMLElement>("[data-theme-light]")];
+    const over = new Set<Element>();
+    let lit = false;
+    const syncNav = () => nav.classList.toggle("is-light", over.size > 0 || lit);
+
+    // Static light sections (case studies): straddle test, nav only.
+    if (statics.length) {
       observer = new IntersectionObserver(
         (entries) => {
           for (const e of entries) {
             if (e.isIntersecting) over.add(e.target);
             else over.delete(e.target);
           }
-          nav.classList.toggle("is-light", over.size > 0);
+          syncNav();
         },
         { rootMargin: `-${SWITCH}px 0px -100% 0px`, threshold: 0 },
       );
-      targets.forEach((t) => observer!.observe(t));
+      statics.forEach((t) => observer!.observe(t));
     }
 
-    // Logo band: position-latched so it never flashes dark on the way out.
-    if (logoBand) {
+    if (trigger && bands.length) {
       const sync = () => {
         raf = 0;
-        logoBand.classList.toggle("is-light", logoBand.getBoundingClientRect().top <= SWITCH);
+        const top = trigger.getBoundingClientRect().top;
+        // Only commit on a definite cross; inside the dead zone, hold.
+        if (top <= SWITCH) lit = true;
+        else if (top > SWITCH + HYSTERESIS) lit = false;
+        bands.forEach((band) => band.classList.toggle("is-light", lit));
+        syncNav();
       };
       onScroll = () => {
         if (!raf) raf = requestAnimationFrame(sync);
       };
       sync();
       window.addEventListener("scroll", onScroll, { passive: true });
+      // The trigger's top moves when the layout reflows, not only when we scroll.
+      window.addEventListener("resize", onScroll, { passive: true });
+    } else {
+      syncNav();
     }
   }
 
