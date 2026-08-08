@@ -38,11 +38,21 @@ interface Props {
   intro: string;
   meta: { year: string; client: string };
   blocks: Block[];
-  /** A shot is a screenshot, or — with `video: true` — an autoplaying,
-      muted, looping clip (needs a `poster` still for the first paint).
-      `half: true` makes it a half-width tile; two consecutive halves sit
-      side-by-side in one grid row. Everything else spans full width. */
-  shots: { src: string; alt: string; w: number; h: number; video?: boolean; poster?: string; half?: boolean }[];
+  /** A shot is a screenshot, or an animated WebP — both render as a plain
+      `<img>`. `half: true` makes it a half-width tile; two consecutive halves
+      sit side-by-side in one grid row. Everything else spans full width.
+      `bed: true` gives the tile a light backing instead of the dark surface,
+      for stills whose own background is light.
+
+      There is deliberately no `<video>` branch. The one clip on these pages
+      was an autoplaying muted loop and it cost days: it played in every
+      environment I could test and never for Victor, across autoplay policy,
+      media decode, extensions and cache revalidation, none of which are
+      observable from here. An animated WebP has none of those failure modes —
+      no play() to reject, no decoder, nothing an extension or an energy saver
+      can pause. If you need real video here again (sound, controls, minutes of
+      footage) bring the element back; for a short silent UI loop, do not. */
+  shots: { src: string; alt: string; w: number; h: number; half?: boolean; bed?: boolean }[];
 }
 
 const { slug, title, mutedLead = false, tags, intro, meta, blocks, shots } = Astro.props;
@@ -139,34 +149,17 @@ const slides: Slide[] = projects.map((p) => ({
 
       <div class="case__shots">
         {
-          shots.map((shot, i) =>
-            shot.video ? (
-              <figure class:list={["shot", shot.half && "shot--half", "shot--video"]}>
-                <video
-                  src={shot.src}
-                  poster={shot.poster}
-                  width={shot.w}
-                  height={shot.h}
-                  autoplay
-                  muted
-                  loop
-                  playsinline
-                  preload="auto"
-                  aria-label={shot.alt}
-                />
-              </figure>
-            ) : (
-              <figure class:list={["shot", shot.half && "shot--half"]}>
-                <img
-                  src={shot.src}
-                  alt={shot.alt}
-                  width={shot.w}
-                  height={shot.h}
-                  loading={i === 0 ? "eager" : "lazy"}
-                />
-              </figure>
-            ),
-          )
+          shots.map((shot, i) => (
+            <figure class:list={["shot", shot.half && "shot--half", shot.bed && "shot--bed"]}>
+              <img
+                src={shot.src}
+                alt={shot.alt}
+                width={shot.w}
+                height={shot.h}
+                loading={i === 0 ? "eager" : "lazy"}
+              />
+            </figure>
+          ))
         }
       </div>
     </div>
@@ -200,71 +193,6 @@ const slides: Slide[] = projects.map((p) => ({
   </section>
 </main>
 
-<script>
-  // Same belt-and-braces autoplay as Showreel.astro, and for a sharper reason
-  // here: on a CLIENT-SIDE navigation the `autoplay` attribute does nothing.
-  // A full page load starts the video through the parser's autoplay path, but
-  // ClientRouter adopts an already-parsed element into the live document, which
-  // does not re-run that algorithm — the element arrives in the DOM paused with
-  // `autoplay` still set. Instrumenting the swap shows it plainly:
-  //
-  //   astro:after-swap   video paused=true   <- in the document, autoplay set
-  //   astro:page-load    video paused=false  <- only our explicit play() ran it
-  //
-  // So on navigation, playback rests entirely on the call below. The previous
-  // version made that call exactly once and swallowed the rejection, so any
-  // browser that refused it (battery saver, data saver, a low media-engagement
-  // score) left the clip frozen on its poster with no second chance — which is
-  // why it looked fine on refresh and dead on navigation. Retry on canplay, on
-  // entering the viewport, and on the visitor's first interaction.
-  //
-  // These clips are NOT paused when they scroll out of view, unlike the
-  // showreel: a failed resume is the exact symptom being fixed here, and a
-  // 13s 760² loop is cheap enough that never pausing is the safer trade.
-  let caseIo: IntersectionObserver | undefined;
-  let caseGestureBound = false;
-
-  function initCaseVideos() {
-    const vids = [...document.querySelectorAll<HTMLVideoElement>(".case__shots video")];
-    // Guard per element, BEFORE touching the observer — astro:page-load also
-    // fires on the initial load, so tearing down first would leave the second
-    // call with no observer at all (the bug Showreel.astro documents).
-    const fresh = vids.filter((v) => !v.dataset.ready);
-    if (!fresh.length) return;
-    caseIo?.disconnect();
-
-    const attempt = (v: HTMLVideoElement) => {
-      if (!v.paused) return;
-      // The muted PROPERTY is what the autoplay policy checks; the attribute
-      // alone can lose a race against a play() call.
-      v.muted = true;
-      v.play().catch(() => {
-        if (caseGestureBound) return;
-        caseGestureBound = true;
-        const once = () => vids.forEach((el) => { el.muted = true; el.play().catch(() => {}); });
-        addEventListener("pointerdown", once, { once: true });
-        addEventListener("keydown", once, { once: true });
-        addEventListener("touchstart", once, { once: true, passive: true });
-      });
-    };
-
-    fresh.forEach((v) => {
-      v.dataset.ready = "1";
-      attempt(v);
-      v.addEventListener("canplay", () => attempt(v), { once: true });
-      v.addEventListener("loadeddata", () => attempt(v), { once: true });
-    });
-
-    caseIo = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && attempt(e.target as HTMLVideoElement)),
-      { threshold: 0.2 },
-    );
-    vids.forEach((v) => caseIo!.observe(v));
-  }
-
-  initCaseVideos();
-  document.addEventListener("astro:page-load", initCaseVideos);
-</script>
 
 <style>
   /* ── Hero ─────────────────────────────────────────────────────────────
@@ -463,24 +391,22 @@ const slides: Slide[] = projects.map((p) => ({
   }
   .shot--half {
     grid-column: span 1;
-    /* Square tile so the two row-mates line up; the video was pre-cropped to
-       1:1 (card only, no letterbox) and the phone is object-fit cropped. */
+    /* Square tile so the two row-mates line up; the roadmap loop is pre-cropped
+       to 1:1 (card only, no letterbox) and the phone is object-fit cropped. */
     aspect-ratio: 1 / 1;
   }
-  .shot img,
-  .shot video {
+  .shot img {
     width: 100%;
     height: auto;
     display: block;
   }
-  .shot--half img,
-  .shot--half video {
+  .shot--half img {
     height: 100%;
     object-fit: cover;
   }
-  /* The roadmap clip is a light card — give its tile a matching light bed so
+  /* For stills whose own background is light — give the tile a matching bed so
      any sub-pixel gap reads light, not the dark surface. */
-  .shot--video {
+  .shot--bed {
     background: #e0e0e0;
   }
 
