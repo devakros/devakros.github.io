@@ -188,6 +188,16 @@ const ogImage = new URL(withBase("/og-image.png"), origin).href;
           height 260ms cubic-bezier(0.16, 1, 0.3, 1),
           background-color 260ms ease;
       }
+      /* Two swell states, and they are deliberately different sizes.
+         `is-hover` is the labelled "Ver" disc over project cards and is the
+         one Victor already signed off — do not retune it. `is-link` is the
+         quieter swell over anything else clickable (nav, CTAs, avatars): no
+         label, about half the diameter, so a link never gets mistaken for a
+         project card. The script sets exactly one of the two. */
+      .cursor.is-link .cursor__ring {
+        width: 34px;
+        height: 34px;
+      }
       .cursor.is-hover .cursor__ring {
         width: 64px;
         height: 64px;
@@ -239,6 +249,21 @@ const ogImage = new URL(withBase("/og-image.png"), origin).href;
         [data-reveal].is-revealed {
           opacity: 1;
           translate: 0 0;
+        }
+
+        /* Opt-in: resolve out of a blur as well as up. Per Victor, for the
+           "Mi enfoque combina…" statement. It is a separate attribute rather
+           than the default because blurring a large block is expensive to
+           composite, and the KPI cards / testimonials do not need it. */
+        [data-reveal][data-reveal-blur] {
+          filter: blur(8px);
+          transition:
+            opacity 720ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
+            translate 720ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
+            filter 620ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
+        }
+        [data-reveal][data-reveal-blur].is-revealed {
+          filter: blur(0);
         }
       }
     </style>
@@ -363,9 +388,14 @@ const ogImage = new URL(withBase("/og-image.png"), origin).href;
         let cursor: HTMLElement;
         let labelEl: HTMLElement;
 
-        // The disc only swells over project cards — everywhere else the plain
-        // dot just follows. (Per Victor: keep the hover effect on projects only.)
+        // Project cards get the big labelled "Ver" disc. Per Victor
+        // (2026-08-08) anything else clickable now gets a smaller unlabelled
+        // swell, so the cursor tells you what will respond to a click —
+        // explicitly WITHOUT changing the "Ver" behaviour, which is why these
+        // are two selectors and two classes rather than one widened selector.
         const INTERACTIVE = "[data-slide]";
+        const CLICKABLE =
+          'a[href], button, [role="button"], summary, label[for], [data-contact-open], [data-person]';
         const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         let x = window.innerWidth / 2;
@@ -418,20 +448,25 @@ const ogImage = new URL(withBase("/og-image.png"), origin).href;
         const labelFor = (el: Element) => el.getAttribute("data-cursor-label") || "Ver";
 
         // Delegated hover — survives client-side navigations without rebinding.
-        document.addEventListener("pointerover", (e) => {
-          const el = (e.target as Element).closest?.(INTERACTIVE);
-          if (!el) return;
-          cursor.classList.add("is-hover");
-          labelEl.textContent = labelFor(el);
-        });
-        document.addEventListener("pointerout", (e) => {
-          const el = (e.target as Element).closest?.(INTERACTIVE);
-          if (!el) return;
-          // Ignore moves between children of the same interactive element.
-          const to = (e as PointerEvent).relatedTarget as Node | null;
-          if (to && el.contains(to)) return;
+        // `pointerover` fires on every element the pointer enters, so the state
+        // is recomputed from scratch each time rather than being added on
+        // `pointerover` and removed on `pointerout`. That pairing needed a
+        // relatedTarget guard to survive moving between a card's own children,
+        // and it could not express "a link, but not inside a card" at all.
+        const applyCursorState = (target: Element | null) => {
+          const slide = target?.closest?.(INTERACTIVE);
+          if (slide) {
+            // A project card wins even though it contains a link.
+            cursor.classList.remove("is-link");
+            cursor.classList.add("is-hover");
+            labelEl.textContent = labelFor(slide);
+            return;
+          }
           cursor.classList.remove("is-hover");
-        });
+          cursor.classList.toggle("is-link", !!target?.closest?.(CLICKABLE));
+        };
+
+        document.addEventListener("pointerover", (e) => applyCursorState(e.target as Element));
       }
     </script>
 

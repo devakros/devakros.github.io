@@ -207,35 +207,54 @@ a {
 
 
 /* ── Film grain ───────────────────────────────────────────────────────────
-   Ported from the Luxora landing (src/app/globals.css). Fixed, non-blocking,
-   and stepped rather than smoothly animated so it reads as grain, not drift.
+   Reworked 2026-08-08 against funtownstudio.com, the reference Victor sent.
+
+   What that site does: a `.grain` layer per section at **opacity 0.03**,
+   tiling a 480x360 animated GIF (76KB) whose own frames do the shimmering —
+   no CSS animation on the element at all. Plus a separate 82px dot-grid SVG
+   tiled at 30px on its light sections, which is a distinct design element we
+   do not have and did not adopt here.
+
+   What we do instead, and why: the same *look* without the 76KB GIF. Four
+   feTurbulence tiles that differ only by `seed`, swapped on a step animation.
+   Because the noise field is regenerated rather than moved, it shimmers in
+   place like real grain. The previous version translated ONE static tile
+   around, which reads as the texture sliding across the page — the giveaway
+   that it is a texture and not grain. That is also why the layer no longer
+   needs to be 200% and offset -50%: nothing moves, so `inset: 0` covers it.
+
+   Opacity is 0.05, not the reference's 0.03 — its GIF grain is higher
+   contrast than feTurbulence, so matching the number would have made ours
+   nearly invisible. Judge it by eye, not by matching the value.
+
    Sits under the nav (z-index 100) so it textures content without veiling it. */
 .noise-overlay::before {
   content: "";
   position: fixed;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
   pointer-events: none;
-  opacity: 0.09;
+  opacity: 0.05;
   z-index: 90;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  background-size: 256px 256px;
-  animation: grain 0.8s steps(6) infinite;
+  background-size: 220px 220px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.5s steps(1) infinite;
 }
 
+/* background-image is a discrete property, so each keyframe snaps rather than
+   interpolating — which is exactly the frame-to-frame jump grain needs. */
 @keyframes grain {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -10%); }
-  20% { transform: translate(-15%, 5%); }
-  30% { transform: translate(7%, -15%); }
-  40% { transform: translate(-5%, 15%); }
-  50% { transform: translate(-15%, 10%); }
-  60% { transform: translate(15%, 0%); }
-  70% { transform: translate(0%, 10%); }
-  80% { transform: translate(3%, -15%); }
-  90% { transform: translate(-10%, 5%); }
+  0% {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  25% {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  50% {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='13' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  75% {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='23' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
 }
 
 /* The grain is texture, not motion — but hold it still for reduced motion. */
