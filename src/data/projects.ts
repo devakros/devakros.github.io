@@ -106,7 +106,7 @@ export const projects: Project[] = [
   {
     slug: "leancore-web",
     title: "LeanCore — Sitio Web",
-    img: "/img/proj-leancore-web.webp",
+    img: "/img/proj-leancore-web-2x.webp",
     alt: "Caso de estudio del sitio web de LeanCore",
     tags: ["UI", "Prototype", "Landing Page", "Design System"],
     cardTags: ["UI", "WebApp", "Design System"],

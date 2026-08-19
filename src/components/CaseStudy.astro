@@ -216,15 +216,13 @@ const slides: Slide[] = projects.map((p) => ({
     display: flex;
     flex-direction: column;
   }
-  /* Hueco que ocupaba el showreel (quitado 2026-08-19): mismo tamaño y radio
-     para que nada debajo se desplace. */
+  /* Hueco que ocupaba el showreel (quitado 2026-08-19): solo dimensiones,
+     vacío de verdad, para que nada debajo se desplace. */
   .hero__space {
     margin-top: 25px;
     width: 291px;
     height: 358px;
     flex: none;
-    background: var(--surface);
-    border-radius: var(--r-md);
   }
   .hero__body {
     display: flex;

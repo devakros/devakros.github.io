@@ -236,16 +236,14 @@ const description =
     display: flex;
     flex-direction: column;
   }
-  /* Volver ends y=167, el recuadro-reserva del showreel arranca en y=192.
-     El showreel se quitó (2026-08-19) pero conserva su hueco exacto para no
-     mover el resto de la página. */
+  /* Volver ends y=167, el espacio del showreel arranca en y=192. Showreel
+     quitado (2026-08-19): solo dimensiones, vacío de verdad, para no mover
+     el resto de la página. */
   .hero__space {
     margin-top: 25px;
     width: 291px;
     height: 358px;
     flex: none;
-    background: var(--surface);
-    border-radius: var(--r-md);
   }
 
   .back {
