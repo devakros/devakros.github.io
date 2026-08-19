@@ -1,0 +1,111 @@
+---
+import Base from "../../layouts/Base.astro";
+import CaseStudy, { type Block } from "../../components/CaseStudy.astro";
+import { bySlug } from "../../data/projects";
+import { withBase } from "../../lib/base";
+
+/**
+ * Luxura — app de citas por invitación para Colombia.
+ *
+ * Contenido inferido del propio portfolio del equipo (hacu9/portfolio) y
+ * reescrito desde el ángulo de diseño de Victor (dirección de diseño oscura
+ * con dorado + UX del flujo de invitación). Las capturas son los renders del
+ * producto; re-exportadas a 2x de la columna (1356px) por si se re-editan en
+ * Figma. Si Victor re-hace las screens en alta res, se reemplazan sobre los
+ * mismos nombres.
+ */
+const project = bySlug("luxura")!;
+
+const blocks: Block[] = [
+  {
+    heading: "El desafío",
+    lead: "Las apps de citas abiertas se ahogan en volumen de bajo esfuerzo.",
+    bullets: [
+      {
+        term: "Embudo invertido:",
+        body: "un lado navega y paga por gastar un número estrictamente limitado de invitaciones; el otro las recibe gratis y elige. La escasez del lado que envía es el producto.",
+      },
+      {
+        term: "Primero se ve, después se paga:",
+        body: "el tráfico se moría en una verificación de tres pasos antes de ver un solo perfil. Movimos el muro al momento de la invitación: entre quienes empezaron un perfil, la verificación completada pasó de 51,5% a 64,1%.",
+      },
+      {
+        term: "Rol de invitación, no género:",
+        body: "el embudo estaba atado al género, lo que en la práctica hacía imposible que un hombre invitara a otro. Lo reemplazamos por un rol INVITER/INVITEE: más justo y mucho más fácil de razonar.",
+      },
+    ],
+  },
+  {
+    heading: "Dirección de diseño",
+    lead: "Oscuro con dorado: una identidad premium para un producto de escasez.",
+    paras: [
+      "Todo el lenguaje visual se construyó sobre esa dirección: la app, la ficha y los assets de Google Play, y la identidad pública en la pauta. Una marca que se ve cara porque el producto lo es — invitaciones limitadas y verificadas, no volumen.",
+      "Las campañas se diseñaron por audiencia — hombres, mujeres y LGBT — manteniendo la misma identidad con promesas distintas: el badge de «en línea» para quien navega, la bandeja de invitaciones con cuenta regresiva para quien elige.",
+    ],
+  },
+  {
+    heading: "Producto y UX",
+    lead: "El onboarding se mueve en tres pasos: perfil, grilla y la primera invitación.",
+    paras: [
+      "Del formulario de perfil a la grilla de perfiles verificados, y de ahí a gastar la primera de las invitaciones diarias. Cada pantalla empuja hacia el momento en que la escasez se siente: el límite y la cuenta regresiva.",
+      "La verificación facial y la moderación viven detrás del flujo, para que la confianza se perciba sin fricción y la calidad se proteja sin entorpecer la conversión.",
+    ],
+  },
+  {
+    heading: "Impacto de negocio",
+    lead: "El resultado fue un producto que se lanzó, se operó y retuvo usuarios.",
+    bullets: [
+      {
+        term: "Once semanas:",
+        body: "de un repo vacío a producción en Google Play, con pruebas cerradas de 14 días y 12 testers.",
+      },
+      {
+        term: "5.000+ descargas:",
+        body: "en Colombia tras el lanzamiento.",
+      },
+      {
+        term: "Embudo real:",
+        body: "al pausar la pauta un día, los registros cayeron 83% y los mensajes 11%: la adquisición paga sostiene la parte alta del embudo, la retención del producto aguanta.",
+      },
+    ],
+  },
+  {
+    heading: "Reflexión",
+    lead: "La escasez del lado que envía es el producto.",
+    paras: [
+      "En una categoría donde todos envían y nadie elige, Luxura invierte el embudo: el que recibe, elige. Diseñar alrededor de esa escasez — y no contra ella — es lo que hace que una invitación valga lo que cuesta.",
+    ],
+  },
+];
+
+const shots = [
+  { src: withBase("/img/case/luxura/hero.webp"), w: 1356, h: 2352, alt: "Landing de Luxura con la dirección de diseño oscura y dorada" },
+  { src: withBase("/img/case/luxura/brand.webp"), w: 1356, h: 2401, alt: "Suite de marca de Luxura y su sistema visual" },
+  { src: withBase("/img/case/luxura/profile.webp"), w: 1356, h: 2401, alt: "Formulario de creación de perfil, primer paso del onboarding" },
+  { src: withBase("/img/case/luxura/browse.webp"), half: true, w: 1356, h: 2401, alt: "Grilla de perfiles verificados con el contador diario de invitaciones" },
+  { src: withBase("/img/case/luxura/invite.webp"), half: true, w: 1356, h: 2401, alt: "Flujo de invitación con límite y cuenta regresiva" },
+  { src: withBase("/img/case/luxura/connections.webp"), w: 1356, h: 2401, alt: "Conexiones y conversación en tiempo real" },
+  { src: withBase("/img/case/luxura/ad-men.webp"), half: true, w: 1356, h: 2411, alt: "Anuncio para la audiencia de hombres: una mujer en la calle al atardecer bajo el badge de «en línea»" },
+  { src: withBase("/img/case/luxura/ad-women.webp"), half: true, w: 1356, h: 2411, alt: "Anuncio para la audiencia de mujeres: la bandeja de invitaciones con tres pendientes y su cuenta regresiva" },
+  { src: withBase("/img/case/luxura/ad-lgbt.webp"), bed: true, w: 1356, h: 2411, alt: "Anuncio para la audiencia LGBT: dos hombres riendo juntos en un bar" },
+];
+
+const description =
+  "Luxura — caso de estudio: una app de citas por invitación para Colombia, con dirección de diseño oscura y dorada y un embudo donde la escasez del lado que envía devuelve la elección al que recibe.";
+---
+
+<Base title={`${project.title} — Victor Vivas`} description={description}>
+  <CaseStudy
+    slug="luxura"
+    title={{
+      base: "El embudo invertido de las citas",
+      muted: "Luxura:",
+    }}
+    mutedLead
+    tags={["UX", "UI", "Branding", "Mobile"]}
+    intro="Luxura es una app de citas por invitación para Colombia. Para devolver la elección a quien recibe, se invirtió el embudo: un lado navega y gasta un número estrictamente limitado de invitaciones; el otro las recibe gratis y elige. Mi rol: dirección de diseño y UX del flujo de invitación, sobre una identidad oscura con dorado."
+    meta={{ year: "2026", client: "Luxura" }}
+    blocks={blocks}
+    shots={shots}
+  />
+</Base>
