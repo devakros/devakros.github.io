@@ -1,13 +1,16 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-// Local dev/build serve at the domain root; CI (GitHub Pages) sets SITE_BASE to
-// the repo subpath so assets and links resolve under /victor-portafolio/.
+// Local dev/build serve at the domain root. CI (GitHub Pages) sets:
+//  - SITE_BASE: "/" for the user site (devakros.github.io) or the repo
+//    subpath (/victor-portafolio) for a project repo like hacu9's.
+//  - SITE_URL:  the Pages origin, so sitemap/SEO point at the right account.
 const base = process.env.SITE_BASE ?? '/';
+const site = process.env.SITE_URL ?? 'https://hacu9.github.io';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://hacu9.github.io',
+  site,
   base,
   vite: {
     preview: {

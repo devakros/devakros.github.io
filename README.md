@@ -1,43 +1,72 @@
-# Astro Starter Kit: Minimal
+# Victor Vivas — Portfolio
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Portfolio de **Victor Vivas**, product designer (UX/UI, diseño de producto y sistemas de diseño). Sitio estático construido con **Astro**, servido por **GitHub Pages** desde el propio repo mediante GitHub Actions.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 🔗 En vivo
 
-## 🚀 Project Structure
+| Cuenta | URL |
+|---|---|
+| `devakros` | https://devakros.github.io/ |
+| `hacu9` (repo de proyecto) | https://hacu9.github.io/victor-portafolio/ |
 
-Inside of your Astro project, you'll see the following folders and files:
+## ✨ Características
+
+- Página de inicio con intro animada, showreel, slider de proyectos y testimonios.
+- Páginas de caso de estudio: Coca‑Cola (ICP Tool), Polestar, LeanCore Studio y LeanCore Web.
+- Tema claro/oscuro por bandas, grano de película animado, cursor personalizado, scroll suave (Lenis) y transición de página tipo "curtain".
+- Diseño implementado en markup real + CSS, reconstruido desde los frames de Figma (ver `docs/design/`).
+- Assets optimizados (WebP/AVIF, derivados 2x, video re-codificado) para rendimiento y nitidez en pantallas HiDPI.
+
+## 🧱 Stack
+
+- [Astro](https://astro.build) (SSG, sin runtime de framework)
+- [Lenis](https://github.com/darkroomengineering/lenis) (smooth scroll)
+- CSS con custom properties (`src/styles/tokens.css`), tipografía Outfit (`@fontsource-variable/outfit`)
+- Deploy: GitHub Actions → GitHub Pages (`actions/deploy-pages`)
+
+## 📁 Estructura
 
 ```text
 /
-├── public/
+├── public/                 # Assets estáticos servidos tal cual
+│   ├── img/                # Imágenes (WebP/PNG), poster y shots de casos
+│   └── video/              # Showreel (derivado 2x)
 ├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+│   ├── components/         # Nav, Showreel, Testimonials, CaseStudy, slider…
+│   ├── data/               # projects.ts, testimonials.ts (contenido real)
+│   ├── layouts/            # Base.astro (transiciones, cursor, grano)
+│   ├── lib/                # withBase() — rutas aware del base path
+│   ├── pages/              # index, /proyectos y los 4 casos de estudio
+│   └── styles/tokens.css   # Design tokens + grano + entrada
+└── docs/design/            # Notas de diseño y decisiones
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 🚀 Desarrollo
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+```sh
+npm install       # instala dependencias (Node >= 22.12)
+npm run dev       # dev server en http://localhost:4321
+npm run build     # build de producción a ./dist/
+npm run preview   # sirve el build localmente
+```
 
-Any static assets, like images, can be placed in the `public/` directory.
+### Compartir un build en local (túnel de revisión)
 
-## 🧞 Commands
+```sh
+npm run build
+npm run preview
+cloudflared tunnel --url http://localhost:4321
+```
 
-All commands are run from the root of the project, from a terminal:
+## ☁️ Deploy (GitHub Pages)
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+El workflow `.github/workflows/deploy.yml` se dispara con un push a `main` y despliega automáticamente.
 
-## 👀 Want to learn more?
+El mismo código se publica desde **dos cuentas**, por eso `SITE_BASE`/`SITE_URL` son condicionales al repo en el workflow y se leen en `astro.config.mjs`:
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- **User site** (`devakros/devakros.github.io`): base `/`, vive en la raíz.
+- **Repo de proyecto** (`hacu9/victor-portafolio`): base `/victor-portafolio/`.
+
+## ©️ Licencia
+
+Todo el contenido, diseño y código de este repositorio pertenecen a Victor Vivas. Uso personal — ver `LICENSE`.

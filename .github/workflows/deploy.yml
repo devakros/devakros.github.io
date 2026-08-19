@@ -20,8 +20,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Build under the repo subpath so assets/links resolve on Pages.
-      SITE_BASE: /victor-portafolio
+      # The same source deploys from two accounts:
+      #  - hacu9/victor-portafolio builds under the repo subpath.
+      #  - devakros/devakros.github.io is a USER SITE and builds at the root.
+      # `site` follows the account so sitemap/asset URLs resolve correctly.
+      SITE_BASE: ${{ github.repository == 'devakros/devakros.github.io' && '/' || '/victor-portafolio' }}
+      SITE_URL: ${{ github.repository == 'devakros/devakros.github.io' && 'https://devakros.github.io' || 'https://hacu9.github.io' }}
     steps:
       - uses: actions/checkout@v4
       - uses: withastro/action@v3
