@@ -223,9 +223,17 @@ a {
    that it is a texture and not grain. That is also why the layer no longer
    needs to be 200% and offset -50%: nothing moves, so `inset: 0` covers it.
 
-   Opacity is 0.05, not the reference's 0.03 — its GIF grain is higher
+   Opacity was 0.05, raised to 0.09 on 2026-08-19 because Victor read it as
+   barely there; the reference (funtown) used 0.03 but its GIF grain is higher
    contrast than feTurbulence, so matching the number would have made ours
    nearly invisible. Judge it by eye, not by matching the value.
+
+   The swap cadence is 0.9s per loop (4 frames → ~4.4 swaps/s), slowed from
+   0.5s: the old rate re-rasterized the full-viewport SVG 8×/sec above the
+   playing reel, which on modest GPUs starved the video's frames and made it
+   read as ~10fps. `contain: paint` limits the invalidation to the layer
+   itself. Slower AND stronger grain: still visibly alive, and it stops
+   hogging the compositor.
 
    Sits under the nav (z-index 100) so it textures content without veiling it. */
 .noise-overlay::before {
@@ -233,11 +241,12 @@ a {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.09;
   z-index: 90;
+  contain: paint;
   background-size: 220px 220px;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain 0.5s steps(1) infinite;
+  animation: grain 0.9s steps(1) infinite;
 }
 
 /* background-image is a discrete property, so each keyframe snaps rather than

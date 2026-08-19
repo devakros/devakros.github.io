@@ -62,7 +62,7 @@ export const projects: Project[] = [
   {
     slug: "polestar",
     title: "Polestar",
-    img: "/img/proj-polestar.png",
+    img: "/img/proj-polestar.webp",
     alt: "Caso de estudio Polestar",
     tags: ["UI", "Prototype", "Landing Page", "Design System"],
     cardTags: ["UX", "UI", "Responsive", "Landing Page", "User Testing"],
@@ -84,7 +84,7 @@ export const projects: Project[] = [
   {
     slug: "leancore-studio",
     title: "LeanCore Studio",
-    img: "/img/proj-leancore.png",
+    img: "/img/proj-leancore.webp",
     alt: "Caso de estudio LeanCore Studio",
     tags: ["UI", "Prototype", "Landing Page", "Design System"],
     cardTags: ["UI", "WebApp", "Design System"],
@@ -106,7 +106,7 @@ export const projects: Project[] = [
   {
     slug: "leancore-web",
     title: "LeanCore — Sitio Web",
-    img: "/img/proj-leancore-web.png",
+    img: "/img/proj-leancore-web.webp",
     alt: "Caso de estudio del sitio web de LeanCore",
     tags: ["UI", "Prototype", "Landing Page", "Design System"],
     cardTags: ["UI", "WebApp", "Design System"],

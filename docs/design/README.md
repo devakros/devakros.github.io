@@ -177,11 +177,15 @@ file, not a layout error — do not "fix" it by shrinking line-height.
   on 2026-08-08 as "we'll change it in the future but for now that works".
   `public/video/showreel-2026.mp4`, centre-cropped from a 1920x1080 source to
   the 946x1044 portrait the slot expects, 10s at 25fps, 943KB, poster is its
-  own frame 0. He offered it as a 4.6MB animated WebP; the mp4 re-encode of the
-  original is 5x smaller, since WebP handles real footage badly (4.4MB for the
-  same framing at 640px/12fps). Replaced the earlier generated placeholder
-  (`public/video/showreel-placeholder.mp4`
-  — a slow push on the Figma poster frame). Real footage needed.
+  own frame 0. What actually ships is a 2x derivative of the HOME display size
+  (`showreel-2026-s.mp4`, 472x522, 516KB, with `showreel-poster-2026-s.jpg` as
+  its frame 0) because decoding 4x fewer pixels is the biggest lever against a
+  choppy reel at the 473x522 slot; on the case-study heros (291x358) it is
+  downscaled and fine. He offered it as a 4.6MB animated WebP; the mp4 re-encode
+  of the original is 5x smaller, since WebP handles real footage badly (4.4MB
+  for the same framing at 640px/12fps). Replaced the earlier generated
+  placeholder (`public/video/showreel-placeholder.mp4` — a slow push on the
+  Figma poster frame). Real footage needed.
 - **⚠️ Six of the seven testimonials are invented.** Only Santiago Gallo's
   quote exists in Figma. The other six are filler written to make the carousel
   readable during review — and they are attached to photographs of real,
