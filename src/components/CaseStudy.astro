@@ -2,7 +2,6 @@
 import Nav from "./Nav.astro";
 import SiteFooter from "./SiteFooter.astro";
 import ProjectSlider, { type Slide } from "./ProjectSlider.astro";
-import Showreel from "./Showreel.astro";
 import { projects } from "../data/projects";
 import { withBase } from "../lib/base";
 
@@ -75,45 +74,39 @@ const slides: Slide[] = projects.map((p) => ({
 <main>
   <!-- ── Hero ─────────────────────────────────────────────────────────── -->
   <section class="hero container-wide">
-    <div class="hero__grid">
-      <div class="hero__left">
-        <a class="back" href={withBase("/")}>
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M14 5 7.5 12l6.5 7" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-          Volver
-        </a>
+    <a class="back" href={withBase("/")}>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M14 5 7.5 12l6.5 7" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      Volver
+    </a>
 
-        <Showreel width={291} height={358} name="Victor Vivas" role="Sobre este proyecto" />
-      </div>
+    <div class="hero__body">
+      <h1 class="t-h2 hero__title">
+        {
+          mutedLead ? (
+            <>
+              <span class="muted">{title.muted}</span> {title.base}
+            </>
+          ) : (
+            <>
+              {title.base} <span class="muted">{title.muted}</span>
+            </>
+          )
+        }
+      </h1>
 
-      <div class="hero__right">
-        <h1 class="t-h2 hero__title">
-          {
-            mutedLead ? (
-              <>
-                <span class="muted">{title.muted}</span> {title.base}
-              </>
-            ) : (
-              <>
-                {title.base} <span class="muted">{title.muted}</span>
-              </>
-            )
-          }
-        </h1>
+      <ul class="tags">
+        {tags.map((tag) => <li class="tag">{tag}</li>)}
+      </ul>
 
-        <ul class="tags">
-          {tags.map((tag) => <li class="tag">{tag}</li>)}
-        </ul>
+      <p class="hero__desc">{intro}</p>
 
-        <p class="hero__desc">{intro}</p>
-
-        <p class="hero__meta">
-          <span>{meta.year}</span>
-          <span class="dot" aria-hidden="true"></span>
-          <span>Lanzado por {meta.client}</span>
-        </p>
-      </div>
+      <p class="hero__meta">
+        <span>{meta.year}</span>
+        <span class="dot" aria-hidden="true"></span>
+        <span>Lanzado por {meta.client}</span>
+      </p>
     </div>
   </section>
 
@@ -198,25 +191,19 @@ const slides: Slide[] = projects.map((p) => ({
 
 <style>
   /* ── Hero ─────────────────────────────────────────────────────────────
-     Matches the Coca-Cola page: Volver + title share a baseline, the reel
-     drops under the back link. Columns 291 / 600 with a 71px gutter. */
+     Without the showreel (removed 2026-08-19) the hero is Volver on its
+     own line and the title/intro block below it at a comfortable measure. */
   .hero {
     padding-top: 14px;
-  }
-  .hero__grid {
-    display: grid;
-    /* Reel stays 291px; the title/intro column grows to fill the wider body
-       container so the hero's right edge lines up with the screenshots below. */
-    grid-template-columns: 291px minmax(0, 1fr);
-    gap: 71px;
-    align-items: start;
-  }
-  .hero__left {
     display: flex;
     flex-direction: column;
+    gap: 24px;
   }
-  .hero__left > :global(.reel) {
-    margin-top: 25px;
+  .hero__body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 800px;
   }
   .back {
     display: inline-flex;
@@ -242,11 +229,6 @@ const slides: Slide[] = projects.map((p) => ({
     translate: -3px 0;
   }
 
-  .hero__right {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
   .hero__title {
     margin: 0;
     color: var(--text);
@@ -502,7 +484,6 @@ const slides: Slide[] = projects.map((p) => ({
     }
   }
   @media (max-width: 1000px) {
-    .hero__grid,
     .case__grid {
       grid-template-columns: 1fr;
       gap: 40px;
