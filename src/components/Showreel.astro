@@ -13,10 +13,14 @@ import { withBase } from "../lib/base";
  * visitor's first interaction anywhere on the page.
  *
  * The footage is Victor's stand-in clip (2026-08-08), centre-cropped from a
- * 1920x1080 source to the 946x1044 portrait this slot expects, 10s at 25fps,
- * 943KB. He supplied it as a 4.6MB animated WebP; re-encoding the ORIGINAL mp4
- * instead is 5x smaller, because WebP is built for graphics and handles real
- * footage badly — the same framing came out at 4.4MB as WebP even at 640px and
+ * 1920x1080 source to the 946x1044 portrait this slot expects, 10s at 25fps.
+ * What ships now is a 2x derivative of the HOME display size (472x522, 25fps,
+ * 516KB) re-encoded with lanczos: decoding 4x fewer pixels is the single
+ * biggest lever on a choppy-looking reel, since the largest slot only shows
+ * it at 473x522 anyway (291x358 on case pages is smaller still). He supplied
+ * it as a 4.6MB animated WebP; re-encoding the ORIGINAL mp4 instead is 5x
+ * smaller, because WebP is built for graphics and handles real footage
+ * badly — the same framing came out at 4.4MB as WebP even at 640px and
  * 12fps. This element also has a sound toggle, which only a <video> can serve.
  *
  * The poster is frame 0 of this exact file, so the poster-to-playback handoff
@@ -35,8 +39,8 @@ interface Props {
   playSize?: number;
 }
 const {
-  src = "/video/showreel-2026.mp4",
-  poster = "/img/showreel-poster-2026.jpg",
+  src = "/video/showreel-2026-s.mp4",
+  poster = "/img/showreel-poster-2026-s.jpg",
   width,
   height,
   name,
