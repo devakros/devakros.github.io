@@ -74,39 +74,47 @@ const slides: Slide[] = projects.map((p) => ({
 <main>
   <!-- ── Hero ─────────────────────────────────────────────────────────── -->
   <section class="hero container-wide">
-    <a class="back" href={withBase("/")}>
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M14 5 7.5 12l6.5 7" stroke-linecap="round" stroke-linejoin="round"></path>
-      </svg>
-      Volver
-    </a>
+    <div class="hero__grid">
+      <div class="hero__left">
+        <a class="back" href={withBase("/")}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M14 5 7.5 12l6.5 7" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          Volver
+        </a>
 
-    <div class="hero__body">
-      <h1 class="t-h2 hero__title">
-        {
-          mutedLead ? (
-            <>
-              <span class="muted">{title.muted}</span> {title.base}
-            </>
-          ) : (
-            <>
-              {title.base} <span class="muted">{title.muted}</span>
-            </>
-          )
-        }
-      </h1>
+        {/* El showreel se quitó (2026-08-19) pero reservamos su hueco exacto
+            para que el resto del hero y el body de abajo no se muevan. */}
+        <div class="hero__space" aria-hidden="true"></div>
+      </div>
 
-      <ul class="tags">
-        {tags.map((tag) => <li class="tag">{tag}</li>)}
-      </ul>
+      <div class="hero__body">
+        <h1 class="t-h2 hero__title">
+          {
+            mutedLead ? (
+              <>
+                <span class="muted">{title.muted}</span> {title.base}
+              </>
+            ) : (
+              <>
+                {title.base} <span class="muted">{title.muted}</span>
+              </>
+            )
+          }
+        </h1>
 
-      <p class="hero__desc">{intro}</p>
+        <ul class="tags">
+          {tags.map((tag) => <li class="tag">{tag}</li>)}
+        </ul>
 
-      <p class="hero__meta">
-        <span>{meta.year}</span>
-        <span class="dot" aria-hidden="true"></span>
-        <span>Lanzado por {meta.client}</span>
-      </p>
+        <p class="hero__desc">{intro}</p>
+
+        <p class="hero__meta">
+          <span>{meta.year}</span>
+          <span class="dot" aria-hidden="true"></span>
+          <span>Lanzado por {meta.client}</span>
+        </p>
+      </div>
     </div>
   </section>
 
@@ -195,15 +203,33 @@ const slides: Slide[] = projects.map((p) => ({
      own line and the title/intro block below it at a comfortable measure. */
   .hero {
     padding-top: 14px;
+  }
+  .hero__grid {
+    display: grid;
+    /* La columna izquierda conserva el ancho del reel aunque ya no haya video:
+       la loseta-reserva mantiene el ritmo vertical del frame. */
+    grid-template-columns: 291px minmax(0, 1fr);
+    gap: 71px;
+    align-items: start;
+  }
+  .hero__left {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+  }
+  /* Hueco que ocupaba el showreel (quitado 2026-08-19): mismo tamaño y radio
+     para que nada debajo se desplace. */
+  .hero__space {
+    margin-top: 25px;
+    width: 291px;
+    height: 358px;
+    flex: none;
+    background: var(--surface);
+    border-radius: var(--r-md);
   }
   .hero__body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    max-width: 800px;
   }
   .back {
     display: inline-flex;
@@ -484,6 +510,7 @@ const slides: Slide[] = projects.map((p) => ({
     }
   }
   @media (max-width: 1000px) {
+    .hero__grid,
     .case__grid {
       grid-template-columns: 1fr;
       gap: 40px;

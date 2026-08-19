@@ -307,11 +307,13 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
   }
 
   /* 67px tiles with a squircle that squares off at the bottom-left. */
+  /* Loseta-marco estilo showcase: borde alrededor (como el Nav) y la foto
+     circular dentro, donde el borde asoma por el hueco entre marco y círculo. */
   .avatar {
     width: 67px;
     height: 67px;
     padding: 0;
-    border: 0;
+    border: 1px solid var(--nav-border);
     display: grid;
     place-items: center;
     background: var(--surface-2);
@@ -323,12 +325,10 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
       translate 320ms ease,
       margin 380ms cubic-bezier(0.65, 0, 0.35, 1);
   }
-  /* La imagen ahora llena la loseta completa con la misma forma cuadrada
-     de la loseta, en vez de un círculo flotando dentro. */
   .avatar img {
-    width: 100%;
-    height: 100%;
-    border-radius: 20px 20px 20px 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
     object-fit: cover;
   }
   .avatar:hover,
@@ -363,12 +363,13 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
     .avatar {
       width: 40px;
       height: 40px;
+      border: 1px solid var(--nav-border);
       border-radius: 13px 13px 13px 0;
     }
     .avatar img {
-      width: 100%;
-      height: 100%;
-      border-radius: 13px 13px 13px 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
     }
     .avatar--active {
       margin-inline: 12px;
