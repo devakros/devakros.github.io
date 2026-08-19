@@ -20,12 +20,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # The same source deploys from two accounts:
-      #  - hacu9/victor-portafolio builds under the repo subpath.
-      #  - devakros/devakros.github.io is a USER SITE and builds at the root.
-      # `site` follows the account so sitemap/asset URLs resolve correctly.
-      SITE_BASE: ${{ github.repository == 'devakros/devakros.github.io' && '/' || '/victor-portafolio' }}
-      SITE_URL: ${{ github.repository == 'devakros/devakros.github.io' && 'https://devakros.github.io' || 'https://hacu9.github.io' }}
+      # Un repo llamado `<user>.github.io` es un USER SITE de GitHub Pages y
+      # construye en la raíz; cualquier otro repo (p. ej. victor-portafolio)
+      # es un project site bajo `/<repo>`. `site` sigue la cuenta para que el
+      # sitemap y las URLs SEO apunten al origen correcto.
+      SITE_BASE: ${{ endsWith(github.repository, '.github.io') && '/' || format('/{0}', github.event.repository.name) }}
+      SITE_URL: ${{ format('https://{0}.github.io', github.repository_owner) }}
     steps:
       - uses: actions/checkout@v4
       - uses: withastro/action@v3

@@ -6,7 +6,8 @@ Portfolio de **Victor Vivas**, product designer (UX/UI, diseño de producto y si
 
 | Cuenta | URL |
 |---|---|
-| `devakros` | https://devakros.github.io/ |
+| `devakros` (user site, raíz) | https://devakros.github.io/ |
+| `hacu9` (user site, raíz) | https://hacu9.github.io/ |
 | `hacu9` (repo de proyecto) | https://hacu9.github.io/victor-portafolio/ |
 
 ## ✨ Características
@@ -62,10 +63,12 @@ cloudflared tunnel --url http://localhost:4321
 
 El workflow `.github/workflows/deploy.yml` se dispara con un push a `main` y despliega automáticamente.
 
-El mismo código se publica desde **dos cuentas**, por eso `SITE_BASE`/`SITE_URL` son condicionales al repo en el workflow y se leen en `astro.config.mjs`:
+El mismo código se publica en **tres repos** (por eso el workflow es condicional a `github.repository` y `astro.config.mjs` lee `SITE_URL`/`SITE_BASE`):
 
-- **User site** (`devakros/devakros.github.io`): base `/`, vive en la raíz.
+- **User sites** (`<user>.github.io`, p. ej. `devakros/devakros.github.io` y `hacu9/hacu9.github.io`): base `/`, viven en la raíz.
 - **Repo de proyecto** (`hacu9/victor-portafolio`): base `/victor-portafolio/`.
+
+Regla en el workflow: si el nombre del repo termina en `.github.io` → raíz; si no, subruta `/<repo>`.
 
 ## ©️ Licencia
 
