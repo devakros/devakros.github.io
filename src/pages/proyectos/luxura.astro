@@ -78,13 +78,18 @@ const blocks: Block[] = [
   },
 ];
 
+/* El caso se lee en pares: landing y marca a ancho completo, después las
+   pantallas de app en dúos lado a lado (perfil+grilla, invitación+chat) y
+   las campañas publicitarias cerrando en pares. Cada "half" recorta la
+   pantalla 9:16 al 1:1 de la loseta, como el patrón de teléfono de
+   LeanCore Web. */
 const shots = [
   { src: withBase("/img/case/luxura/hero.webp"), w: 1356, h: 2352, alt: "Landing de Luxura con la dirección de diseño oscura y dorada" },
   { src: withBase("/img/case/luxura/brand.webp"), w: 1356, h: 2401, alt: "Suite de marca de Luxura y su sistema visual" },
-  { src: withBase("/img/case/luxura/profile.webp"), w: 1356, h: 2401, alt: "Formulario de creación de perfil, primer paso del onboarding" },
+  { src: withBase("/img/case/luxura/profile.webp"), half: true, w: 1356, h: 2401, alt: "Formulario de creación de perfil, primer paso del onboarding" },
   { src: withBase("/img/case/luxura/browse.webp"), half: true, w: 1356, h: 2401, alt: "Grilla de perfiles verificados con el contador diario de invitaciones" },
   { src: withBase("/img/case/luxura/invite.webp"), half: true, w: 1356, h: 2401, alt: "Flujo de invitación con límite y cuenta regresiva" },
-  { src: withBase("/img/case/luxura/connections.webp"), w: 1356, h: 2401, alt: "Conexiones y conversación en tiempo real" },
+  { src: withBase("/img/case/luxura/connections.webp"), half: true, w: 1356, h: 2401, alt: "Conexiones y conversación en tiempo real" },
   { src: withBase("/img/case/luxura/ad-men.webp"), half: true, w: 1356, h: 2411, alt: "Anuncio para la audiencia de hombres: una mujer en la calle al atardecer bajo el badge de «en línea»" },
   { src: withBase("/img/case/luxura/ad-women.webp"), half: true, w: 1356, h: 2411, alt: "Anuncio para la audiencia de mujeres: la bandeja de invitaciones con tres pendientes y su cuenta regresiva" },
   { src: withBase("/img/case/luxura/ad-lgbt.webp"), bed: true, w: 1356, h: 2411, alt: "Anuncio para la audiencia LGBT: dos hombres riendo juntos en un bar" },

@@ -42,7 +42,7 @@ export const projects: Project[] = [
   {
     slug: "luxura",
     title: "Luxura",
-    img: "/img/proj-luxura.webp",
+    img: "/img/proj-luxura-browse.webp",
     alt: "Caso de estudio Luxura",
     tags: ["UI", "UX", "Branding", "Mobile"],
     cardTags: ["UX", "UI", "Branding", "Mobile App"],
