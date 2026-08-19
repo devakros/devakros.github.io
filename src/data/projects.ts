@@ -40,28 +40,6 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    slug: "luxura",
-    title: "Luxura",
-    img: "/img/proj-luxura-browse.webp",
-    alt: "Caso de estudio Luxura",
-    tags: ["UI", "UX", "Branding", "Mobile"],
-    cardTags: ["UX", "UI", "Branding", "Mobile App"],
-    desc: "Luxura: el embudo invertido de las citas. Una app por invitación donde la escasez del lado que envía devuelve la elección al que recibe.",
-    frame: "/img/case/luxura/hero.webp",
-    frameHeight: 2352,
-    year: "2026",
-    role: "Product Design",
-    built: true,
-    headline: {
-      mutedLead: true,
-      muted: "Luxura:",
-      base: "App de citas por invitación para Colombia",
-    },
-    intro:
-      "**Luxura** es una app de citas por invitación. Para devolver la elección a quien recibe, el embudo se invirtió: un lado navega y gasta un número estrictamente limitado de invitaciones, el otro las recibe gratis y elige. De repo vacío a Google Play en once semanas, con 5.000+ descargas en Colombia. Mi rol: dirección de diseño y el UX del flujo de invitación.",
-    listTags: ["UX", "UI", "Branding", "Mobile", "Producto"],
-  },
-  {
     slug: "coca-cola",
     title: "ICP Tool Coca-Cola",
     img: "/img/proj-coca.png",
