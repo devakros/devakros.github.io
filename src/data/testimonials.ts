@@ -82,6 +82,19 @@ export const testimonials: Testimonial[] = [
     ],
     profileUrl: "#",
   },
+  {
+    name: "Santiago Gallo",
+    role: "Cofundador en Verticcal",
+    avatar: "/img/avatar-7.webp",
+    quote: [
+      "Victor es el diseñador UI más responsable y creativo que conozco. Resolvió incontables desafíos en los productos de NuHome con su extraordinaria proactividad, al proponer ideas creativas cuyo impacto se reflejó en las métricas de nuestros productos.",
+      "Destaco su atención al detalle, su inclinación a la excelencia y su genuina preocupación por el cumplimiento de las metas y del bienestar del equipo.",
+    ],
+    profileUrl: "#",
+    // El avatar es un placeholder de iniciales — hay que reemplazarlo por la
+    // foto real de Santiago cuando el cliente la envíe.
+    placeholder: true,
+  },
 ];
 
 // Base-aware avatar paths for the GitHub Pages subpath.
