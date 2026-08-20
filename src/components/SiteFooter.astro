@@ -38,9 +38,7 @@ const p = (hash: string) => (home ? hash : withBase(`/${hash}`));
   <nav class="footer__nav" aria-label="Pie de página">
     <a href={p("#proyectos")}>Proyectos</a>
     <span class="sep" aria-hidden="true"></span>
-    <a href={p("#sobre-mi")}>Sobre mi</a>
-    <span class="sep" aria-hidden="true"></span>
-    <a href={p("#resumen")}>Resumen</a>
+    <a href={withBase("/resumen.pdf")} download>Resumen</a>
   </nav>
 </div>
 

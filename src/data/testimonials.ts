@@ -91,9 +91,6 @@ export const testimonials: Testimonial[] = [
       "Destaco su atención al detalle, su inclinación a la excelencia y su genuina preocupación por el cumplimiento de las metas y del bienestar del equipo.",
     ],
     profileUrl: "#",
-    // El avatar es un placeholder de iniciales — hay que reemplazarlo por la
-    // foto real de Santiago cuando el cliente la envíe.
-    placeholder: true,
   },
 ];
 

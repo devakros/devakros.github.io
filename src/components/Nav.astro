@@ -17,18 +17,12 @@ interface Props {
 }
 const { wide = false } = Astro.props;
 
-// Only Home carries #sobre-mi, so off Home that link has to go back to Home
-// first — otherwise it sets the hash and nothing happens. Every page has a
-// #resumen (the light testimonials/footer band), so that one stays in-page.
-// "Proyectos" now goes to the /proyectos index rather than Home's slider
-// anchor: it is a real page, and the anchor only existed on Home anyway.
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-const onHome = Astro.url.pathname.replace(/\/$/, "") === BASE;
-
+// "Proyectos" va al índice real /proyectos. "Resumen" ya no ancla: descarga el
+// CV (resumen.pdf) que vive en public/. La sección #sobre-mi de Home sigue
+// existiendo en la página, pero ya no es un destino de navegación.
 const links = [
   { label: "Proyectos", href: withBase("/proyectos") },
-  { label: "Sobre mi", href: onHome ? "#sobre-mi" : withBase("/#sobre-mi") },
-  { label: "Resumen", href: "#resumen" },
+  { label: "Resumen", href: withBase("/resumen.pdf"), download: true },
 ];
 ---
 
@@ -44,7 +38,7 @@ const links = [
                 holding the letter twice, stacked. On hover they slide up in
                 sequence. The visible copy is aria-hidden and the accessible
                 name comes from the sr-only span. */}
-            <a class="nav__link" href={link.href} style={`--ni:${i}`}>
+            <a class="nav__link" href={link.href} download={link.download} style={`--ni:${i}`}>
               <span class="sr-only">{link.label}</span>
               <span class="roll" aria-hidden="true">
                 {[...link.label].map((ch, c) => (
@@ -84,7 +78,7 @@ const links = [
     <div class="nav__menu" id="nav-menu" data-nav-menu hidden>
       {
         links.map((link) => (
-          <a class="nav__menu-link" href={link.href}>
+          <a class="nav__menu-link" href={link.href} download={link.download}>
             {link.label}
           </a>
         ))
