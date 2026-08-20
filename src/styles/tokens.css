@@ -42,7 +42,7 @@
    token values, so a component cannot tell which one it sits in. */
 .theme-light,
 .band.is-light {
-  --bg: #fbfbfb;
+  --bg: #eeebe2;
   --surface: #f6f6f6;
   --surface-alt: #f1f2f2;
   --surface-2: #edefef;
@@ -86,7 +86,7 @@
 }
 
 .band.is-light::before {
-  background-color: #fbfbfb;
+  background-color: #eeebe2;
 }
 
 *,

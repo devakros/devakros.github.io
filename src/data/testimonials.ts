@@ -96,4 +96,4 @@ export const testimonials: Testimonial[] = [
 for (const t of testimonials) t.avatar = withBase(t.avatar);
 
 /** Eduardo's quote leads — a strong, mid-length Spanish testimonial. */
-export const defaultTestimonial = 3;
+export const defaultTestimonial = 4;

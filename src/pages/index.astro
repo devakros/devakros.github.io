@@ -87,7 +87,7 @@ const description =
       <div class="hero__row" id="proyectos" data-intro-hide>
         <ProjectSlider slides={slides} />
 
-        <Showreel width={473} height={522} name="Victor Vivas" role="Product Designer" />
+        <Showreel width={473} height={266} name="Victor Vivas" role="Product Designer" />
       </div>
     </section>
 
@@ -277,6 +277,11 @@ const description =
     padding: 25px;
     background: var(--surface);
     border-radius: var(--r-md);
+  }
+  /* Cards sobre la logo wall — en claro quedan en el tono cálido solicitado
+     (2026-08-20); en oscuro mantienen el surface del tema. */
+  .approach.is-light .kpi {
+    background: #dcd7c5;
   }
 
   .kpi__icon {

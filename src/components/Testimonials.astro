@@ -329,7 +329,8 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    object-fit: cover;
+    /* contain: la foto se muestra completa, sin recortar por CSS (2026-08-20) */
+    object-fit: contain;
   }
   .avatar:hover,
   .avatar:focus-visible {

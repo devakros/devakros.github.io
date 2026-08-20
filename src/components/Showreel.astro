@@ -3,8 +3,7 @@ import Play from "../icons/play.svg?raw";
 import { withBase } from "../lib/base";
 
 /**
- * The muted, looping showreel used on Home (473x522) and on the case studies
- * (291x358).
+ * The muted, looping showreel used on Home (473x266, 16:9).
  *
  * Autoplay is deliberately belt-and-braces. `autoplay` alone is not reliable:
  * Chrome blocks it under battery saver, data saver, or a low media-engagement
@@ -12,21 +11,17 @@ import { withBase } from "../lib/base";
  * retry on canplay, on entering the viewport, and — as a last resort — on the
  * visitor's first interaction anywhere on the page.
  *
- * The footage is Victor's stand-in clip (2026-08-08), centre-cropped from a
- * 1920x1080 source to the 946x1044 portrait this slot expects, 10s at 25fps.
- * What ships now is a 2x derivative of the HOME display size (472x522, 25fps,
- * 516KB) re-encoded with lanczos: decoding 4x fewer pixels is the single
- * biggest lever on a choppy-looking reel, since the largest slot only shows
- * it at 473x522 anyway (291x358 on case pages is smaller still). He supplied
- * it as a 4.6MB animated WebP; re-encoding the ORIGINAL mp4 instead is 5x
- * smaller, because WebP is built for graphics and handles real footage
- * badly — the same framing came out at 4.4MB as WebP even at 640px and
- * 12fps. This element also has a sound toggle, which only a <video> can serve.
+ * The current footage is Victor's screen recording (WIN_20260819, landscape
+ * 1920x1080 VFR 33s, 85MB) re-encoded to 946x532, 30fps CFR, h264, 4.2MB with
+ * lanczos — decoding 4x fewer pixels and constant frames keeps the reel
+ * smooth, and the file is ~20x lighter. The home slot shows it at 473x266
+ * (2x = 946x532, so it is served at native-ish density).
  *
  * The poster is frame 0 of this exact file, so the poster-to-playback handoff
  * is invisible. Keep that true if you re-cut it, and give the new file a NEW
- * NAME — the previous clip and poster were replaced under their old filenames
- * elsewhere in this project and browsers kept serving the stale copies.
+ * NAME — the previous clips and posters were replaced under their old
+ * filenames elsewhere in this project and browsers kept serving the stale
+ * copies.
  */
 interface Props {
   src?: string;
@@ -39,8 +34,8 @@ interface Props {
   playSize?: number;
 }
 const {
-  src = "/video/showreel-2026-s.mp4",
-  poster = "/img/showreel-poster-2026-s.jpg",
+  src = "/video/showreel-2026-win.mp4",
+  poster = "/img/showreel-poster-2026-win.jpg",
   width,
   height,
   name,
