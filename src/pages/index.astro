@@ -226,7 +226,8 @@ const description =
   }
 
   /* Card column starts at y=393, video column at y=286 — same 27px gutter,
-     different top offsets, both ending at y=808. */
+     different top offsets, both ending at y=808. (2026-08-20: both ahora
+     comparten el mismo top para quedar alineados.) */
   .hero__row {
     display: flex;
     align-items: flex-start;
@@ -234,9 +235,11 @@ const description =
     margin-top: 52px;
   }
 
-  /* The slider column starts lower than the video (Figma offset); both keep
-     their designed sizes so the mockups and video read correctly. */
+  /* Slider y video comparten el mismo top (107px): alineados (2026-08-20). */
   .hero__row > :global(.slider) {
+    margin-top: 107px;
+  }
+  .hero__row > :global(.reel) {
     margin-top: 107px;
   }
 
@@ -442,6 +445,9 @@ const description =
     }
     .hero__row > :global(.slider) {
       width: 100%;
+      margin-top: 0;
+    }
+    .hero__row > :global(.reel) {
       margin-top: 0;
     }
     .video {
