@@ -5,40 +5,38 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Permissions the deploy-pages action needs.
+# El publish de la rama gh-pages necesita escribir en el repo.
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# One deploy at a time; don't cancel an in-progress one.
+# Un deploy a la vez; si llega otro, cancela el anterior.
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Un repo llamado `<user>.github.io` es un USER SITE de GitHub Pages y
-      # construye en la raíz; cualquier otro repo (p. ej. victor-portafolio)
-      # es un project site bajo `/<repo>`. `site` sigue la cuenta para que el
-      # sitemap y las URLs SEO apunten al origen correcto.
+      # Un repo `<user>.github.io` es un USER SITE → raíz; cualquier otro
+      # (p. ej. victor-portafolio) es un project site → /<repo>.
       SITE_BASE: ${{ endsWith(github.repository, '.github.io') && '/' || format('/{0}', github.event.repository.name) }}
       SITE_URL: ${{ format('https://{0}.github.io', github.repository_owner) }}
     steps:
       - uses: actions/checkout@v4
       - uses: withastro/action@v3
         with:
-          # Astro 5 requires Node >=22.12; the action defaults to 20.
+          # Astro requiere Node >=22.12; la action por defecto usa 20.
           node-version: 22
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      # Publicación a la rama gh-pages (Pages en modo "Deploy from a branch").
+      # Se usa esta vía en lugar de actions/deploy-pages porque esa API quedó
+      # con un deployment "in_progress" eterno (bug de GitHub) que bloqueaba
+      # toda publicación; la rama no tiene ese candado.
+      - name: Deploy a la rama gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          force_orphan: true
+          enable_jekyll: false
