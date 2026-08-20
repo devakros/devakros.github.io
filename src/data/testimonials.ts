@@ -52,6 +52,17 @@ export const testimonials: Testimonial[] = [
     profileUrl: "https://www.linkedin.com/in/michellepennat/",
   },
   {
+    /* Luis va CENTRO de la fila: 3 a la izquierda y 3 a la derecha
+       (2026-08-20). */
+    name: "Luis Bernardo",
+    role: "Supervisor directo en Blaster",
+    avatar: "/img/avatar-5.webp",
+    quote: [
+      "Como supervisor directo de Víctor en Blaster, puedo decir que trabajar con él fue una experiencia excepcional. No solo es un diseñador de interfaz sumamente rápido y eficiente, sino que mantiene un nivel de rigor y atención al detalle impecable en cada entrega. Más allá de su talento técnico, Víctor es un gran compañero y un activo valioso para cualquier equipo: siempre proactivo, con una actitud excelente y genuinamente dispuesto a colaborar y potenciar a los demás. Lo recomiendo sin dudarlo, tanto por su calidad profesional como humana.",
+    ],
+    profileUrl: "https://www.linkedin.com/in/luis-bernardo-perez-ramirez/",
+  },
+  {
     name: "Eduardo Méndez",
     role: "Cofundador en Pukara",
     avatar: "/img/avatar-4.webp",
@@ -60,15 +71,6 @@ export const testimonials: Testimonial[] = [
       "Admiro su meticulosa atención al detalle, su pasión por la excelencia, y su sincera dedicación tanto al logro de los objetivos como al bienestar del equipo.",
     ],
     profileUrl: "https://www.linkedin.com/in/eduardo-mendez-devops/",
-  },
-  {
-    name: "Luis Bernardo",
-    role: "Supervisor directo en Blaster",
-    avatar: "/img/avatar-5.webp",
-    quote: [
-      "Como supervisor directo de Víctor en Blaster, puedo decir que trabajar con él fue una experiencia excepcional. No solo es un diseñador de interfaz sumamente rápido y eficiente, sino que mantiene un nivel de rigor y atención al detalle impecable en cada entrega. Más allá de su talento técnico, Víctor es un gran compañero y un activo valioso para cualquier equipo: siempre proactivo, con una actitud excelente y genuinamente dispuesto a colaborar y potenciar a los demás. Lo recomiendo sin dudarlo, tanto por su calidad profesional como humana.",
-    ],
-    profileUrl: "https://www.linkedin.com/in/luis-bernardo-perez-ramirez/",
   },
   {
     name: "Henry Cabello",
@@ -95,5 +97,5 @@ export const testimonials: Testimonial[] = [
 // Base-aware avatar paths for the GitHub Pages subpath.
 for (const t of testimonials) t.avatar = withBase(t.avatar);
 
-/** Eduardo's quote leads — a strong, mid-length Spanish testimonial. */
-export const defaultTestimonial = 4;
+/** Luis leads (centro de la fila: 3 a la izquierda, 3 a la derecha). */
+export const defaultTestimonial = 3;
