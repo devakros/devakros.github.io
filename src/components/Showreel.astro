@@ -4,9 +4,10 @@ import { withBase } from "../lib/base";
 /**
  * The muted, looping showreel used on Home (473x434, a la altura del slider).
  *
- * Player: Media Chrome (media-chrome) — controles nativos estilables:
- * play/pausa, -15s/+15s, mute, volumen, tiempo y fullscreen. Accessibility y
- * teclado incluidos.
+ * Player: controles NATIVOS del navegador (`controls` en el <video>) —
+ * play/pausa, seek, volumen y fullscreen garantizados en todos los
+ * navegadores, sin librerías. (Se probó media-chrome y su barra colapsaba a
+ * 0x0 sin razón aparente; los nativos son la vía infalible.)
  *
  * Autoplay is deliberately belt-and-braces. `autoplay` alone is not reliable:
  * Chrome blocks it under battery saver, data saver, or a low media-engagement
@@ -46,30 +47,18 @@ const {
 ---
 
 <figure class="reel" style={`--w:${width}px; --h:${height}px;`}>
-  <media-controller class="reel__player">
-    <video
-      slot="media"
-      data-showreel
-      src={withBase(src)}
-      poster={withBase(poster)}
-      autoplay
-      muted
-      loop
-      playsinline
-      preload="auto"
-      disablepictureinpicture
-      aria-label={`Showreel de ${name}`}></video>
-
-    <media-control-bar slot="controls">
-      <media-play-button></media-play-button>
-      <media-seek-backward-button seek-offset="15"></media-seek-backward-button>
-      <media-seek-forward-button seek-offset="15"></media-seek-forward-button>
-      <media-mute-button></media-mute-button>
-      <media-volume-range></media-volume-range>
-      <media-time-display></media-time-display>
-      <media-fullscreen-button></media-fullscreen-button>
-    </media-control-bar>
-  </media-controller>
+  <video
+    data-showreel
+    src={withBase(src)}
+    poster={withBase(poster)}
+    controls
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+    disablepictureinpicture
+    aria-label={`Showreel de ${name}`}></video>
 
   <figcaption class="reel__caption">
     <span class="t-body-md">{name}</span>
@@ -94,10 +83,12 @@ const {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    accent-color: var(--accent);
   }
 
-  /* Rectangle 3990 carries a #1D2222 fill at 33% over the footage. Debajo de
-     los controles (z-index), encima del video. */
+  /* Rectangle 3990 carries a #1D2222 fill at 33% over the footage.
+     Al pasar el cursor se desvanece para que el video y sus controles
+     nativos se lean a plena luz. */
   .reel::after {
     content: "";
     position: absolute;
@@ -105,82 +96,21 @@ const {
     z-index: 0;
     background: rgb(29 34 34 / 0.33);
     pointer-events: none;
+    transition: opacity 250ms ease;
   }
-
-  /* Media Chrome: temas oscuros/dorados del sitio. */
-  .reel__player {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    font-family: var(--font);
-    --media-control-background: transparent;
-    --media-control-hover-background: rgb(29 34 34 / 0.85);
-    --media-control-icon-color: #fff;
-    --media-control-icon-size: 18px;
-    --media-range-track-height: 4px;
-    --media-range-thumb-height: 12px;
-    --media-range-thumb-width: 12px;
-    --media-range-track-background: rgb(255 255 255 / 0.25);
-    --media-range-bar-color: var(--accent);
-    --media-time-display-background: transparent;
-    --media-time-display-color: #fff;
-    --media-control-bar-spacing: 4px;
-  }
-
-  /* Visibilidad de la barra de control gobernada aquí (no por el idle de
-     media-chrome): se muestra con hover/foco sobre el reel y siempre en
-     pantallas táctiles. */
-  .reel media-control-bar {
+  .reel:hover::after {
     opacity: 0;
-    visibility: hidden;
-    translate: 0 8px;
-    transition:
-      opacity 200ms ease,
-      translate 200ms ease,
-      visibility 0s 200ms;
-  }
-  .reel:hover media-control-bar,
-  .reel:focus-within media-control-bar,
-  .reel:has(media-controller:not([userinactive])) media-control-bar,
-  .reel:has(media-controller[mediapaused]) media-control-bar,
-  .reel.reel--controls-on media-control-bar {
-    opacity: 1;
-    visibility: visible;
-    translate: 0 0;
-    transition:
-      opacity 200ms ease,
-      translate 200ms ease,
-      visibility 0s;
-  }
-  @media (hover: none) {
-    .reel media-control-bar {
-      opacity: 1;
-      visibility: visible;
-      translate: 0 0;
-    }
   }
 
   .reel__caption {
     position: absolute;
     left: 18px;
-    bottom: 18px;
-    z-index: 2;
+    bottom: 60px;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     color: var(--text);
-    transition: bottom 200ms ease;
     pointer-events: none;
-  }
-  /* Con los controles visibles (hover sobre el reel), la leyenda sube por
-     encima de la barra de control. También cuando media-chrome marca usuario
-     activo o está la clase forzada. */
-  .reel:hover .reel__caption,
-  .reel:focus-within .reel__caption,
-  .reel:has(media-controller:not([userinactive])) .reel__caption,
-  .reel:has(media-controller[mediapaused]) .reel__caption,
-  .reel.reel--controls-on .reel__caption {
-    bottom: 58px;
   }
 
   @media (max-width: 1000px) {
@@ -193,8 +123,6 @@ const {
 </style>
 
 <script>
-  import "media-chrome";
-
   let io: IntersectionObserver | undefined;
   let gestureBound = false;
   // Whatever `attempt` currently points at, so the listeners at the bottom can
@@ -250,20 +178,6 @@ const {
     // astro:page-load fires on the initial load too, so the second call tore
     // down what the first had just set up.
     io?.disconnect();
-
-    // Refuerzo de visibilidad de controles: espeja el estado de media-chrome
-    // (.reel--controls-on) para que barra y leyenda respondan en cualquier
-    // navegador, sin depender de :has() ni del hover sintético.
-    const controller = video.closest("media-controller");
-    const fig = video.closest(".reel");
-    if (controller && fig) {
-      const sync = () => fig.classList.toggle("reel--controls-on", !controller.hasAttribute("userinactive"));
-      sync();
-      new MutationObserver(sync).observe(controller, {
-        attributes: true,
-        attributeFilter: ["userinactive"],
-      });
-    }
 
     video.addEventListener("canplay", attempt, { once: true });
     video.addEventListener("loadeddata", attempt, { once: true });
