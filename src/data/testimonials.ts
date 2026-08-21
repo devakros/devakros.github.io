@@ -55,7 +55,7 @@ export const testimonials: Testimonial[] = [
     /* Luis va CENTRO de la fila: 3 a la izquierda y 3 a la derecha
        (2026-08-20). */
     name: "Luis Bernardo",
-    role: "Supervisor directo en Blaster",
+    role: "Director Creativo en Blaster",
     avatar: "/img/avatar-5.webp",
     quote: [
       "Como supervisor directo de Víctor en Blaster, puedo decir que trabajar con él fue una experiencia excepcional. No solo es un diseñador de interfaz sumamente rápido y eficiente, sino que mantiene un nivel de rigor y atención al detalle impecable en cada entrega. Más allá de su talento técnico, Víctor es un gran compañero y un activo valioso para cualquier equipo: siempre proactivo, con una actitud excelente y genuinamente dispuesto a colaborar y potenciar a los demás. Lo recomiendo sin dudarlo, tanto por su calidad profesional como humana.",
