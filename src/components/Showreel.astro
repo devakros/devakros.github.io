@@ -5,10 +5,11 @@ import { withBase } from "../lib/base";
  * Showreel de Home (473x434, a la altura del slider).
  *
  * El video del hero es un PREVIEW: autoplay silenciado en loop, sin
- * controles. Un clic en cualquier parte del reel abre un MODAL (<dialog>
- * nativo) que reproduce el mismo clip DESDE EL INICIO CON SONIDO y con los
- * controles nativos del navegador (play/pausa, seek, volumen, fullscreen).
- * El modal cierra con ESC, con el botón X, o haciendo clic fuera (backdrop).
+ * controles. Un clic en cualquier parte del reel (o en el play centrado)
+ * abre un MODAL (<dialog> nativo) que muestra el clip PAUSADO desde el
+ * inicio; el usuario le da play con los controles nativos y suena (ese clic
+ * es el gesto que garantiza el audio). Cierra con ESC, el botón X o un clic
+ * fuera del modal (backdrop).
  *
  * Autoplay is deliberately belt-and-braces. `autoplay` alone is not reliable:
  * Chrome blocks it under battery saver, data saver, or a low media-engagement
@@ -290,11 +291,12 @@ const {
     // ── Modal: preview → reproducción con sonido desde el inicio ──────
     if (reel && modal && modalVideo && openBtn && closeBtn) {
       const open = () => {
-        // El click es el gesto que permite audio; arrancamos del inicio.
+        // El dialog se abre PAUSADO desde el inicio: el usuario decide cuándo
+        // dar play (su clic en el control es el gesto que garantiza el audio).
+        if (modal.open) return;
         modalVideo.currentTime = 0;
         modalVideo.muted = false;
         modal.showModal();
-        modalVideo.play().catch(() => {});
         // El preview queda en pausa mientras el modal está abierto.
         video.pause();
       };
