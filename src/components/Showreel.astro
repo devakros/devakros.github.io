@@ -128,6 +128,39 @@ const {
     --media-control-bar-spacing: 4px;
   }
 
+  /* Visibilidad de la barra de control gobernada aquí (no por el idle de
+     media-chrome): se muestra con hover/foco sobre el reel y siempre en
+     pantallas táctiles. */
+  .reel media-control-bar {
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 8px;
+    transition:
+      opacity 200ms ease,
+      translate 200ms ease,
+      visibility 0s 200ms;
+  }
+  .reel:hover media-control-bar,
+  .reel:focus-within media-control-bar,
+  .reel:has(media-controller:not([userinactive])) media-control-bar,
+  .reel:has(media-controller[mediapaused]) media-control-bar,
+  .reel.reel--controls-on media-control-bar {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+    transition:
+      opacity 200ms ease,
+      translate 200ms ease,
+      visibility 0s;
+  }
+  @media (hover: none) {
+    .reel media-control-bar {
+      opacity: 1;
+      visibility: visible;
+      translate: 0 0;
+    }
+  }
+
   .reel__caption {
     position: absolute;
     left: 18px;
@@ -139,11 +172,14 @@ const {
     transition: bottom 200ms ease;
     pointer-events: none;
   }
-  /* Con los controles visibles (usuario activo), la leyenda sube por encima
-     de la barra de control. media-chrome v4 usa el atributo `userinactive`
-     (sin guion) sobre media-controller; la leyenda es hermana del
-     controller, así que se engancha con :has(). */
-  .reel:has(.reel__player:not([userinactive])) .reel__caption {
+  /* Con los controles visibles (hover sobre el reel), la leyenda sube por
+     encima de la barra de control. También cuando media-chrome marca usuario
+     activo o está la clase forzada. */
+  .reel:hover .reel__caption,
+  .reel:focus-within .reel__caption,
+  .reel:has(media-controller:not([userinactive])) .reel__caption,
+  .reel:has(media-controller[mediapaused]) .reel__caption,
+  .reel.reel--controls-on .reel__caption {
     bottom: 58px;
   }
 
@@ -214,6 +250,20 @@ const {
     // astro:page-load fires on the initial load too, so the second call tore
     // down what the first had just set up.
     io?.disconnect();
+
+    // Refuerzo de visibilidad de controles: espeja el estado de media-chrome
+    // (.reel--controls-on) para que barra y leyenda respondan en cualquier
+    // navegador, sin depender de :has() ni del hover sintético.
+    const controller = video.closest("media-controller");
+    const fig = video.closest(".reel");
+    if (controller && fig) {
+      const sync = () => fig.classList.toggle("reel--controls-on", !controller.hasAttribute("userinactive"));
+      sync();
+      new MutationObserver(sync).observe(controller, {
+        attributes: true,
+        attributeFilter: ["userinactive"],
+      });
+    }
 
     video.addEventListener("canplay", attempt, { once: true });
     video.addEventListener("loadeddata", attempt, { once: true });
