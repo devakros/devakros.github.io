@@ -11,11 +11,12 @@ import { withBase } from "../lib/base";
  * retry on canplay, on entering the viewport, and — as a last resort — on the
  * visitor's first interaction anywhere on the page.
  *
- * The current footage is Victor's screen recording (WIN_20260819, landscape
- * 1920x1080 VFR 33s, 85MB) re-encoded to 946x532, 30fps CFR, h264, 4.2MB with
+ * The current footage is Victor's own clip (VideoVictor.mp4, 1440x1080 4:3,
+ * 25fps, 44s, 51MB) re-encoded to 946x710, 25fps CFR, h264, 5.2MB with
  * lanczos — decoding 4x fewer pixels and constant frames keeps the reel
- * smooth, and the file is ~20x lighter. The home slot shows it at 473x266
- * (2x = 946x532, so it is served at native-ish density).
+ * smooth, and the file is ~10x lighter. The home slot shows it at 473x434
+ * (borde a borde con el slider), con object-fit cover que recorta apenas el
+ * 4:3 en su estado natural.
  *
  * The poster is frame 0 of this exact file, so the poster-to-playback handoff
  * is invisible. Keep that true if you re-cut it, and give the new file a NEW
@@ -34,8 +35,8 @@ interface Props {
   playSize?: number;
 }
 const {
-  src = "/video/showreel-2026-win.mp4",
-  poster = "/img/showreel-poster-2026-win.jpg",
+  src = "/video/showreel-2026-victor.mp4",
+  poster = "/img/showreel-poster-2026-victor.jpg",
   width,
   height,
   name,
