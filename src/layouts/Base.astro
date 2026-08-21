@@ -225,6 +225,17 @@ const ogImage = new URL(withBase("/og-image.png"), origin).href;
       html.has-cursor :is(input, textarea, select) {
         cursor: text;
       }
+      /* Un <dialog> modal vive en la TOP LAYER del navegador, por encima de
+         cualquier z-index — incluso el cursor custom (9999). Mientras haya un
+         dialog abierto, el cursor NATIVO toma el control y el custom se
+         oculta, para que no quede detrás del backdrop. */
+      html.has-cursor:has(dialog[open]) .cursor {
+        opacity: 0;
+      }
+      html.has-cursor:has(dialog[open]),
+      html.has-cursor:has(dialog[open]) * {
+        cursor: auto !important;
+      }
 
       @media (prefers-reduced-motion: reduce) {
         .cursor__ring,
