@@ -60,10 +60,8 @@ const {
     disablepictureinpicture
     aria-label={`Showreel de ${name} (preview)`}></video>
 
-  <button class="reel__expand" type="button" data-reel-open aria-label="Reproducir con sonido">
-    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" stroke-linecap="round" stroke-linejoin="round" />
-    </svg>
+  <button class="reel__play" type="button" data-reel-open aria-label="Reproducir con sonido">
+    <img src={withBase("/img/play-circle.png")} alt="" width="66" height="66" />
   </button>
 
   <figcaption class="reel__caption">
@@ -124,31 +122,42 @@ const {
     opacity: 0;
   }
 
-  .reel__expand {
+  .reel__play {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
     z-index: 2;
-    width: 34px;
-    height: 34px;
     padding: 0;
     border: 0;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: rgb(26 30 30 / 0.8);
-    color: #fff;
+    background: none;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 220ms ease;
+    filter: drop-shadow(0 2px 10px rgb(0 0 0 / 0.5));
+    /* Pulso sutil: invita al clic sin robar protagonismo. */
+    animation: reel-pulse 2.4s ease-in-out infinite;
   }
-  .reel:hover .reel__expand,
-  .reel:focus-within .reel__expand {
-    opacity: 1;
+  .reel__play img {
+    width: 66px;
+    height: 66px;
+    display: block;
   }
-  .reel__expand svg {
-    width: 16px;
-    height: 16px;
+  .reel__play:hover {
+    scale: 1.12;
+    animation-play-state: paused;
+  }
+  @keyframes reel-pulse {
+    0%,
+    100% {
+      scale: 1;
+    }
+    50% {
+      scale: 1.08;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reel__play {
+      animation: none;
+    }
   }
 
   .reel__caption {
