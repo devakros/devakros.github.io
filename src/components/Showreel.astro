@@ -140,8 +140,10 @@ const {
     pointer-events: none;
   }
   /* Con los controles visibles (usuario activo), la leyenda sube por encima
-     de la barra de control. */
-  .reel__player:not([user-inactive]) .reel__caption {
+     de la barra de control. media-chrome v4 usa el atributo `userinactive`
+     (sin guion) sobre media-controller; la leyenda es hermana del
+     controller, así que se engancha con :has(). */
+  .reel:has(.reel__player:not([userinactive])) .reel__caption {
     bottom: 58px;
   }
 
