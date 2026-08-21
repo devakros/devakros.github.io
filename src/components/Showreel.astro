@@ -1,9 +1,12 @@
 ---
-import Play from "../icons/play.svg?raw";
 import { withBase } from "../lib/base";
 
 /**
- * The muted, looping showreel used on Home (473x266, 16:9).
+ * The muted, looping showreel used on Home (473x434, a la altura del slider).
+ *
+ * Player: Media Chrome (media-chrome) — controles nativos estilables:
+ * play/pausa, -15s/+15s, mute, volumen, tiempo y fullscreen. Accessibility y
+ * teclado incluidos.
  *
  * Autoplay is deliberately belt-and-braces. `autoplay` alone is not reliable:
  * Chrome blocks it under battery saver, data saver, or a low media-engagement
@@ -31,8 +34,6 @@ interface Props {
   height: number;
   name: string;
   role: string;
-  /** Larger reels get the bigger play affordance from the frame. */
-  playSize?: number;
 }
 const {
   src = "/video/showreel-2026-victor.mp4",
@@ -41,33 +42,34 @@ const {
   height,
   name,
   role,
-  playSize = 66,
 } = Astro.props;
 ---
 
-<figure class="reel" style={`--w:${width}px; --h:${height}px; --play:${playSize}px;`}>
-  <video
-    data-showreel
-    src={withBase(src)}
-    poster={withBase(poster)}
-    width={width}
-    height={height}
-    autoplay
-    muted
-    loop
-    playsinline
-    preload="auto"
-    disablepictureinpicture
-    aria-label={`Showreel de ${name}`}></video>
+<figure class="reel" style={`--w:${width}px; --h:${height}px;`}>
+  <media-controller class="reel__player">
+    <video
+      slot="media"
+      data-showreel
+      src={withBase(src)}
+      poster={withBase(poster)}
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      disablepictureinpicture
+      aria-label={`Showreel de ${name}`}></video>
 
-  <button
-    class="reel__play"
-    type="button"
-    data-showreel-toggle
-    data-state="muted"
-    aria-label="Activar sonido"
-    set:html={Play}
-  />
+    <media-control-bar slot="controls">
+      <media-play-button></media-play-button>
+      <media-seek-backward-button seek-offset="15"></media-seek-backward-button>
+      <media-seek-forward-button seek-offset="15"></media-seek-forward-button>
+      <media-mute-button></media-mute-button>
+      <media-volume-range></media-volume-range>
+      <media-time-display></media-time-display>
+      <media-fullscreen-button></media-fullscreen-button>
+    </media-control-bar>
+  </media-controller>
 
   <figcaption class="reel__caption">
     <span class="t-body-md">{name}</span>
@@ -84,6 +86,7 @@ const {
     margin: 0;
     border-radius: var(--r-md);
     overflow: hidden;
+    background: var(--surface);
   }
 
   .reel video {
@@ -93,53 +96,53 @@ const {
     object-fit: cover;
   }
 
-  /* Rectangle 3990 carries a #1D2222 fill at 33% over the footage. */
+  /* Rectangle 3990 carries a #1D2222 fill at 33% over the footage. Debajo de
+     los controles (z-index), encima del video. */
   .reel::after {
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 0;
     background: rgb(29 34 34 / 0.33);
     pointer-events: none;
   }
 
-  .reel__play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
+  /* Media Chrome: temas oscuros/dorados del sitio. */
+  .reel__player {
+    position: relative;
     z-index: 1;
-    width: var(--play);
-    height: var(--play);
-    padding: 0;
-    border: 0;
-    background: none;
-    color: #fff;
-    cursor: pointer;
-    transition:
-      scale 250ms ease,
-      opacity 300ms ease;
-  }
-  .reel__play:hover {
-    scale: 1.06;
-  }
-  /* Hidden once the reel is running with sound. */
-  .reel__play[data-state="unmuted"] {
-    opacity: 0;
-    pointer-events: none;
-  }
-  .reel__play :global(svg) {
     width: 100%;
     height: 100%;
+    font-family: var(--font);
+    --media-control-background: transparent;
+    --media-control-hover-background: rgb(29 34 34 / 0.85);
+    --media-control-icon-color: #fff;
+    --media-control-icon-size: 18px;
+    --media-range-track-height: 4px;
+    --media-range-thumb-height: 12px;
+    --media-range-thumb-width: 12px;
+    --media-range-track-background: rgb(255 255 255 / 0.25);
+    --media-range-bar-color: var(--accent);
+    --media-time-display-background: transparent;
+    --media-time-display-color: #fff;
+    --media-control-bar-spacing: 4px;
   }
 
   .reel__caption {
     position: absolute;
     left: 18px;
-    bottom: 20px;
-    z-index: 1;
+    bottom: 18px;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     color: var(--text);
+    transition: bottom 200ms ease;
+    pointer-events: none;
+  }
+  /* Con los controles visibles (usuario activo), la leyenda sube por encima
+     de la barra de control. */
+  .reel__player:not([user-inactive]) .reel__caption {
+    bottom: 58px;
   }
 
   @media (max-width: 1000px) {
@@ -152,6 +155,8 @@ const {
 </style>
 
 <script>
+  import "media-chrome";
+
   let io: IntersectionObserver | undefined;
   let gestureBound = false;
   // Whatever `attempt` currently points at, so the listeners at the bottom can
@@ -160,8 +165,7 @@ const {
 
   function boot() {
     const video = document.querySelector<HTMLVideoElement>("[data-showreel]");
-    const toggle = document.querySelector<HTMLButtonElement>("[data-showreel-toggle]");
-    if (!video || !toggle) {
+    if (!video) {
       // Clear it, or the listeners at the bottom keep calling play() on the
       // PREVIOUS page's detached <video> — and the closure holds that element
       // and its media buffer alive for the rest of the session.
@@ -211,21 +215,6 @@ const {
 
     video.addEventListener("canplay", attempt, { once: true });
     video.addEventListener("loadeddata", attempt, { once: true });
-
-    toggle.addEventListener("click", async () => {
-      video.muted = false;
-      await video.play().catch(() => {});
-      toggle.dataset.state = "unmuted";
-      toggle.setAttribute("aria-label", "Silenciar");
-    });
-
-    // Click the reel itself to mute again and bring the button back.
-    video.addEventListener("click", () => {
-      if (video.muted) return;
-      video.muted = true;
-      toggle.dataset.state = "muted";
-      toggle.setAttribute("aria-label", "Activar sonido");
-    });
 
     // Don't burn CPU decoding a reel nobody is looking at — but always try to
     // resume when it comes back into view.
