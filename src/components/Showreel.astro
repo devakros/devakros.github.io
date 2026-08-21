@@ -6,10 +6,10 @@ import { withBase } from "../lib/base";
  *
  * El video del hero es un PREVIEW: autoplay silenciado en loop, sin
  * controles. Un clic en cualquier parte del reel (o en el play centrado)
- * abre un MODAL (<dialog> nativo) que muestra el clip PAUSADO desde el
- * inicio; el usuario le da play con los controles nativos y suena (ese clic
- * es el gesto que garantiza el audio). Cierra con ESC, el botón X o un clic
- * fuera del modal (backdrop).
+ * abre un MODAL (<dialog> nativo) que ARRANCA SOLO desde el inicio CON
+ * SONIDO (el gesto del clic lo habilita); si algún navegador bloquea el
+ * autoplay, queda pausado y su play nativo lo arranca. Cierra con ESC, el
+ * botón X o un clic fuera del modal (backdrop).
  *
  * Autoplay is deliberately belt-and-braces. `autoplay` alone is not reliable:
  * Chrome blocks it under battery saver, data saver, or a low media-engagement
@@ -188,6 +188,31 @@ const {
   .reel__modal::backdrop {
     background: rgb(13 17 17 / 0.9);
   }
+  /* Entrada suave del modal y su backdrop (sin cortes secos). */
+  .reel__modal[open] {
+    animation: reel-modal-in 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reel__modal[open]::backdrop {
+    animation: reel-backdrop-in 280ms ease;
+  }
+  @keyframes reel-modal-in {
+    from {
+      opacity: 0;
+      translate: 0 12px;
+      scale: 0.98;
+    }
+  }
+  @keyframes reel-backdrop-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reel__modal[open],
+    .reel__modal[open]::backdrop {
+      animation: none;
+    }
+  }
   .reel__modal video {
     display: block;
     width: 100%;
@@ -291,14 +316,15 @@ const {
     // ── Modal: preview → reproducción con sonido desde el inicio ──────
     if (reel && modal && modalVideo && openBtn && closeBtn) {
       const open = () => {
-        // El dialog se abre PAUSADO desde el inicio: el usuario decide cuándo
-        // dar play (su clic en el control es el gesto que garantiza el audio).
+        // El clic es el gesto: el modal arranca solo, CON sonido, desde el
+        // inicio. Si algún navegador bloquea el autoplay, queda pausado y el
+        // botón nativo del video lo arranca.
         if (modal.open) return;
         modalVideo.currentTime = 0;
         modalVideo.muted = false;
-        modal.showModal();
-        // El preview queda en pausa mientras el modal está abierto.
         video.pause();
+        modal.showModal();
+        modalVideo.play().catch(() => {});
       };
       const close = () => {
         modal.close();
