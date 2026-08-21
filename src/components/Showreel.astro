@@ -2,12 +2,13 @@
 import { withBase } from "../lib/base";
 
 /**
- * The muted, looping showreel used on Home (473x434, a la altura del slider).
+ * Showreel de Home (473x434, a la altura del slider).
  *
- * Player: controles NATIVOS del navegador (`controls` en el <video>) —
- * play/pausa, seek, volumen y fullscreen garantizados en todos los
- * navegadores, sin librerías. (Se probó media-chrome y su barra colapsaba a
- * 0x0 sin razón aparente; los nativos son la vía infalible.)
+ * El video del hero es un PREVIEW: autoplay silenciado en loop, sin
+ * controles. Un clic en cualquier parte del reel abre un MODAL (<dialog>
+ * nativo) que reproduce el mismo clip DESDE EL INICIO CON SONIDO y con los
+ * controles nativos del navegador (play/pausa, seek, volumen, fullscreen).
+ * El modal cierra con ESC, con el botón X, o haciendo clic fuera (backdrop).
  *
  * Autoplay is deliberately belt-and-braces. `autoplay` alone is not reliable:
  * Chrome blocks it under battery saver, data saver, or a low media-engagement
@@ -46,25 +47,47 @@ const {
 } = Astro.props;
 ---
 
-<figure class="reel" style={`--w:${width}px; --h:${height}px;`}>
+<figure class="reel" style={`--w:${width}px; --h:${height}px;`} data-reel>
   <video
     data-showreel
     src={withBase(src)}
     poster={withBase(poster)}
-    controls
     autoplay
     muted
     loop
     playsinline
     preload="auto"
     disablepictureinpicture
-    aria-label={`Showreel de ${name}`}></video>
+    aria-label={`Showreel de ${name} (preview)`}></video>
+
+  <button class="reel__expand" type="button" data-reel-open aria-label="Reproducir con sonido">
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </button>
 
   <figcaption class="reel__caption">
     <span class="t-body-md">{name}</span>
     <span class="t-body">{role}</span>
   </figcaption>
 </figure>
+
+<dialog class="reel__modal" data-reel-modal aria-label={`Showreel de ${name}, con sonido`}>
+  <video
+    data-reel-modal-video
+    src={withBase(src)}
+    poster={withBase(poster)}
+    controls
+    playsinline
+    preload="auto"
+    disablepictureinpicture
+    aria-label={`Showreel de ${name}, con sonido`}></video>
+  <button class="reel__modal-close" type="button" data-reel-close aria-label="Cerrar">
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M6 6l12 12M18 6 6 18" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </button>
+</dialog>
 
 <style>
   .reel {
@@ -76,6 +99,7 @@ const {
     border-radius: var(--r-md);
     overflow: hidden;
     background: var(--surface);
+    cursor: pointer;
   }
 
   .reel video {
@@ -83,12 +107,10 @@ const {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    accent-color: var(--accent);
   }
 
   /* Rectangle 3990 carries a #1D2222 fill at 33% over the footage.
-     Al pasar el cursor se desvanece para que el video y sus controles
-     nativos se lean a plena luz. */
+     Al pasar el cursor se desvanece para leer el preview a plena luz. */
   .reel::after {
     content: "";
     position: absolute;
@@ -102,15 +124,85 @@ const {
     opacity: 0;
   }
 
+  .reel__expand {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgb(26 30 30 / 0.8);
+    color: #fff;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 220ms ease;
+  }
+  .reel:hover .reel__expand,
+  .reel:focus-within .reel__expand {
+    opacity: 1;
+  }
+  .reel__expand svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .reel__caption {
     position: absolute;
     left: 18px;
-    bottom: 60px;
+    bottom: 18px;
     z-index: 1;
     display: flex;
     flex-direction: column;
     color: var(--text);
     pointer-events: none;
+  }
+
+  /* ── Modal ─────────────────────────────────────────────────────────── */
+  .reel__modal {
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-md);
+    background: #000;
+    width: min(92vw, 960px);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+  .reel__modal[open] {
+    max-width: none;
+  }
+  .reel__modal::backdrop {
+    background: rgb(13 17 17 / 0.9);
+  }
+  .reel__modal video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .reel__modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgb(26 30 30 / 0.85);
+    color: #fff;
+    cursor: pointer;
+  }
+  .reel__modal-close svg {
+    width: 18px;
+    height: 18px;
   }
 
   @media (max-width: 1000px) {
@@ -131,6 +223,12 @@ const {
 
   function boot() {
     const video = document.querySelector<HTMLVideoElement>("[data-showreel]");
+    const reel = document.querySelector<HTMLElement>("[data-reel]");
+    const modal = document.querySelector<HTMLDialogElement>("[data-reel-modal]");
+    const modalVideo = document.querySelector<HTMLVideoElement>("[data-reel-modal-video]");
+    const openBtn = document.querySelector<HTMLButtonElement>("[data-reel-open]");
+    const closeBtn = document.querySelector<HTMLButtonElement>("[data-reel-close]");
+
     if (!video) {
       // Clear it, or the listeners at the bottom keep calling play() on the
       // PREVIOUS page's detached <video> — and the closure holds that element
@@ -164,26 +262,13 @@ const {
     resume = attempt;
     attempt();
 
-    // Everything below is one-time wiring. The guard used to sit at the very
-    // top of boot() and returned before attempt() even existed — which is why
-    // the reel stopped after a back navigation (per Victor, 2026-08-08).
-    // ClientRouter can restore a cached DOM on popstate, and that DOM carries
-    // BOTH data-ready="1" and a video the observer had paused on the way out,
-    // so boot() bailed and nothing ever restarted it. Setup stays guarded;
-    // resuming no longer is.
     if (video.dataset.ready) return;
     video.dataset.ready = "1";
-    // Only disconnect once we know we are about to re-observe. Disconnecting
-    // above the guard is how this previously ended up with no observer at all:
-    // astro:page-load fires on the initial load too, so the second call tore
-    // down what the first had just set up.
     io?.disconnect();
 
     video.addEventListener("canplay", attempt, { once: true });
     video.addEventListener("loadeddata", attempt, { once: true });
 
-    // Don't burn CPU decoding a reel nobody is looking at — but always try to
-    // resume when it comes back into view.
     io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) attempt();
@@ -192,6 +277,38 @@ const {
       { threshold: 0.15 },
     );
     io.observe(video);
+
+    // ── Modal: preview → reproducción con sonido desde el inicio ──────
+    if (reel && modal && modalVideo && openBtn && closeBtn) {
+      const open = () => {
+        // El click es el gesto que permite audio; arrancamos del inicio.
+        modalVideo.currentTime = 0;
+        modalVideo.muted = false;
+        modal.showModal();
+        modalVideo.play().catch(() => {});
+        // El preview queda en pausa mientras el modal está abierto.
+        video.pause();
+      };
+      const close = () => {
+        modal.close();
+      };
+      const onClose = () => {
+        modalVideo.pause();
+        // El preview retoma su autoplay donde quedó.
+        attempt();
+      };
+
+      openBtn.addEventListener("click", open);
+      reel.addEventListener("click", open);
+      // El video del modal tiene sus propios controles: clic dentro NO cierra.
+      modalVideo.addEventListener("click", (e) => e.stopPropagation());
+      closeBtn.addEventListener("click", close);
+      modal.addEventListener("click", (e) => {
+        // Clic sobre el backdrop (el evento llega al dialog) cierra.
+        if (e.target === modal) close();
+      });
+      modal.addEventListener("close", onClose);
+    }
   }
 
   boot();
