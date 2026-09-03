@@ -1,7 +1,7 @@
 ---
 import LogoFlip from "./LogoFlip.astro";
 import { withBase } from "../lib/base";
-import { getLangFromUrl, pathsForUrl, projectsPath, htmlLang } from "../i18n";
+import { getLangFromUrl, pathsForUrl, projectsPath, htmlLang, langName } from "../i18n";
 import { useTranslations } from "../i18n/ui";
 
 /**
@@ -82,16 +82,31 @@ const links = [
       </button>
 
       {/* Language switcher. Two locales, so one link is enough: it always
-          points at the other locale of the page you are on. */}
+          points at the other locale of the page you are on, never at Home.
+          Styled as a nav link (same size, weight and roll as Proyectos and
+          Resumen) with a standing underline, so it reads as an obvious control
+          and still belongs to the bar. The label is the target language named
+          in its own language — the one word a reader who cannot read this page
+          will still recognise. */}
+      <span class="sep" aria-hidden="true" />
       <a
-        class="nav__lang"
+        class="nav__link nav__lang"
         href={otherHref}
         hreflang={htmlLang[otherLang]}
         lang={htmlLang[otherLang]}
-        aria-label={t("nav.langSwitch")}
-        title={t("nav.langSwitch")}
+        style="--ni:2"
       >
-        {t("nav.langCode")}
+        <span class="sr-only">{t("nav.langSwitch")}</span>
+        <span class="roll" aria-hidden="true">
+          {[...langName[otherLang]].map((ch, c) => (
+            <span class="roll__char" style={`--i:${c}`}>
+              <span class="roll__inner">
+                <span class="roll__face">{ch === " " ? " " : ch}</span>
+                <span class="roll__face">{ch === " " ? " " : ch}</span>
+              </span>
+            </span>
+          ))}
+        </span>
       </a>
 
       <a class="nav__cta" href="#contacto" data-contact-open>{t("nav.cta")}</a>
@@ -286,27 +301,13 @@ const links = [
     filter: brightness(1.08);
   }
 
-  /* Language switcher. Deliberately quieter than the CTA: an outlined pill in
-     the nav's own text colour, so it re-themes with the pill on the light band
-     and never competes with ¡Hablemos! for the eye. */
-  .nav__lang {
-    padding: 7px 10px;
-    border: 1px solid var(--nav-border);
-    border-radius: var(--r-sm);
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 18px;
-    font-weight: 400;
-    letter-spacing: 0.04em;
-    transition:
-      background-color 200ms ease,
-      border-color 200ms ease,
-      color 200ms ease;
-  }
-  .nav__lang:hover,
-  .nav__lang:focus-visible {
-    background: color-mix(in srgb, var(--text) 10%, transparent);
-    color: var(--text);
+  /* Language switcher. It inherits .nav__link entirely — same 16/20.2 type,
+     same weight, same hover — so it is styled WITH the page rather than as a
+     separate widget. The standing underline is the only addition: it is what
+     makes it read as an obvious, clickable control instead of a label. */
+  .nav__lang .roll {
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
   }
 
   /* ── Mobile menu ──────────────────────────────────────────────────────

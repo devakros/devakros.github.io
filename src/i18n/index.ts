@@ -33,6 +33,12 @@ export function getLangFromUrl(url: URL): Lang {
   return first === "en" ? "en" : "es";
 }
 
+/**
+ * Each language named in its OWN language, which is how a reader who cannot
+ * read the current page still recognises the way out.
+ */
+export const langName: Record<Lang, string> = { es: "Español", en: "English" };
+
 /** Root-absolute path of the projects index in each locale. */
 export const projectsPath: Record<Lang, string> = {
   es: "/proyectos",

@@ -36,6 +36,17 @@ const testimonials = getTestimonials(lang);
             {person.quote.map((p) => (
               <p>{p}</p>
             ))}
+            {/* Five of the seven wrote in Spanish. On /en their words are our
+                translation, so say so rather than putting English in their
+                mouth unmarked. Pedro and Alejandro wrote in English and carry
+                no note in either locale. */}
+            {person.translated && (
+              <p class="quote__translated">
+                {person.sourceLang === "es"
+                  ? t("testimonials.translatedFromEs")
+                  : t("testimonials.translatedFromEn")}
+              </p>
+            )}
           </div>
         ))
       }
@@ -179,6 +190,20 @@ const testimonials = getTestimonials(lang);
     width: 100%;
     max-width: 757px;
     margin-inline: auto;
+  }
+
+  /* A footnote on the quote, not a second voice: one step down the type
+     scale, the muted token at reduced opacity, and it never affects the card
+     height because every quote shares the same grid cell. */
+  .quote__translated {
+    margin: 18px 0 0;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.01em;
+    color: var(--muted);
+    opacity: 0.72;
   }
 
   .quote__text {

@@ -221,13 +221,13 @@ const defs: CaseDef[] = [
     copy: {
       es: {
         description:
-          "Rediseño integral de Polestar Pilates: elevando la conversión mediante UX estratégica, de una tasa de rebote del 70% a un funnel enfocado en la venta de cursos.",
+          "Rediseño integral de Polestar Pilates: elevando la conversión mediante UX estratégica, de unas fugas concentradas en el home a un funnel enfocado en la venta de cursos.",
         headline: {
           base: "Rediseño integral de Polestar Pilates:",
           muted: "Elevando la conversión mediante UX estratégica",
         },
         intro:
-          "Más que un rediseño visual, este proyecto fue una intervención estratégica para transformar una plataforma de educación en Pilates con una tasa de rebote del 70%. Mi rol como UX/UI y Product Owner fue alinear la propuesta de valor con las necesidades reales del usuario para maximizar las ventas de cursos.",
+          "Más que un rediseño visual, este proyecto fue una intervención estratégica para transformar una plataforma de educación en Pilates donde el 70% de las fugas se concentraba en el home. Mi rol como UX/UI y Product Owner fue alinear la propuesta de valor con las necesidades reales del usuario para maximizar las ventas de cursos.",
         blocks: [
           {
             heading: "El desafío: Más allá de la estética",
@@ -264,7 +264,7 @@ const defs: CaseDef[] = [
             ],
           },
           {
-            heading: "Resultados (Medibles)",
+            heading: "Resultados",
             bullets: [
               {
                 term: "Reducción de fricción:",
@@ -290,13 +290,13 @@ const defs: CaseDef[] = [
       },
       en: {
         description:
-          "Full redesign of Polestar Pilates: raising conversion through strategic UX, from a bounce rate of 70% to a funnel focused on course sales.",
+          "Full redesign of Polestar Pilates: raising conversion through strategic UX, from drop-offs concentrated on the home page to a funnel focused on course sales.",
         headline: {
           base: "Full redesign of Polestar Pilates:",
           muted: "Raising conversion through strategic UX",
         },
         intro:
-          "More than a visual redesign, this project was a strategic intervention to transform a Pilates education platform with a bounce rate of 70%. My role as UX/UI and Product Owner was to align the value proposition with the real needs of the user in order to maximise course sales.",
+          "More than a visual redesign, this project was a strategic intervention to transform a Pilates education platform where 70% of the drop-offs were concentrated on the home page. My role as UX/UI and Product Owner was to align the value proposition with the real needs of the user in order to maximise course sales.",
         blocks: [
           {
             heading: "The challenge: beyond aesthetics",
@@ -304,7 +304,7 @@ const defs: CaseDef[] = [
             bullets: [
               {
                 term: "Strategic prioritisation:",
-                body: "Instead of a blind redesign of everything, we identified that 70% of the losses happened on the home page, so we focused the effort on a simpler information architecture there.",
+                body: "Instead of a blind redesign of everything, we identified that 70% of the drop-offs were concentrated on the home page, so we focused the effort on a simpler information architecture there.",
               },
               {
                 term: "Business impact:",
@@ -333,7 +333,7 @@ const defs: CaseDef[] = [
             ],
           },
           {
-            heading: "Results (measurable)",
+            heading: "Results",
             bullets: [
               {
                 term: "Less friction:",

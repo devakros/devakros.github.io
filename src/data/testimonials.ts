@@ -9,6 +9,10 @@ export interface Testimonial {
   quote: string[];
   profileUrl: string;
   placeholder?: boolean;
+  /** The language the person actually wrote in. */
+  sourceLang: Lang;
+  /** True when the quote on screen is our translation rather than their words. */
+  translated: boolean;
 }
 
 interface TestimonialDef {
@@ -16,6 +20,8 @@ interface TestimonialDef {
   avatar: string;
   profileUrl: string;
   placeholder?: boolean;
+  /** The language the person actually wrote in. Drives the "translated" note. */
+  sourceLang: Lang;
   role: Record<Lang, string>;
   quote: Record<Lang, string[]>;
 }
@@ -38,6 +44,7 @@ interface TestimonialDef {
 const defs: TestimonialDef[] = [
   {
     name: "Pedro Sanin",
+    sourceLang: "en",
     avatar: "/img/avatar-1.webp",
     profileUrl: "https://www.linkedin.com/in/pedro-sanin/",
     role: { es: "CEO Blaster", en: "CEO Blaster" },
@@ -52,6 +59,7 @@ const defs: TestimonialDef[] = [
   },
   {
     name: "Alejandro Malagón",
+    sourceLang: "en",
     avatar: "/img/avatar-2.webp",
     profileUrl: "https://www.linkedin.com/in/alejandromalagon/",
     role: { es: "Product Lead", en: "Product Lead" },
@@ -72,6 +80,7 @@ const defs: TestimonialDef[] = [
   },
   {
     name: "Michelle Penna",
+    sourceLang: "es",
     avatar: "/img/avatar-3.webp",
     profileUrl: "https://www.linkedin.com/in/michellepennat/",
     role: { es: "Web Developer en Digital FENSA", en: "Web Developer at Digital FENSA" },
@@ -86,6 +95,7 @@ const defs: TestimonialDef[] = [
   },
   {
     name: "Luis Bernardo",
+    sourceLang: "es",
     avatar: "/img/avatar-5.webp",
     profileUrl: "https://www.linkedin.com/in/luis-bernardo-perez-ramirez/",
     role: { es: "Director Creativo en Blaster", en: "Creative Director at Blaster" },
@@ -100,6 +110,7 @@ const defs: TestimonialDef[] = [
   },
   {
     name: "Eduardo Méndez",
+    sourceLang: "es",
     avatar: "/img/avatar-4.webp",
     profileUrl: "https://www.linkedin.com/in/eduardo-mendez-devops/",
     role: { es: "Cofundador en Pukara", en: "Cofounder at Pukara" },
@@ -116,6 +127,7 @@ const defs: TestimonialDef[] = [
   },
   {
     name: "Henry Cabello",
+    sourceLang: "es",
     avatar: "/img/avatar-6.webp",
     profileUrl: "https://www.linkedin.com/in/cabello986/",
     role: { es: "Senior Software Engineer", en: "Senior Software Engineer" },
@@ -132,6 +144,7 @@ const defs: TestimonialDef[] = [
   },
   {
     name: "Santiago Gallo",
+    sourceLang: "es",
     avatar: "/img/avatar-7.webp",
     profileUrl: "https://www.linkedin.com/in/sgallorestrepo/",
     role: { es: "Cofundador en Verticcal", en: "Cofounder at Verticcal" },
@@ -152,11 +165,19 @@ for (const def of defs) def.avatar = withBase(def.avatar);
 
 /** Every testimonial, with role and quote resolved for one locale. */
 export const getTestimonials = (lang: Lang): Testimonial[] =>
-  defs.map(({ role, quote, ...rest }) => ({
-    ...rest,
-    role: role[lang] ?? role[defaultLang],
-    quote: quote[lang] ?? quote[defaultLang],
-  }));
+  defs.map(({ role, quote, ...rest }) => {
+    const shown = quote[lang] ?? quote[defaultLang];
+    const original = quote[rest.sourceLang];
+    return {
+      ...rest,
+      role: role[lang] ?? role[defaultLang],
+      quote: shown,
+      // Compared against the original rather than assumed from the locale: the
+      // two people who wrote in English show the same words in both locales,
+      // so neither page marks them as translated.
+      translated: shown.join("\u0000") !== original.join("\u0000"),
+    };
+  });
 
 /** Luis leads (centro de la fila: 3 a la izquierda, 3 a la derecha). */
 export const defaultTestimonial = 3;

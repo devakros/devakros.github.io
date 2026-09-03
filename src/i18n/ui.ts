@@ -26,6 +26,7 @@ export const ui = {
     "home.title": "Victor Vivas — IA Powered product designer",
     "home.description":
       "Product designer y estratega de experiencia de usuario. +8 años creando soluciones de UX/UI con impacto para Coca-Cola, Polestar y LeanCore.",
+    "home.hero.sep": "-",
     "home.hero.lead": "IA",
     "home.hero.base": "Powered product designer",
     "home.hero.muted": "+ estratega de experiencia de usuario",
@@ -80,6 +81,8 @@ export const ui = {
     // --- Testimonials ----------------------------------------------------
     "testimonials.aria": "Testimonios",
     "testimonials.profile": "Ir a su perfil",
+    "testimonials.translatedFromEs": "Traducido del español",
+    "testimonials.translatedFromEn": "Traducido del inglés",
 
     // --- Footer ----------------------------------------------------------
     "footer.aria": "Pie de página",
@@ -103,7 +106,7 @@ export const ui = {
     // --- Navigation ------------------------------------------------------
     "nav.aria": "Main",
     "nav.projects": "Projects",
-    "nav.resume": "Resume",
+    "nav.resume": "Resume (Spanish)",
     "nav.cta": "Let's talk!",
     "nav.burger": "Open menu",
     "nav.burgerClose": "Close menu",
@@ -117,6 +120,7 @@ export const ui = {
     "home.title": "Victor Vivas | AI Powered product designer",
     "home.description":
       "Product designer and user experience strategist. +8 years creating UX/UI solutions with impact for Coca-Cola, Polestar and LeanCore.",
+    "home.hero.sep": "",
     "home.hero.lead": "AI",
     "home.hero.base": "Powered product designer",
     "home.hero.muted": "+ user experience strategist",
@@ -171,6 +175,8 @@ export const ui = {
     // --- Testimonials ----------------------------------------------------
     "testimonials.aria": "Testimonials",
     "testimonials.profile": "Go to profile",
+    "testimonials.translatedFromEs": "Translated from Spanish",
+    "testimonials.translatedFromEn": "Translated from English",
 
     // --- Footer ----------------------------------------------------------
     "footer.aria": "Footer",

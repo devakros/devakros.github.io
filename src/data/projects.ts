@@ -100,7 +100,7 @@ const defs: ProjectDef[] = [
           mutedLead: true,
         },
         intro:
-          "Más que un rediseño visual, este proyecto fue una intervención estratégica para transformar una plataforma de educación en Pilates con una tasa de rebote del 70%. Mi rol como UX/UI y Product Owner fue alinear la propuesta de valor con las necesidades reales del usuario para maximizar las ventas de cursos.",
+          "Más que un rediseño visual, este proyecto fue una intervención estratégica para transformar una plataforma de educación en Pilates donde el 70% de las fugas se concentraba en el home. Mi rol como UX/UI y Product Owner fue alinear la propuesta de valor con las necesidades reales del usuario para maximizar las ventas de cursos.",
       },
       en: {
         title: "Polestar",
@@ -112,7 +112,7 @@ const defs: ProjectDef[] = [
           mutedLead: true,
         },
         intro:
-          "More than a visual redesign, this project was a strategic intervention to transform a Pilates education platform with a bounce rate of 70%. My role as UX/UI and Product Owner was to align the value proposition with the real needs of the user in order to maximise course sales.",
+          "More than a visual redesign, this project was a strategic intervention to transform a Pilates education platform where 70% of the drop-offs were concentrated on the home page. My role as UX/UI and Product Owner was to align the value proposition with the real needs of the user in order to maximise course sales.",
       },
     },
   },

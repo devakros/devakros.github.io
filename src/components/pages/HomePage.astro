@@ -59,6 +59,8 @@ const tools = [
 // without two slots showing the same logo.
 const LOGO_SLOTS = 5;
 
+const heroSep = t("home.hero.sep");
+
 const title = t("home.title");
 const description = t("home.description");
 ---
@@ -70,10 +72,16 @@ const description = t("home.description");
     <!-- ── Hero ───────────────────────────────────────────────────────── -->
     <section class="hero container">
       <div class="hero__top">
+        {/* The separator is part of the Spanish lockup ("IA - Powered"). English
+            has no such convention, so `home.hero.sep` is empty there and the
+            mark is not rendered at all. */}
         <h1 class="t-h2 hero__title" data-intro-title>
-          {t("home.hero.lead")} <span class="muted">-</span> {t("home.hero.base")} <span
-            class="muted">{t("home.hero.muted")}</span
-          >
+          {t("home.hero.lead")}{heroSep && (
+            <>
+              {" "}
+              <span class="muted">{heroSep}</span>
+            </>
+          )} {t("home.hero.base")} <span class="muted">{t("home.hero.muted")}</span>
         </h1>
         <div data-intro-hide><LocalClock size="hero" /></div>
       </div>
