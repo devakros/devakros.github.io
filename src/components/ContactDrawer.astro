@@ -7,6 +7,10 @@
  * Progressive enhancement: with JS off the trigger still falls back to the
  * footer #contacto anchor (see Nav), so contact info is never unreachable.
  */
+import { getLangFromUrl } from "../i18n";
+import { useTranslations } from "../i18n/ui";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
 ---
 
 <div class="cd" data-contact hidden>
@@ -19,14 +23,14 @@
     aria-labelledby="cd-title"
     tabindex="-1"
   >
-    <button class="cd__close" type="button" data-contact-close aria-label="Cerrar">
+    <button class="cd__close" type="button" data-contact-close aria-label={t("contact.close")}>
       <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
         <path d="M6 6l14 14M20 6L6 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
       </svg>
     </button>
 
-    <h2 class="cd__title" id="cd-title">¿Empezamos?</h2>
-    <p class="cd__sub">Estoy listo para escuchar tu propuesta. Escríbeme y hablemos de negocios.</p>
+    <h2 class="cd__title" id="cd-title">{t("contact.title")}</h2>
+    <p class="cd__sub">{t("contact.sub")}</p>
 
     {/* With JS on, this is intercepted and POSTed to Web3Forms (a real inbox
         delivery, no mailto). The mailto action is only the no-JS fallback.
@@ -39,21 +43,25 @@
       enctype="text/plain"
       data-contact-form
       data-access-key="9aa954b0-1f6c-4302-84cd-254384177f69"
+      data-msg-sending={t("contact.sending")}
+      data-msg-ok={t("contact.ok")}
+      data-msg-error={t("contact.error")}
+      data-msg-error-network={t("contact.errorNetwork")}
     >
-      <input class="cd__field" type="text" name="nombre" placeholder="Nombre" autocomplete="name" required />
-      <input class="cd__field" type="email" name="correo" placeholder="Correo" autocomplete="email" required />
-      <textarea class="cd__field cd__field--area" name="mensaje" placeholder="¿Qué tienes en mente?" rows="4" required></textarea>
+      <input class="cd__field" type="text" name="nombre" placeholder={t("contact.name")} autocomplete="name" required />
+      <input class="cd__field" type="email" name="correo" placeholder={t("contact.email")} autocomplete="email" required />
+      <textarea class="cd__field cd__field--area" name="mensaje" placeholder={t("contact.message")} rows="4" required></textarea>
 
       {/* Web3Forms plumbing. access_key is injected by the script from
           data-access-key. subject sets the email subject; botcheck is a
           honeypot — real users never see or fill it. */}
-      <input type="hidden" name="subject" value="Nuevo mensaje desde el portafolio" />
+      <input type="hidden" name="subject" value={t("contact.subject")} />
       <input type="hidden" name="from_name" value="Portafolio Victor Vivas" />
       <input class="cd__hp" type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
       <div class="cd__actions">
         <button class="cd__submit" type="submit">
-          <span class="cd__submit-text">Iniciar conversación</span>
+          <span class="cd__submit-text">{t("contact.submit")}</span>
           <span class="rocket" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               {/* Exhaust flame — rendered first so the body sits over it. */}
@@ -519,7 +527,7 @@
 
       submitBtn?.setAttribute("aria-busy", "true");
       const label = submitText?.textContent ?? "";
-      if (submitText) submitText.textContent = "Enviando…";
+      if (submitText) submitText.textContent = form.dataset.msgSending ?? "";
       status && (status.hidden = true);
 
       try {
@@ -531,12 +539,12 @@
         const data = await res.json();
         if (data.success) {
           form.reset();
-          setStatus("ok", "¡Listo! Tu mensaje ya va en camino. Te respondo pronto.");
+          setStatus("ok", form.dataset.msgOk ?? "");
         } else {
-          setStatus("error", data.message || "No se pudo enviar. Intenta de nuevo.");
+          setStatus("error", data.message || form.dataset.msgError || "");
         }
       } catch {
-        setStatus("error", "No se pudo enviar. Revisa tu conexión e intenta de nuevo.");
+        setStatus("error", form.dataset.msgErrorNetwork ?? "");
       } finally {
         submitBtn?.removeAttribute("aria-busy");
         if (submitText) submitText.textContent = label;

@@ -36,13 +36,41 @@ Portfolio de **Victor Vivas**, product designer (UX/UI, diseño de producto y si
 │   └── video/              # Showreel (derivado 2x)
 ├── src/
 │   ├── components/         # Nav, Showreel, Testimonials, CaseStudy, slider…
-│   ├── data/               # projects.ts, testimonials.ts (contenido real)
+│   │   └── pages/          # Cuerpo de cada página, compartido por los dos idiomas
+│   ├── data/               # projects.ts, testimonials.ts, cases.ts (contenido real, es + en)
+│   ├── i18n/               # index.ts (rutas por idioma) + ui.ts (diccionario de textos)
 │   ├── layouts/            # Base.astro (transiciones, cursor, grano)
 │   ├── lib/                # withBase() — rutas aware del base path
 │   ├── pages/              # index, /proyectos y los 4 casos de estudio
+│   │   └── en/             # Las mismas 6 páginas en inglés, bajo /en
 │   └── styles/tokens.css   # Design tokens + grano + entrada
 └── docs/design/            # Notas de diseño y decisiones
 ```
+
+## 🌐 Idiomas
+
+El sitio es bilingüe. El español es el idioma por defecto y conserva todas sus
+URLs. El inglés vive bajo el prefijo `/en`.
+
+| Página | Español | Inglés |
+|---|---|---|
+| Inicio | `/` | `/en/` |
+| Índice de proyectos | `/proyectos` | `/en/projects` |
+| Caso de estudio | `/proyectos/<slug>` | `/en/projects/<slug>` |
+
+Reglas para editar:
+
+- El idioma se deduce de la URL con `getLangFromUrl()`. Ningún componente
+  recibe el idioma como prop.
+- Los textos de interfaz (nav, botones, formulario, etiquetas ARIA) viven en
+  `src/i18n/ui.ts`, con una columna por idioma.
+- El contenido de los casos de estudio vive en `src/data/cases.ts`, también con
+  una entrada por idioma.
+- El cuerpo de cada página vive en `src/components/pages/`. Las rutas de
+  `src/pages/` solo lo invocan. Así las dos versiones no se separan.
+- Al añadir una página nueva, crea las dos rutas y añade el par a
+  `pathsForUrl()` en `src/i18n/index.ts`, que alimenta el selector de idioma,
+  los `hreflang` y el sitemap.
 
 ## 🚀 Desarrollo
 

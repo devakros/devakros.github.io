@@ -1,4 +1,5 @@
 import { withBase } from "../lib/base";
+import { defaultLang, type Lang } from "../i18n";
 
 export interface Testimonial {
   name: string;
@@ -10,6 +11,15 @@ export interface Testimonial {
   placeholder?: boolean;
 }
 
+interface TestimonialDef {
+  name: string;
+  avatar: string;
+  profileUrl: string;
+  placeholder?: boolean;
+  role: Record<Lang, string>;
+  quote: Record<Lang, string[]>;
+}
+
 /**
  * Real testimonials supplied by Victor (transcribed from his source).
  *
@@ -19,83 +29,134 @@ export interface Testimonial {
  * Michelle Penna's quote is verbatim from Victor — not a placeholder.
  *
  * Profile URLs supplied 2026-08-20 (LinkedIn), wired into "Ir a su perfil".
+ *
+ * LANGUAGES. Pedro Sanin and Alejandro Malagón wrote in English, so both
+ * locales show their words unchanged. The other five wrote in Spanish; the
+ * `en` entry is a translation of that Spanish, not a second statement by the
+ * same person. Nothing is added to any quote.
  */
-export const testimonials: Testimonial[] = [
+const defs: TestimonialDef[] = [
   {
     name: "Pedro Sanin",
-    role: "CEO Blaster",
     avatar: "/img/avatar-1.webp",
-    quote: [
-      "Victor is a great U/UI designer. He's fast, really fast, but thorough, attentive to details and precise. He was also great to have on our team, always had a good attitude, and happy to share his skills with the rest of our team. I highly recommend him, both as a professional, and as a person.",
-    ],
     profileUrl: "https://www.linkedin.com/in/pedro-sanin/",
+    role: { es: "CEO Blaster", en: "CEO Blaster" },
+    quote: {
+      es: [
+        "Victor is a great U/UI designer. He's fast, really fast, but thorough, attentive to details and precise. He was also great to have on our team, always had a good attitude, and happy to share his skills with the rest of our team. I highly recommend him, both as a professional, and as a person.",
+      ],
+      en: [
+        "Victor is a great U/UI designer. He's fast, really fast, but thorough, attentive to details and precise. He was also great to have on our team, always had a good attitude, and happy to share his skills with the rest of our team. I highly recommend him, both as a professional, and as a person.",
+      ],
+    },
   },
   {
     name: "Alejandro Malagón",
-    role: "Product Lead",
     avatar: "/img/avatar-2.webp",
-    quote: [
-      "Working with Victor was a great experience, the type of experience that you believe people can create great products with business impact through teamwork.",
-      "We collaborate on a very complex product that allowed a Fortune 100 company to manage finances across the globe on product trio mindset where Victor brought value on understanding the user and business problems and land useful solutions within the product experience.",
-      "The tech lead and myself (Product Manager) were happy to have Victor in the team, not only because his design skills but his human way of working.",
-      "Anyone wondering if he is any good? Feel free to reach out and talk further on his work.",
-    ],
     profileUrl: "https://www.linkedin.com/in/alejandromalagon/",
+    role: { es: "Product Lead", en: "Product Lead" },
+    quote: {
+      es: [
+        "Working with Victor was a great experience, the type of experience that you believe people can create great products with business impact through teamwork.",
+        "We collaborate on a very complex product that allowed a Fortune 100 company to manage finances across the globe on product trio mindset where Victor brought value on understanding the user and business problems and land useful solutions within the product experience.",
+        "The tech lead and myself (Product Manager) were happy to have Victor in the team, not only because his design skills but his human way of working.",
+        "Anyone wondering if he is any good? Feel free to reach out and talk further on his work.",
+      ],
+      en: [
+        "Working with Victor was a great experience, the type of experience that you believe people can create great products with business impact through teamwork.",
+        "We collaborate on a very complex product that allowed a Fortune 100 company to manage finances across the globe on product trio mindset where Victor brought value on understanding the user and business problems and land useful solutions within the product experience.",
+        "The tech lead and myself (Product Manager) were happy to have Victor in the team, not only because his design skills but his human way of working.",
+        "Anyone wondering if he is any good? Feel free to reach out and talk further on his work.",
+      ],
+    },
   },
   {
     name: "Michelle Penna",
-    role: "Web Developer en Digital FENSA",
     avatar: "/img/avatar-3.webp",
-    quote: [
-      "Victor, es un gran diseñador, realizó diseños de otro mundo con ideas innovadoras y bastante brillantes, me encantó la forma de trabajar lo detallista que es, es un gran compañero de trabajo y nuestras reuniones eran bastante amenas y divertidas.",
-    ],
     profileUrl: "https://www.linkedin.com/in/michellepennat/",
+    role: { es: "Web Developer en Digital FENSA", en: "Web Developer at Digital FENSA" },
+    quote: {
+      es: [
+        "Victor, es un gran diseñador, realizó diseños de otro mundo con ideas innovadoras y bastante brillantes, me encantó la forma de trabajar lo detallista que es, es un gran compañero de trabajo y nuestras reuniones eran bastante amenas y divertidas.",
+      ],
+      en: [
+        "Victor is a great designer. He made designs from another world, with innovative and truly brilliant ideas. I loved the way he works and how thorough he is with detail. He is a great colleague and our meetings were always pleasant and fun.",
+      ],
+    },
   },
   {
-    /* Luis va CENTRO de la fila: 3 a la izquierda y 3 a la derecha
-       (2026-08-20). */
     name: "Luis Bernardo",
-    role: "Director Creativo en Blaster",
     avatar: "/img/avatar-5.webp",
-    quote: [
-      "Como supervisor directo de Víctor en Blaster, puedo decir que trabajar con él fue una experiencia excepcional. No solo es un diseñador de interfaz sumamente rápido y eficiente, sino que mantiene un nivel de rigor y atención al detalle impecable en cada entrega. Más allá de su talento técnico, Víctor es un gran compañero y un activo valioso para cualquier equipo: siempre proactivo, con una actitud excelente y genuinamente dispuesto a colaborar y potenciar a los demás. Lo recomiendo sin dudarlo, tanto por su calidad profesional como humana.",
-    ],
     profileUrl: "https://www.linkedin.com/in/luis-bernardo-perez-ramirez/",
+    role: { es: "Director Creativo en Blaster", en: "Creative Director at Blaster" },
+    quote: {
+      es: [
+        "Como supervisor directo de Víctor en Blaster, puedo decir que trabajar con él fue una experiencia excepcional. No solo es un diseñador de interfaz sumamente rápido y eficiente, sino que mantiene un nivel de rigor y atención al detalle impecable en cada entrega. Más allá de su talento técnico, Víctor es un gran compañero y un activo valioso para cualquier equipo: siempre proactivo, con una actitud excelente y genuinamente dispuesto a colaborar y potenciar a los demás. Lo recomiendo sin dudarlo, tanto por su calidad profesional como humana.",
+      ],
+      en: [
+        "As Victor's direct supervisor at Blaster, I can say that working with him was an exceptional experience. He is not only an extremely fast and efficient interface designer, he also holds an impeccable level of rigour and attention to detail in every delivery. Beyond his technical talent, Victor is a great colleague and a valuable asset for any team: always proactive, with an excellent attitude and genuinely willing to collaborate and lift up the people around him. I recommend him without hesitation, for his professional quality and for his human quality alike.",
+      ],
+    },
   },
   {
     name: "Eduardo Méndez",
-    role: "Cofundador en Pukara",
     avatar: "/img/avatar-4.webp",
-    quote: [
-      "Víctor es el diseñador UI más ingenioso y comprometido que he tenido el placer de trabajar. En Pukara, enfrentó y superó innumerables retos en nuestros productos, siempre con una actitud proactiva y aportando ideas innovadoras que realmente marcaron la diferencia en nuestros resultados.",
-      "Admiro su meticulosa atención al detalle, su pasión por la excelencia, y su sincera dedicación tanto al logro de los objetivos como al bienestar del equipo.",
-    ],
     profileUrl: "https://www.linkedin.com/in/eduardo-mendez-devops/",
+    role: { es: "Cofundador en Pukara", en: "Cofounder at Pukara" },
+    quote: {
+      es: [
+        "Víctor es el diseñador UI más ingenioso y comprometido que he tenido el placer de trabajar. En Pukara, enfrentó y superó innumerables retos en nuestros productos, siempre con una actitud proactiva y aportando ideas innovadoras que realmente marcaron la diferencia en nuestros resultados.",
+        "Admiro su meticulosa atención al detalle, su pasión por la excelencia, y su sincera dedicación tanto al logro de los objetivos como al bienestar del equipo.",
+      ],
+      en: [
+        "Victor is the most inventive and committed UI designer I have had the pleasure to work with. At Pukara he faced and overcame countless challenges in our products, always with a proactive attitude and with innovative ideas that really made a difference in our results.",
+        "I admire his meticulous attention to detail, his passion for excellence, and his sincere dedication both to reaching the goals and to the wellbeing of the team.",
+      ],
+    },
   },
   {
     name: "Henry Cabello",
-    role: "Senior Software Engineer",
     avatar: "/img/avatar-6.webp",
-    quote: [
-      "Trabajar con Victor me demostró que destaca mucho por estar constantemente innovando, buscando entender y mejorar el producto desde la raíz, usando sus habilidades en UI combinadas con psicología con el fin de darle al usuario la mejor experiencia siempre.",
-      "Me encantó la habilidad que tiene para percibir imperfecciones durante el desarrollo y hacerles saber a los desarrolladores qué pixel mejorar…👌",
-    ],
     profileUrl: "https://www.linkedin.com/in/cabello986/",
+    role: { es: "Senior Software Engineer", en: "Senior Software Engineer" },
+    quote: {
+      es: [
+        "Trabajar con Victor me demostró que destaca mucho por estar constantemente innovando, buscando entender y mejorar el producto desde la raíz, usando sus habilidades en UI combinadas con psicología con el fin de darle al usuario la mejor experiencia siempre.",
+        "Me encantó la habilidad que tiene para percibir imperfecciones durante el desarrollo y hacerles saber a los desarrolladores qué pixel mejorar…👌",
+      ],
+      en: [
+        "Working with Victor showed me that he stands out for constant innovation. He looks to understand and improve the product from the root, and he uses his UI skills together with psychology in order to always give the user the best experience.",
+        "I loved his ability to spot imperfections during development and to tell the developers exactly which pixel to improve…👌",
+      ],
+    },
   },
   {
     name: "Santiago Gallo",
-    role: "Cofundador en Verticcal",
     avatar: "/img/avatar-7.webp",
-    quote: [
-      "Victor es el diseñador UI más responsable y creativo que conozco. Resolvió incontables desafíos en los productos de NuHome con su extraordinaria proactividad, al proponer ideas creativas cuyo impacto se reflejó en las métricas de nuestros productos.",
-      "Destaco su atención al detalle, su inclinación a la excelencia y su genuina preocupación por el cumplimiento de las metas y del bienestar del equipo.",
-    ],
     profileUrl: "https://www.linkedin.com/in/sgallorestrepo/",
+    role: { es: "Cofundador en Verticcal", en: "Cofounder at Verticcal" },
+    quote: {
+      es: [
+        "Victor es el diseñador UI más responsable y creativo que conozco. Resolvió incontables desafíos en los productos de NuHome con su extraordinaria proactividad, al proponer ideas creativas cuyo impacto se reflejó en las métricas de nuestros productos.",
+        "Destaco su atención al detalle, su inclinación a la excelencia y su genuina preocupación por el cumplimiento de las metas y del bienestar del equipo.",
+      ],
+      en: [
+        "Victor is the most reliable and creative UI designer I know. He solved countless challenges in the NuHome products with extraordinary drive, and he proposed creative ideas whose impact showed in the metrics of our products.",
+        "I highlight his attention to detail, his inclination towards excellence and his genuine concern for meeting the goals and for the wellbeing of the team.",
+      ],
+    },
   },
 ];
 
-// Base-aware avatar paths for the GitHub Pages subpath.
-for (const t of testimonials) t.avatar = withBase(t.avatar);
+for (const def of defs) def.avatar = withBase(def.avatar);
+
+/** Every testimonial, with role and quote resolved for one locale. */
+export const getTestimonials = (lang: Lang): Testimonial[] =>
+  defs.map(({ role, quote, ...rest }) => ({
+    ...rest,
+    role: role[lang] ?? role[defaultLang],
+    quote: quote[lang] ?? quote[defaultLang],
+  }));
 
 /** Luis leads (centro de la fila: 3 a la izquierda, 3 a la derecha). */
 export const defaultTestimonial = 3;

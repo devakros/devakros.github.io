@@ -2,6 +2,8 @@
 import LogoFlip from "./LogoFlip.astro";
 import LocalClock from "./LocalClock.astro";
 import { withBase } from "../lib/base";
+import { getLangFromUrl, homePath } from "../i18n";
+import { useTranslations } from "../i18n/ui";
 
 /**
  * Figma Frame 1000003344 (y=3032) plus the footer nav at y=3130 and the
@@ -12,11 +14,16 @@ interface Props {
   home?: boolean;
 }
 const { home = true } = Astro.props;
-const p = (hash: string) => (home ? hash : withBase(`/${hash}`));
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// `#proyectos` is a DOM id, not copy, so it stays the same in both locales.
+const p = (hash: string) => (home ? hash : withBase(`${homePath[lang]}${hash}`));
 ---
 
 <div class="footer container" id="contacto">
-  <LogoFlip scale={1.2727} href="/" />
+  <LogoFlip scale={1.2727} href={homePath[lang]} />
 
   <div class="footer__cols">
     <div class="footer__col">
@@ -35,10 +42,10 @@ const p = (hash: string) => (home ? hash : withBase(`/${hash}`));
     </div>
   </div>
 
-  <nav class="footer__nav" aria-label="Pie de página">
-    <a href={p("#proyectos")}>Proyectos</a>
+  <nav class="footer__nav" aria-label={t("footer.aria")}>
+    <a href={p("#proyectos")}>{t("nav.projects")}</a>
     <span class="sep" aria-hidden="true"></span>
-    <a href={withBase("/resumen.pdf")} download>Resumen</a>
+    <a href={withBase("/resumen.pdf")} download>{t("nav.resume")}</a>
   </nav>
 </div>
 

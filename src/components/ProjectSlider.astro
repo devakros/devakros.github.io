@@ -1,5 +1,7 @@
 ---
 import ArrowCircle from "../icons/arrow-circle.svg?raw";
+import { getLangFromUrl } from "../i18n";
+import { useTranslations } from "../i18n/ui";
 
 /**
  * Figma Frame 146 (462x415) plus the 3 dots at y=818.
@@ -24,6 +26,8 @@ interface Props {
 }
 const { slides, intervalMs = 6000 } = Astro.props;
 
+const t = useTranslations(getLangFromUrl(Astro.url));
+
 // r is inset by half the stroke so the ring sits inside its 25px box.
 const R = 11.257;
 const CIRC = +(2 * Math.PI * R).toFixed(3);
@@ -42,12 +46,12 @@ const CIRC = +(2 * Math.PI * R).toFixed(3);
     </span>
 
     <span class="slider__arrows">
-      <button class="arrow" type="button" data-slider-prev aria-label="Proyecto anterior" set:html={ArrowCircle} />
+      <button class="arrow" type="button" data-slider-prev aria-label={t("slider.prev")} set:html={ArrowCircle} />
       <button
         class="arrow arrow--next"
         type="button"
         data-slider-next
-        aria-label="Proyecto siguiente"
+        aria-label={t("slider.next")}
         set:html={ArrowCircle}
       />
     </span>
@@ -87,7 +91,7 @@ const CIRC = +(2 * Math.PI * R).toFixed(3);
     </div>
   </div>
 
-  <div class="slider__dots" role="tablist" aria-label="Proyectos">
+  <div class="slider__dots" role="tablist" aria-label={t("slider.dots")}>
     {
       slides.map((slide, i) => (
         <button

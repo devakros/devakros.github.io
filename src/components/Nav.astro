@@ -1,6 +1,8 @@
 ---
 import LogoFlip from "./LogoFlip.astro";
 import { withBase } from "../lib/base";
+import { getLangFromUrl, pathsForUrl, projectsPath, htmlLang } from "../i18n";
+import { useTranslations } from "../i18n/ui";
 
 /**
  * Figma `menu dark version` (1007:5859) — 962x66, #1A1E1E on a 1px #2A3231
@@ -17,19 +19,28 @@ interface Props {
 }
 const { wide = false } = Astro.props;
 
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// The other locale of THIS page, so the switcher never drops the reader on the
+// home page when they are three levels deep in a case study.
+const alternates = pathsForUrl(Astro.url);
+const otherLang = lang === "es" ? "en" : "es";
+const otherHref = withBase(alternates[otherLang]);
+
 // "Proyectos" va al índice real /proyectos. "Resumen" ya no ancla: descarga el
 // CV (resumen.pdf) que vive en public/. La sección #sobre-mi de Home sigue
 // existiendo en la página, pero ya no es un destino de navegación.
 const links = [
-  { label: "Proyectos", href: withBase("/proyectos") },
-  { label: "Resumen", href: withBase("/resumen.pdf"), download: true },
+  { label: t("nav.projects"), href: withBase(projectsPath[lang]) },
+  { label: t("nav.resume"), href: withBase("/resumen.pdf"), download: true },
 ];
 ---
 
 <header class:list={["nav", wide ? "container-wide" : "container"]} data-nav data-intro-hide>
     <LogoFlip scale={1} />
 
-    <nav class="nav__right" aria-label="Principal">
+    <nav class="nav__right" aria-label={t("nav.aria")}>
       {
         links.map((link, i) => (
           <>
@@ -63,12 +74,27 @@ const links = [
         data-nav-toggle
         aria-expanded="false"
         aria-controls="nav-menu"
-        aria-label="Abrir menú"
+        aria-label={t("nav.burger")}
+        data-label-open={t("nav.burger")}
+        data-label-close={t("nav.burgerClose")}
       >
         <span class="nav__burger-box" aria-hidden="true"><span /><span /></span>
       </button>
 
-      <a class="nav__cta" href="#contacto" data-contact-open>¡Hablemos!</a>
+      {/* Language switcher. Two locales, so one link is enough: it always
+          points at the other locale of the page you are on. */}
+      <a
+        class="nav__lang"
+        href={otherHref}
+        hreflang={htmlLang[otherLang]}
+        lang={htmlLang[otherLang]}
+        aria-label={t("nav.langSwitch")}
+        title={t("nav.langSwitch")}
+      >
+        {t("nav.langCode")}
+      </a>
+
+      <a class="nav__cta" href="#contacto" data-contact-open>{t("nav.cta")}</a>
     </nav>
 
     {/* Drops out of the nav pill itself rather than covering the screen — the
@@ -83,6 +109,14 @@ const links = [
           </a>
         ))
       }
+      <a
+        class="nav__menu-link"
+        href={otherHref}
+        hreflang={htmlLang[otherLang]}
+        lang={htmlLang[otherLang]}
+      >
+        {t("nav.langSwitch")}
+      </a>
     </div>
 </header>
 
@@ -252,6 +286,29 @@ const links = [
     filter: brightness(1.08);
   }
 
+  /* Language switcher. Deliberately quieter than the CTA: an outlined pill in
+     the nav's own text colour, so it re-themes with the pill on the light band
+     and never competes with ¡Hablemos! for the eye. */
+  .nav__lang {
+    padding: 7px 10px;
+    border: 1px solid var(--nav-border);
+    border-radius: var(--r-sm);
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease;
+  }
+  .nav__lang:hover,
+  .nav__lang:focus-visible {
+    background: color-mix(in srgb, var(--text) 10%, transparent);
+    color: var(--text);
+  }
+
   /* ── Mobile menu ──────────────────────────────────────────────────────
      The burger and its panel only exist below 720px, where the inline links
      are hidden. Before this the bar offered no navigation at all on a phone —
@@ -345,8 +402,11 @@ const links = [
       padding: 10px 12px;
       height: 58px;
     }
-    /* The three text links collapse into the burger menu below. */
+    /* The three text links collapse into the burger menu below. The language
+       pill goes with them — the panel carries it as a full-word link instead,
+       so a 58px bar does not have to hold burger + pill + CTA. */
     .nav__link,
+    .nav__lang,
     .sep {
       display: none;
     }
@@ -416,7 +476,12 @@ const links = [
 
     const setOpen = (open: boolean) => {
       toggle.setAttribute("aria-expanded", String(open));
-      toggle.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
+      // The two labels are rendered per locale onto the button itself, because
+      // this script is a shared bundle and knows nothing about the page's language.
+      toggle.setAttribute(
+        "aria-label",
+        (open ? toggle.dataset.labelClose : toggle.dataset.labelOpen) ?? "",
+      );
       if (open) {
         menu.hidden = false;
         // One frame between unhiding and the class, or the transition has no

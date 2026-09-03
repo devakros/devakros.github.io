@@ -2,8 +2,13 @@
 import Nav from "./Nav.astro";
 import SiteFooter from "./SiteFooter.astro";
 import ProjectSlider, { type Slide } from "./ProjectSlider.astro";
-import { projects } from "../data/projects";
+import { getProjects } from "../data/projects";
+import { getCase } from "../data/cases";
 import { withBase } from "../lib/base";
+import { getLangFromUrl, homePath, projectsPath, projectPath } from "../i18n";
+import { useTranslations } from "../i18n/ui";
+
+export type { Block, Bullet, Shot } from "../data/cases";
 
 /**
  * Shared case-study layout, reconstructed from the Figma frames (page 3.0):
@@ -12,59 +17,46 @@ import { withBase } from "../lib/base";
  * (450px editorial copy + 678px screenshot stack), the light "next projects"
  * band, and the shared footer — but driven by data so both pages share it.
  *
+ * Every string comes from `src/data/cases.ts`, resolved for the locale of the
+ * URL being rendered. Nothing user facing is typed into this file, which is
+ * what keeps the Spanish and English versions from drifting apart.
+ *
  * The right-column screenshots stay as exported images: they are the clients'
  * live products (a Pilates site, a fintech flow-builder), so rebuilding them in
  * HTML would be reconstructing someone else's product, not Victor's design.
+ *
+ * A shot is a screenshot, or an animated WebP — both render as a plain `<img>`.
+ * `half: true` makes it a half-width tile; two consecutive halves sit
+ * side-by-side in one grid row. Everything else spans full width. `bed: true`
+ * gives the tile a light backing instead of the dark surface, for stills whose
+ * own background is light.
+ *
+ * There is deliberately no `<video>` branch. The one clip on these pages was an
+ * autoplaying muted loop and it cost days: it played in every environment I
+ * could test and never for Victor, across autoplay policy, media decode,
+ * extensions and cache revalidation, none of which are observable from here. An
+ * animated WebP has none of those failure modes — no play() to reject, no
+ * decoder, nothing an extension or an energy saver can pause. If you need real
+ * video here again (sound, controls, minutes of footage) bring the element
+ * back; for a short silent UI loop, do not.
  */
-export interface Block {
-  /** Muted eyebrow heading (#4A5856, 20/30). */
-  heading: string;
-  /** Prominent lead sentence (#B3D6D3, 25/30). */
-  lead?: string;
-  /** Body paragraphs (16/300). A U+2028 inside a string becomes a line break. */
-  paras?: string[];
-  /** Bulleted points with a bold lead-in term, inline. */
-  bullets?: { term: string; body: string }[];
-}
-
 interface Props {
   slug: string;
-  title: { base: string; muted: string };
-  /** Render the muted portion BEFORE the bright one (e.g. a greyed
-      "Rediseño de LeanCore:" leading into the bright headline). */
-  mutedLead?: boolean;
-  tags: string[];
-  intro: string;
-  meta: { year: string; client: string };
-  blocks: Block[];
-  /** A shot is a screenshot, or an animated WebP — both render as a plain
-      `<img>`. `half: true` makes it a half-width tile; two consecutive halves
-      sit side-by-side in one grid row. Everything else spans full width.
-      `bed: true` gives the tile a light backing instead of the dark surface,
-      for stills whose own background is light.
-
-      There is deliberately no `<video>` branch. The one clip on these pages
-      was an autoplaying muted loop and it cost days: it played in every
-      environment I could test and never for Victor, across autoplay policy,
-      media decode, extensions and cache revalidation, none of which are
-      observable from here. An animated WebP has none of those failure modes —
-      no play() to reject, no decoder, nothing an extension or an energy saver
-      can pause. If you need real video here again (sound, controls, minutes of
-      footage) bring the element back; for a short silent UI loop, do not. */
-  shots: { src: string; alt: string; w: number; h: number; half?: boolean; bed?: boolean }[];
 }
+const { slug } = Astro.props;
 
-const { slug, title, mutedLead = false, tags, intro, meta, blocks, shots } = Astro.props;
-const project = projects.find((p) => p.slug === slug)!;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const study = getCase(slug, lang);
 
 // Same related-projects slider the Coca-Cola page uses.
-const slides: Slide[] = projects.map((p) => ({
+const slides: Slide[] = getProjects(lang).map((p) => ({
   title: p.title,
   img: p.img,
   alt: p.alt,
   tags: p.cardTags ?? p.tags,
   desc: p.desc,
-  href: withBase(`/proyectos/${p.slug}`),
+  href: withBase(projectPath(p.slug, lang)),
   placeholder: p.placeholder,
 }));
 ---
@@ -76,11 +68,11 @@ const slides: Slide[] = projects.map((p) => ({
   <section class="hero container-wide">
     <div class="hero__grid">
       <div class="hero__left">
-        <a class="back" href={withBase("/")}>
+        <a class="back" href={withBase(homePath[lang])}>
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M14 5 7.5 12l6.5 7" stroke-linecap="round" stroke-linejoin="round"></path>
           </svg>
-          Volver
+          {t("case.back")}
         </a>
 
         {/* El showreel se quitó (2026-08-19) pero reservamos su hueco exacto
@@ -91,28 +83,28 @@ const slides: Slide[] = projects.map((p) => ({
       <div class="hero__body">
         <h1 class="t-h2 hero__title">
           {
-            mutedLead ? (
+            study.mutedLead ? (
               <>
-                <span class="muted">{title.muted}</span> {title.base}
+                <span class="muted">{study.headline.muted}</span> {study.headline.base}
               </>
             ) : (
               <>
-                {title.base} <span class="muted">{title.muted}</span>
+                {study.headline.base} <span class="muted">{study.headline.muted}</span>
               </>
             )
           }
         </h1>
 
         <ul class="tags">
-          {tags.map((tag) => <li class="tag">{tag}</li>)}
+          {study.tags.map((tag) => <li class="tag">{tag}</li>)}
         </ul>
 
-        <p class="hero__desc">{intro}</p>
+        <p class="hero__desc">{study.intro}</p>
 
         <p class="hero__meta">
-          <span>{meta.year}</span>
+          <span>{study.meta.year}</span>
           <span class="dot" aria-hidden="true"></span>
-          <span>Lanzado por {meta.client}</span>
+          <span>{t("case.launchedBy")} {study.meta.client}</span>
         </p>
       </div>
     </div>
@@ -123,7 +115,7 @@ const slides: Slide[] = projects.map((p) => ({
     <div class="case__grid container-wide">
       <div class="case__copy">
         {
-          blocks.map((block) => (
+          study.blocks.map((block) => (
             <section class="block">
               <h2 class="block__heading">{block.heading}</h2>
               {block.lead && <p class="block__lead">{block.lead}</p>}
@@ -150,7 +142,7 @@ const slides: Slide[] = projects.map((p) => ({
 
       <div class="case__shots">
         {
-          shots.map((shot, i) => (
+          study.shots.map((shot, i) => (
             <figure class:list={["shot", shot.half && "shot--half", shot.bed && "shot--bed"]}>
               <img
                 src={shot.src}
@@ -170,13 +162,10 @@ const slides: Slide[] = projects.map((p) => ({
   <section class="related">
     <div class="related__grid container">
       <div class="related__intro">
-        <h2 class="t-h2 related__title">Proyectos clave que he ayudado a hacer realidad</h2>
-        <p class="related__desc">
-          Trabajos seleccionados de proyectos que se lanzaron al mercado. Problemas reales,
-          soluciones reales.
-        </p>
-        <a class="related__cta" href={withBase("/proyectos")}>
-          Ver todos los proyectos
+        <h2 class="t-h2 related__title">{t("case.related.title")}</h2>
+        <p class="related__desc">{t("case.related.desc")}</p>
+        <a class="related__cta" href={withBase(projectsPath[lang])}>
+          {t("case.related.cta")}
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"></path>
           </svg>
@@ -195,7 +184,6 @@ const slides: Slide[] = projects.map((p) => ({
     <SiteFooter home={false} />
   </section>
 </main>
-
 
 <style>
   /* ── Hero ─────────────────────────────────────────────────────────────

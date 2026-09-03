@@ -1,5 +1,7 @@
 ---
 import { withBase } from "../lib/base";
+import { getLangFromUrl } from "../i18n";
+import { useTranslations } from "../i18n/ui";
 
 /**
  * Showreel de Home (473x434, a la altura del slider).
@@ -46,6 +48,8 @@ const {
   name,
   role,
 } = Astro.props;
+
+const t = useTranslations(getLangFromUrl(Astro.url));
 ---
 
 <figure class="reel" style={`--w:${width}px; --h:${height}px;`} data-reel>
@@ -59,9 +63,9 @@ const {
     playsinline
     preload="auto"
     disablepictureinpicture
-    aria-label={`Showreel de ${name} (preview)`}></video>
+    aria-label={t("reel.preview", { name })}></video>
 
-  <button class="reel__play" type="button" data-reel-open aria-label="Reproducir con sonido">
+  <button class="reel__play" type="button" data-reel-open aria-label={t("reel.play")}>
     <img src={withBase("/img/play-circle.png")} alt="" width="66" height="66" />
   </button>
 
@@ -71,7 +75,7 @@ const {
   </figcaption>
 </figure>
 
-<dialog class="reel__modal" data-reel-modal aria-label={`Showreel de ${name}, con sonido`}>
+<dialog class="reel__modal" data-reel-modal aria-label={t("reel.sound", { name })}>
   <video
     data-reel-modal-video
     src={withBase(src)}
@@ -80,8 +84,8 @@ const {
     playsinline
     preload="auto"
     disablepictureinpicture
-    aria-label={`Showreel de ${name}, con sonido`}></video>
-  <button class="reel__modal-close" type="button" data-reel-close aria-label="Cerrar">
+    aria-label={t("reel.sound", { name })}></video>
+  <button class="reel__modal-close" type="button" data-reel-close aria-label={t("reel.close")}>
     <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M6 6l12 12M18 6 6 18" stroke-linecap="round" stroke-linejoin="round" />
     </svg>

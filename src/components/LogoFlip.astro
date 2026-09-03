@@ -11,13 +11,23 @@
  * below derives from `scale`, so both stay in sync.
  */
 import { withBase } from "../lib/base";
+import { getLangFromUrl, homePath } from "../i18n";
+import { useTranslations } from "../i18n/ui";
 
 interface Props {
   scale?: number;
   href?: string;
   label?: string;
 }
-const { scale = 1, href = "/", label = "Victor Vivas — UX UI Designer" } = Astro.props;
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const {
+  scale = 1,
+  href = homePath[lang],
+  label = t("logo.aria"),
+} = Astro.props;
 
 const row = 26 * scale; // window height / row height
 const font = 21.36529 * scale;

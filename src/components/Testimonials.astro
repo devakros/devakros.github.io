@@ -1,7 +1,9 @@
 ---
 import QuoteOpen from "../icons/quote-open.svg?raw";
 import QuoteClose from "../icons/quote-close.svg?raw";
-import { testimonials, defaultTestimonial } from "../data/testimonials";
+import { getTestimonials, defaultTestimonial } from "../data/testimonials";
+import { getLangFromUrl } from "../i18n";
+import { useTranslations } from "../i18n/ui";
 
 /**
  * Figma Component 24 (959x536) — the quote card plus the 7-avatar picker.
@@ -10,6 +12,9 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
  * full opacity, and gets 73px of breathing room either side (Figma x-positions
  * 297/382/467 · 607 · 747/832/917) so the name/role/button block below has room.
  */
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const testimonials = getTestimonials(lang);
 ---
 
 <figure class="quote container" data-testimonials>
@@ -39,7 +44,7 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
   </blockquote>
 
   <figcaption class="people">
-    <ul class="people__row" role="tablist" aria-label="Testimonios">
+    <ul class="people__row" role="tablist" aria-label={t("testimonials.aria")}>
       {
         testimonials.map((person, i) => (
           <li class="person">
@@ -49,7 +54,7 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
               role="tab"
               data-person
               aria-selected={i === defaultTestimonial ? "true" : "false"}
-              aria-label={person.placeholder ? `Testimonio ${i + 1}` : person.name}
+              aria-label={person.placeholder ? `${t("testimonials.aria")} ${i + 1}` : person.name}
             >
               <img src={person.avatar} alt="" width="47" height="47" loading="lazy" />
             </button>
@@ -60,7 +65,7 @@ import { testimonials, defaultTestimonial } from "../data/testimonials";
               <span class="person__name">{person.name}</span>
               <span class="person__role">{person.role}</span>
               <a class="person__link" href={person.profileUrl} target="_blank" rel="noopener noreferrer">
-                Ir a su perfil
+                {t("testimonials.profile")}
                 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M7 17 17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>

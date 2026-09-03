@@ -1,0 +1,28 @@
+---
+import Base from "../../layouts/Base.astro";
+import CaseStudy from "../CaseStudy.astro";
+import { bySlug } from "../../data/projects";
+import { getCase } from "../../data/cases";
+import { getLangFromUrl } from "../../i18n";
+
+/**
+ * Thin wrapper that turns a slug into a full case-study page in the locale of
+ * the URL. Polestar, LeanCore Studio and the LeanCore website all go through
+ * it; Coca-Cola has its own bespoke layout in `CocaColaPage.astro`.
+ */
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+
+const lang = getLangFromUrl(Astro.url);
+const project = bySlug(slug, lang)!;
+const study = getCase(slug, lang);
+
+const pageTitle =
+  lang === "en" ? `${project.title} | Victor Vivas` : `${project.title} — Victor Vivas`;
+---
+
+<Base title={pageTitle} description={study.description}>
+  <CaseStudy slug={slug} />
+</Base>
