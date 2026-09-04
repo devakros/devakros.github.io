@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://devakros.github.io/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/en/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/proyectos</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/en/projects</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/proyectos/coca-cola</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos/coca-cola"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects/coca-cola"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/en/projects/coca-cola</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos/coca-cola"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects/coca-cola"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/proyectos/polestar</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos/polestar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects/polestar"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/en/projects/polestar</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos/polestar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects/polestar"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/proyectos/leancore-studio</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos/leancore-studio"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects/leancore-studio"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/en/projects/leancore-studio</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos/leancore-studio"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects/leancore-studio"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/proyectos/leancore-web</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos/leancore-web"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects/leancore-web"/>
+  </url>
+  <url>
+    <loc>https://devakros.github.io/en/projects/leancore-web</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://devakros.github.io/proyectos/leancore-web"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://devakros.github.io/en/projects/leancore-web"/>
+  </url>
+</urlset>
