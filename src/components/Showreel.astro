@@ -337,10 +337,15 @@ const t = useTranslations(getLangFromUrl(Astro.url));
     // for the rest of the visit. Retrying costs nothing: attempt() returns
     // immediately once the video is playing, and the timer stops itself.
     // Reported by Victor 2026-09-04, going from /en back to /.
+    // The modal PAUSES the hero on purpose, so the retry has to stand down for
+    // it. Without this the loop reads that deliberate pause as a failed
+    // autoplay, calls play() and load() again, and the hero fights the modal
+    // for the same file: the modal opens on a still frame. Broke exactly that
+    // way for Victor on 2026-09-04, within the 5s window after a swap.
     clearInterval(retryTimer);
     const until = Date.now() + 5000;
     retryTimer = window.setInterval(() => {
-      if (!video.paused || Date.now() > until) {
+      if (!video.paused || modal?.open || Date.now() > until) {
         clearInterval(retryTimer);
         return;
       }
@@ -373,6 +378,8 @@ const t = useTranslations(getLangFromUrl(Astro.url));
         // inicio. Si algún navegador bloquea el autoplay, queda pausado y el
         // botón nativo del video lo arranca.
         if (modal.open) return;
+        // Kill the retry loop before pausing the hero, or it revives it.
+        clearInterval(retryTimer);
         modalVideo.currentTime = 0;
         modalVideo.muted = false;
         video.pause();
