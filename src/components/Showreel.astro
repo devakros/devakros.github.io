@@ -267,6 +267,7 @@ const t = useTranslations(getLangFromUrl(Astro.url));
 <script>
   let io: IntersectionObserver | undefined;
   let gestureBound = false;
+  let retryTimer = 0;
   // Whatever `attempt` currently points at, so the listeners at the bottom can
   // resume the reel without re-running setup.
   let resume: (() => void) | undefined;
@@ -327,6 +328,27 @@ const t = useTranslations(getLangFromUrl(Astro.url));
     // listeners at the bottom can always resume even when setup is skipped.
     resume = attempt;
     attempt();
+
+    // One play() call after a ClientRouter swap is not enough. On a normal page
+    // load the browser honours the autoplay attribute itself; on a swap the
+    // <video> is a brand new node inserted by script, the reel is often still
+    // behind the transition curtain, and the file may not have a single frame
+    // yet — so that first call can simply lose, and the reel sits on its poster
+    // for the rest of the visit. Retrying costs nothing: attempt() returns
+    // immediately once the video is playing, and the timer stops itself.
+    // Reported by Victor 2026-09-04, going from /en back to /.
+    clearInterval(retryTimer);
+    const until = Date.now() + 5000;
+    retryTimer = window.setInterval(() => {
+      if (!video.paused || Date.now() > until) {
+        clearInterval(retryTimer);
+        return;
+      }
+      // A node inserted by the swap can sit at readyState 0 with no request in
+      // flight; load() is what actually starts fetching in that case.
+      if (video.readyState === 0) video.load();
+      attempt();
+    }, 300);
 
     if (video.dataset.ready) return;
     video.dataset.ready = "1";
