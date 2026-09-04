@@ -291,6 +291,22 @@ const t = useTranslations(getLangFromUrl(Astro.url));
     // alone can lose a race against a play() call.
     video.muted = true;
 
+    // Re-arm the gesture fallback for THIS page. `gestureBound` lives at module
+    // scope, so without this it latches true on the first page whose autoplay
+    // Chrome blocks and never lets the fallback re-arm again. The failure is
+    // silent and looks like a broken video:
+    //   1. Autoplay is blocked here, so we bind a {once:true} pointerdown.
+    //   2. The visitor clicks a link. THAT click consumes the once listener,
+    //      and its closure plays the video on the page we are leaving.
+    //   3. ClientRouter swaps in a FRESH <video> (verified 2026-09-04: the node
+    //      is new, not reused). Autoplay is blocked again, but the catch sees
+    //      gestureBound === true and returns, so nothing is ever bound to the
+    //      new element. No autoplay, and no later click can rescue it.
+    // Only reachable when Chrome actually blocks autoplay, which is why an
+    // automated browser never sees it: Playwright's Chromium runs with the
+    // autoplay policy disabled, so play() resolves and this path is dead code.
+    gestureBound = false;
+
     const attempt = () => {
       if (!video.paused) return;
       video.play().catch(() => {
