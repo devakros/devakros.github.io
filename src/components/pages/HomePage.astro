@@ -89,7 +89,18 @@ const description = t("home.description");
       <div class="hero__row" id="proyectos" data-intro-hide>
         <ProjectSlider slides={slides} />
 
-        <Showreel width={473} height={434} name="Victor Vivas" role="Product Designer" />
+        <Showreel
+          width={473}
+          height={434}
+          name="Victor Vivas"
+          role="Product Designer"
+          {...(lang === "en"
+            ? {
+                src: "/video/showreel-2026-victor-en-a.mp4",
+                poster: "/img/showreel-poster-2026-victor-en-a.jpg",
+              }
+            : {})}
+        />
       </div>
     </section>
 

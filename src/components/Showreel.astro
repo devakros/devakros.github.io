@@ -31,6 +31,17 @@ import { useTranslations } from "../i18n/ui";
  * NAME — the previous clips and posters were replaced under their old
  * filenames elsewhere in this project and browsers kept serving the stale
  * copies.
+ *
+ * EN variant, added 2026-09-04. `/en` passes showreel-2026-victor-en-a.mp4,
+ * where Victor speaks English; `/` keeps the Spanish clip. HomePage picks it
+ * by `lang`, so the default props above stay the Spanish ones. The source was
+ * a 1920x1080 60fps webcam capture, so unlike the 4:3 Spanish clip it needed a
+ * deliberate crop: `crop=1440:1080:440:0` centres Victor's face, which sits at
+ * about x1160 in the source. Do NOT letterbox or squash 16:9 into this
+ * component — `.reel video` is `object-fit: cover` in a near square 473x434
+ * box, so it crops the sides AGAIN, and anything already letterboxed loses
+ * Victor's head. Same recipe otherwise: 946x710, 25fps CFR, h264 + aac 128k
+ * stereo, 5.2MB. Keep the "-a" suffix meaning: it carries AUDIO.
  */
 interface Props {
   src?: string;
